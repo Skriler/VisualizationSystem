@@ -10,5 +10,10 @@ public class NodeObject
     [Required]
     public string? Name { get; set; }
 
-    public List<NodeParameter> Parameters  { get; set; } = new List<NodeParameter>();
+    public List<NodeParameter> Parameters  { get; set; }
+
+    public NodeObject()
+    {
+        Parameters = new List<NodeParameter>();
+    }
 }

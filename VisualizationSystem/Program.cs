@@ -33,7 +33,7 @@ internal static class Program
     {
         services.AddDbContext<VisualizationSystemDbContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))
-            );
+        );
 
         services.AddTransient<MainForm>();
     }
