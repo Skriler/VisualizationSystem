@@ -28,11 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             menuStrip = new MenuStrip();
             dataToolStripMenuItem = new ToolStripMenuItem();
             loadToolStripMenuItem = new ToolStripMenuItem();
             showToolStripMenuItem = new ToolStripMenuItem();
+            dataGridViewNodes = new DataGridView();
             menuStrip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridViewNodes).BeginInit();
             SuspendLayout();
             // 
             // menuStrip
@@ -63,18 +66,32 @@
             showToolStripMenuItem.Name = "showToolStripMenuItem";
             showToolStripMenuItem.Size = new Size(103, 22);
             showToolStripMenuItem.Text = "Show";
+            showToolStripMenuItem.Click += showToolStripMenuItem_Click;
+            // 
+            // dataGridViewNodes
+            // 
+            dataGridViewNodes.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewNodes.Location = new Point(12, 27);
+            dataGridViewNodes.Name = "dataGridViewNodes";
+            dataGridViewNodes.Size = new Size(776, 411);
+            dataGridViewNodes.TabIndex = 1;
+            dataGridViewNodes.Visible = false;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(dataGridViewNodes);
             Controls.Add(menuStrip);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MainMenuStrip = menuStrip;
             Name = "MainForm";
             Text = "Main Form";
+            Load += MainForm_Load;
             menuStrip.ResumeLayout(false);
             menuStrip.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridViewNodes).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -85,5 +102,6 @@
         private ToolStripMenuItem dataToolStripMenuItem;
         private ToolStripMenuItem loadToolStripMenuItem;
         private ToolStripMenuItem showToolStripMenuItem;
+        private DataGridView dataGridViewNodes;
     }
 }
