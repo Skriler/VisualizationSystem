@@ -1,42 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.IdentityModel.Tokens;
 using VisualizationSystem.Models.Entities;
 
 namespace VisualizationSystem.Models.ViewModels;
 
 public class NodeObjectViewModel
 {
-    public static List<string> Headers { get; private set; }
+    public static List<string> Headers { get; private set; } = new List<string>();
 
-    public string Name { get; set; }
-
-    public List<string> Parameters { get; private set; }
-
-    static NodeObjectViewModel()
-    {
-        Headers = new List<string>();
-    }
+    public List<string> Parameters { get; private set; } = new List<string>();
 
     public NodeObjectViewModel(NodeObject node)
     {
-        Name = node.Name;
-        Parameters = new List<string>();
-
-        foreach (var parameter in node.Parameters)
-        {
-            Parameters.Add(parameter.Value);
-            AddHeaders(parameter.Name);
-        }
+        Parameters = GetParameters(node);
     }
 
-    public static void AddHeaders(string header)
+    public static void InitializeHeaders(IEnumerable<string> headers)
     {
-        if (!Headers.Contains(header))
+        Headers.Clear();
+        Headers.Add("Name"); // TODO
+
+        foreach (var header in headers)
         {
             Headers.Add(header);
         }
+    }
+
+    private List<string> GetParameters(NodeObject node)
+    {
+        if (node == null || node.Parameters.IsNullOrEmpty())
+            throw new ArgumentNullException(nameof(node));
+
+        var parameters = new List<string>
+        {
+            node.Name ?? string.Empty
+        };
+
+        foreach (var parameter in node.Parameters)
+        {
+            parameters.Add(parameter.Value ?? string.Empty);
+        }
+
+        return parameters;
     }
 }

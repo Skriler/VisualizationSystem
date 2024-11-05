@@ -1,4 +1,5 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using System.Data;
+using Microsoft.IdentityModel.Tokens;
 using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.ViewModels;
 using VisualizationSystem.SL;
@@ -16,7 +17,7 @@ namespace VisualizationSystem.Forms
         private readonly VisualizationSystemDbContext db;
         private readonly NodeRepository nodeRepository;
 
-        private List<NodeObject> nodes = new List<NodeObject>();
+        private NodeTable nodeTable = new NodeTable();
 
         public MainForm(VisualizationSystemDbContext context)
         {
@@ -28,7 +29,7 @@ namespace VisualizationSystem.Forms
 
         private async void MainForm_Load(object sender, EventArgs e)
         {
-            nodes = await nodeRepository.GetAllAsync();
+            nodeTable = await nodeRepository.GetTableAsync();
         }
 
         private async void loadToolStripMenuItem_Click(object sender, EventArgs e)
@@ -39,35 +40,28 @@ namespace VisualizationSystem.Forms
 
         private void showToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (nodes.IsNullOrEmpty())
+            if (nodeTable.NodeObjects.IsNullOrEmpty())
                 return;
 
-            var nodeViewModels = nodes
+            var headers =
+                nodeTable
+                .ParameterTypes
+                .Select(p => p.Name)
+                .Where(name => name != null)
+                .Cast<string>();
+
+            NodeObjectViewModel.InitializeHeaders(headers);
+
+            var nodeViewModels = nodeTable.NodeObjects
                 .Select(n => new NodeObjectViewModel(n))
                 .ToList();
 
+            var dataTable = CreateDataTable(nodeViewModels);
+
             dataGridViewNodes.Visible = true;
-            dataGridViewNodes.DataSource = nodeViewModels;
+            dataGridViewNodes.DataSource = dataTable;
 
-            //dataGridViewNodes.AutoGenerateColumns = false;
-            //dataGridViewNodes.Columns.Clear();
-
-            //dataGridViewNodes.Columns.Add(new DataGridViewTextBoxColumn
-            //{
-            //    HeaderText = "Node Name",
-            //    DataPropertyName = "Name"
-            //});
-
-            //for (int i = 0; i < NodeObjectViewModel.Headers.Count; ++i)
-            //{
-            //    dataGridViewNodes.Columns.Add(new DataGridViewTextBoxColumn
-            //    {
-            //        HeaderText = NodeObjectViewModel.Headers[i],
-            //        DataPropertyName = $"ParameterValues[{i}]"
-            //    });
-            //}
-
-            //dataGridViewNodes.DataSource = nodeViewModels;
+            DisableDataGridViewInteractions();
         }
 
         private void LoadExcelData()
@@ -83,7 +77,7 @@ namespace VisualizationSystem.Forms
 
                 try
                 {
-                    nodes = ExcelReader.ReadFile(filePath);
+                    nodeTable = ExcelReader.ReadFile(filePath);
                     MessageBox.Show("Data read successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
@@ -91,6 +85,31 @@ namespace VisualizationSystem.Forms
                     MessageBox.Show($"Error while reading file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private DataTable CreateDataTable(List<NodeObjectViewModel> nodeViewModels)
+        {
+            var dataTable = new DataTable();
+
+            foreach (var header in NodeObjectViewModel.Headers)
+            {
+                dataTable.Columns.Add(header);
+            }
+
+            DataRow row;
+            foreach (var node in nodeViewModels)
+            {
+                row = dataTable.NewRow();
+
+                for (int i = 0; i < node.Parameters.Count; ++i)
+                {
+                    row[i] = node.Parameters[i];
+                }
+
+                dataTable.Rows.Add(row);
+            }
+
+            return dataTable;
         }
 
         private void InitializeFileDialogParameters(OpenFileDialog openFileDialog)
@@ -105,13 +124,24 @@ namespace VisualizationSystem.Forms
         {
             try
             {
-                await nodeRepository.AddListAsync(nodes);
+                await nodeRepository.AddTableAsync(nodeTable);
                 MessageBox.Show("Data saved to database successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error while saving data to database: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void DisableDataGridViewInteractions()
+        {
+            dataGridViewNodes.ReadOnly = true;
+            dataGridViewNodes.AllowUserToAddRows = false;
+            dataGridViewNodes.AllowUserToDeleteRows = false;
+            dataGridViewNodes.AllowUserToResizeRows = false;
+            dataGridViewNodes.AllowUserToResizeColumns = false;
+            dataGridViewNodes.AllowUserToOrderColumns = false;
+            //dataGridViewNodes.RowHeadersVisible = false;
         }
     }
 }

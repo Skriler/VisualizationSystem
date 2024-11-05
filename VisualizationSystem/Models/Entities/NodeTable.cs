@@ -2,7 +2,7 @@
 
 namespace VisualizationSystem.Models.Entities;
 
-public class NodeObject
+public class NodeTable
 {
     [Key]
     public int Id { get; set; }
@@ -10,5 +10,7 @@ public class NodeObject
     [Required]
     public string Name { get; set; } = string.Empty;
 
-    public List<NodeParameter> Parameters  { get; set; } = new List<NodeParameter>();
+    public List<ParameterType> ParameterTypes { get; set; } = new List<ParameterType>();
+
+    public List<NodeObject> NodeObjects { get; set; } = new List<NodeObject>();
 }

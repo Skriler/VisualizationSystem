@@ -14,7 +14,7 @@ public static class ExcelReader
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
-    public static List<NodeObject> ReadFile(string filePath)
+    public static NodeTable ReadFile(string filePath)
     {
         using (var stream = File.Open(filePath, FileMode.Open, FileAccess.Read))
         {
@@ -26,59 +26,71 @@ public static class ExcelReader
         }
     }
 
-    private static List<NodeObject> ParseDataSet(DataSet dataSet, short tableIndex = 0)
+    private static NodeTable ParseDataSet(DataSet dataSet, short tableIndex = 0)
     {
-        List<NodeObject> nodes = new List<NodeObject>();
-
         var table = dataSet.Tables[tableIndex];
 
         if (table.Rows.Count == 0)
-            return nodes;
+            return new NodeTable();
 
-        var headers = GetHeaders(table, RowHeadersIndex);
+        var parameterTypes = InitializeParameterTypes(table, RowHeadersIndex);
+
+        NodeTable nodeTable = new NodeTable
+        {
+            Name = table.TableName,
+            ParameterTypes = parameterTypes
+        };
+
+        List<NodeObject> nodes = new List<NodeObject>();
 
         NodeObject node;
         for (int row = RowHeadersIndex + 1; row < table.Rows.Count; ++row)
         {
-            node = ParseDataRow(table.Rows[row], headers);
+            node = ParseDataRow(table.Rows[row], parameterTypes);
             nodes.Add(node);
         }
 
-        return nodes;
+        nodeTable.NodeObjects = nodes;
+
+        return nodeTable;
     }
 
-    private static List<string> GetHeaders(DataTable table, short rowHeadersIndex)
+    private static List<ParameterType> InitializeParameterTypes(DataTable table, short rowHeadersIndex)
     {
-        var headers = new List<string>();
+        var parameterTypes = new List<ParameterType>();
         var rowHeaders = table.Rows[rowHeadersIndex];
 
         for (int col = 1; col < table.Columns.Count; ++col)
         {
-            headers.Add(rowHeaders[col]?.ToString() ?? string.Empty);
+            var parameterName = rowHeaders[col]?.ToString() ?? string.Empty;
+
+            var parameterType = new ParameterType
+            {
+                Name = parameterName
+            };
+
+            parameterTypes.Add(parameterType);
         }
 
-        return headers;
+        return parameterTypes;
     }
 
-    private static NodeObject ParseDataRow(DataRow rowData, List<string> headers)
+    private static NodeObject ParseDataRow(DataRow rowData, List<ParameterType> parameterTypes)
     {
-        NodeObject node;
-
-        node = new NodeObject()
+        NodeObject node = new NodeObject()
         {
-            Name = rowData[0].ToString()
+            Name = rowData[0].ToString() ?? string.Empty
         };
 
         var rowAmount = rowData.Table.Columns.Count;
         for (int col = 1; col < rowAmount; ++col)
         {
-            var parameterName = headers[col - 1];
             var parameterValue = rowData[col]?.ToString() ?? string.Empty;
 
             node.Parameters.Add(new NodeParameter
             {
-                Name = parameterName,
-                Value = parameterValue
+                Value = parameterValue,
+                ParameterType = parameterTypes[col - 1]
             });
         }
 

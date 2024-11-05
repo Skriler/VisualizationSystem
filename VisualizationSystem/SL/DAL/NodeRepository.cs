@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using VisualizationSystem.Models.Entities;
 
 namespace VisualizationSystem.SL.DAL;
@@ -15,40 +16,56 @@ public class NodeRepository
         db = context;
     }
 
-    public async Task AddListAsync(List<NodeObject> nodes)
+    public async Task AddTableAsync(NodeTable nodeTable)
     {
-        foreach (NodeObject node in nodes)
-        {
-            NormalizeNode(node);
-            db.NodeObjects.Add(node);
-        }
+        //NormalizeParameterTypes(nodeTable.ParameterTypes);
+
+        //foreach (NodeObject node in nodeTable.NodeObjects)
+        //{
+        //    NormalizeNode(node);
+        //}
+
+        db.NodeTable.Add(nodeTable);
 
         await db.SaveChangesAsync();
     }
 
-    public async Task<List<NodeObject>> GetAllAsync()
+    public async Task<NodeTable> GetTableAsync()
     {
-        return await db.NodeObjects
-            .Include(node => node.Parameters)
-            .ToListAsync();
+        // TODO
+        if (!db.NodeTable.Any())
+            return new NodeTable();
+
+        return await db.NodeTable
+            .Include(table => table.ParameterTypes)
+            .Include(table => table.NodeObjects)
+            .ThenInclude(node => node.Parameters)
+            .FirstAsync();
     }
 
-    private void NormalizeNode(NodeObject node)
-    {
-        node.Name = NormalizeString(node.Name);
+    //private void NormalizeParameterTypes(List<ParameterType> parameterTypes)
+    //{
+    //    foreach (var parameterType in parameterTypes)
+    //    {
+    //        parameterType.Name = NormalizeString(parameterType.Name);
+    //    }
+    //}
 
-        foreach (var parameter in node.Parameters)
-        {
-            parameter.Name = NormalizeString(parameter.Name);
-            parameter.Value = NormalizeString(parameter.Value);
-        }
-    }
+    //private void NormalizeNode(NodeObject node)
+    //{
+    //    node.Name = NormalizeString(node.Name);
 
-    private string NormalizeString(string? str)
-    {
-        if (string.IsNullOrWhiteSpace(str))
-            return string.Empty;
+    //    foreach (var parameter in node.Parameters)
+    //    {
+    //        parameter.Value = NormalizeString(parameter.Value);
+    //    }
+    //}
 
-        return Regex.Replace(str, NormalizationPattern, "_").Trim();
-    }
+    //private string NormalizeString(string? str)
+    //{
+    //    if (string.IsNullOrWhiteSpace(str))
+    //        return string.Empty;
+
+    //    return Regex.Replace(str, NormalizationPattern, "_").Trim();
+    //}
 }

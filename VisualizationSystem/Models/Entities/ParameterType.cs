@@ -2,13 +2,11 @@
 
 namespace VisualizationSystem.Models.Entities;
 
-public class NodeObject
+public class ParameterType
 {
     [Key]
     public int Id { get; set; }
 
     [Required]
     public string Name { get; set; } = string.Empty;
-
-    public List<NodeParameter> Parameters  { get; set; } = new List<NodeParameter>();
 }

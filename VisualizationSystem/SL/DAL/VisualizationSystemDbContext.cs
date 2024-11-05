@@ -5,7 +5,12 @@ namespace VisualizationSystem.SL.DAL;
 
 public class VisualizationSystemDbContext : DbContext
 {
+    public DbSet<NodeTable> NodeTable { get; set; }
+
     public DbSet<NodeObject> NodeObjects { get; set; }
+
+    public DbSet<ParameterType> ParameterTypes { get; set; }
+    
     public DbSet<NodeParameter> NodeParameters { get; set; }
 
     public VisualizationSystemDbContext(DbContextOptions<VisualizationSystemDbContext> options)
@@ -13,15 +18,4 @@ public class VisualizationSystemDbContext : DbContext
     {
         Database.EnsureCreated();
     }
-
-    //protected override void OnModelCreating(ModelBuilder modelBuilder)
-    //{
-    //    base.OnModelCreating(modelBuilder);
-
-    //    modelBuilder.Entity<NodeParameter>()
-    //        .HasOne(p => p.NodeObject)
-    //        .WithMany(n => n.Parameters)
-    //        .HasForeignKey(p => p.NodeObjectId);
-            
-    //}
 }
