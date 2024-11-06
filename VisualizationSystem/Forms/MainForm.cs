@@ -143,5 +143,21 @@ namespace VisualizationSystem.Forms
             dataGridViewNodes.AllowUserToOrderColumns = false;
             //dataGridViewNodes.RowHeadersVisible = false;
         }
+
+        private void calculateSimilarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (nodeTable.NodeObjects.Count <= 0)
+                return;
+
+            try
+            {
+                var comparisonResults = NodeComparer.GetSimilarNodes(nodeTable);
+                MessageBox.Show("Nodes compared successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error while comparing nodes: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }

@@ -34,6 +34,7 @@
             loadToolStripMenuItem = new ToolStripMenuItem();
             showToolStripMenuItem = new ToolStripMenuItem();
             dataGridViewNodes = new DataGridView();
+            calculateSimilarToolStripMenuItem = new ToolStripMenuItem();
             menuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridViewNodes).BeginInit();
             SuspendLayout();
@@ -49,7 +50,7 @@
             // 
             // dataToolStripMenuItem
             // 
-            dataToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { loadToolStripMenuItem, showToolStripMenuItem });
+            dataToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { loadToolStripMenuItem, showToolStripMenuItem, calculateSimilarToolStripMenuItem });
             dataToolStripMenuItem.Name = "dataToolStripMenuItem";
             dataToolStripMenuItem.Size = new Size(43, 20);
             dataToolStripMenuItem.Text = "Data";
@@ -57,14 +58,14 @@
             // loadToolStripMenuItem
             // 
             loadToolStripMenuItem.Name = "loadToolStripMenuItem";
-            loadToolStripMenuItem.Size = new Size(103, 22);
+            loadToolStripMenuItem.Size = new Size(180, 22);
             loadToolStripMenuItem.Text = "Load";
             loadToolStripMenuItem.Click += loadToolStripMenuItem_Click;
             // 
             // showToolStripMenuItem
             // 
             showToolStripMenuItem.Name = "showToolStripMenuItem";
-            showToolStripMenuItem.Size = new Size(103, 22);
+            showToolStripMenuItem.Size = new Size(180, 22);
             showToolStripMenuItem.Text = "Show";
             showToolStripMenuItem.Click += showToolStripMenuItem_Click;
             // 
@@ -76,6 +77,13 @@
             dataGridViewNodes.Size = new Size(776, 411);
             dataGridViewNodes.TabIndex = 1;
             dataGridViewNodes.Visible = false;
+            // 
+            // calculateSimilarToolStripMenuItem
+            // 
+            calculateSimilarToolStripMenuItem.Name = "calculateSimilarToolStripMenuItem";
+            calculateSimilarToolStripMenuItem.Size = new Size(180, 22);
+            calculateSimilarToolStripMenuItem.Text = "Calculate similar";
+            calculateSimilarToolStripMenuItem.Click += calculateSimilarToolStripMenuItem_Click;
             // 
             // MainForm
             // 
@@ -103,5 +111,6 @@
         private ToolStripMenuItem loadToolStripMenuItem;
         private ToolStripMenuItem showToolStripMenuItem;
         private DataGridView dataGridViewNodes;
+        private ToolStripMenuItem calculateSimilarToolStripMenuItem;
     }
 }
