@@ -33,15 +33,17 @@
             dataToolStripMenuItem = new ToolStripMenuItem();
             loadToolStripMenuItem = new ToolStripMenuItem();
             showToolStripMenuItem = new ToolStripMenuItem();
-            dataGridViewNodes = new DataGridView();
             calculateSimilarToolStripMenuItem = new ToolStripMenuItem();
+            dataGridViewNodes = new DataGridView();
+            visualizationToolStripMenuItem = new ToolStripMenuItem();
+            settingsToolStripMenuItem = new ToolStripMenuItem();
             menuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridViewNodes).BeginInit();
             SuspendLayout();
             // 
             // menuStrip
             // 
-            menuStrip.Items.AddRange(new ToolStripItem[] { dataToolStripMenuItem });
+            menuStrip.Items.AddRange(new ToolStripItem[] { dataToolStripMenuItem, visualizationToolStripMenuItem });
             menuStrip.Location = new Point(0, 0);
             menuStrip.Name = "menuStrip";
             menuStrip.Size = new Size(800, 24);
@@ -58,16 +60,23 @@
             // loadToolStripMenuItem
             // 
             loadToolStripMenuItem.Name = "loadToolStripMenuItem";
-            loadToolStripMenuItem.Size = new Size(180, 22);
+            loadToolStripMenuItem.Size = new Size(161, 22);
             loadToolStripMenuItem.Text = "Load";
             loadToolStripMenuItem.Click += loadToolStripMenuItem_Click;
             // 
             // showToolStripMenuItem
             // 
             showToolStripMenuItem.Name = "showToolStripMenuItem";
-            showToolStripMenuItem.Size = new Size(180, 22);
+            showToolStripMenuItem.Size = new Size(161, 22);
             showToolStripMenuItem.Text = "Show";
             showToolStripMenuItem.Click += showToolStripMenuItem_Click;
+            // 
+            // calculateSimilarToolStripMenuItem
+            // 
+            calculateSimilarToolStripMenuItem.Name = "calculateSimilarToolStripMenuItem";
+            calculateSimilarToolStripMenuItem.Size = new Size(161, 22);
+            calculateSimilarToolStripMenuItem.Text = "Calculate similar";
+            calculateSimilarToolStripMenuItem.Click += calculateSimilarToolStripMenuItem_Click;
             // 
             // dataGridViewNodes
             // 
@@ -78,12 +87,19 @@
             dataGridViewNodes.TabIndex = 1;
             dataGridViewNodes.Visible = false;
             // 
-            // calculateSimilarToolStripMenuItem
+            // visualizationToolStripMenuItem
             // 
-            calculateSimilarToolStripMenuItem.Name = "calculateSimilarToolStripMenuItem";
-            calculateSimilarToolStripMenuItem.Size = new Size(180, 22);
-            calculateSimilarToolStripMenuItem.Text = "Calculate similar";
-            calculateSimilarToolStripMenuItem.Click += calculateSimilarToolStripMenuItem_Click;
+            visualizationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { settingsToolStripMenuItem });
+            visualizationToolStripMenuItem.Name = "visualizationToolStripMenuItem";
+            visualizationToolStripMenuItem.Size = new Size(85, 20);
+            visualizationToolStripMenuItem.Text = "Visualization";
+            // 
+            // settingsToolStripMenuItem
+            // 
+            settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            settingsToolStripMenuItem.Size = new Size(180, 22);
+            settingsToolStripMenuItem.Text = "Settings";
+            settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
             // 
             // MainForm
             // 
@@ -112,5 +128,7 @@
         private ToolStripMenuItem showToolStripMenuItem;
         private DataGridView dataGridViewNodes;
         private ToolStripMenuItem calculateSimilarToolStripMenuItem;
+        private ToolStripMenuItem visualizationToolStripMenuItem;
+        private ToolStripMenuItem settingsToolStripMenuItem;
     }
 }

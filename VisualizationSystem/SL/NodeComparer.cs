@@ -3,11 +3,18 @@ using VisualizationSystem.Models.Storages;
 
 namespace VisualizationSystem.SL;
 
-public static class NodeComparer
+public class NodeComparer
 {
-    private static readonly float DeviationPercent = 10;
+    private ComparisonSettings settings;
 
-    public static List<NodeComparisonResult> GetSimilarNodes(NodeTable table)
+    public NodeComparer()
+    {
+        settings = new ComparisonSettings();
+    }
+
+    public void UpdateSettings(ComparisonSettings comparisonSettings) => settings = comparisonSettings;
+
+    public List<NodeComparisonResult> GetSimilarNodes(NodeTable table)
     {
         var comparisonResults = new List<NodeComparisonResult>();
 
@@ -36,7 +43,7 @@ public static class NodeComparer
         return comparisonResults;
     }
 
-    private static int GetSimilarParametersCount(NodeObject firstNode, NodeObject secondNode)
+    private int GetSimilarParametersCount(NodeObject firstNode, NodeObject secondNode)
     {
         if (firstNode.Parameters.Count != secondNode.Parameters.Count)
             throw new InvalidOperationException("NodeObjects must have the same number of parameters");
@@ -61,7 +68,7 @@ public static class NodeComparer
         return similarCount;
     }
 
-    private static bool IsParameterMatch(string firstValue, string secondValue)
+    private bool IsParameterMatch(string firstValue, string secondValue)
     {
         if (string.IsNullOrWhiteSpace(firstValue) || string.IsNullOrWhiteSpace(secondValue))
             return false;
@@ -70,7 +77,7 @@ public static class NodeComparer
             double.TryParse(secondValue, out double secondNumber))
         {
             double maxNumber = Math.Max(firstNumber, secondNumber);
-            double tolerance = maxNumber * DeviationPercent / 100;
+            double tolerance = maxNumber * settings.DeviationPercent / 100;
 
             return Math.Abs(firstNumber - secondNumber) <= tolerance;
         }
