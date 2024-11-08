@@ -17,8 +17,9 @@ public partial class MainForm : Form
 
     private readonly VisualizationSystemDbContext db;
     private readonly NodeRepository nodeRepository;
-    private readonly NodeComparer nodeComparer;
     private readonly ComparisonSettings comparisonSettings;
+    private readonly NodeComparer nodeComparer;
+    private readonly GraphBuilder graphBuilder;
 
     private NodeTable nodeTable = new NodeTable();
 
@@ -28,8 +29,9 @@ public partial class MainForm : Form
 
         db = context;
         nodeRepository = new NodeRepository(db);
-        nodeComparer = new NodeComparer();
         comparisonSettings = new ComparisonSettings();
+        nodeComparer = new NodeComparer(comparisonSettings);
+        graphBuilder = new GraphBuilder(comparisonSettings);
     }
 
     private async void MainForm_Load(object sender, EventArgs e)
@@ -107,7 +109,29 @@ public partial class MainForm : Form
                 return;
 
             nodeComparer.UpdateSettings(comparisonSettings);
+            graphBuilder.Equals(comparisonSettings);
             MessageBox.Show("Settings changed successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+    }
+
+
+    private void buildGraphToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        if (nodeTable.NodeObjects.IsNullOrEmpty())
+        {
+            MessageBox.Show("No data to visualize graph", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        try
+        {
+            var comparisonResults = nodeComparer.GetSimilarNodes(nodeTable);
+            gViewer.Graph = graphBuilder.BuildGraph(comparisonResults, nodeTable);
+            MessageBox.Show("Nodes compared successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error while visualizing graph: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 

@@ -120,6 +120,15 @@
   <metadata name="menuStrip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <data name="gViewer.Transform" mimetype="application/x-microsoft.net.object.binary.base64">
+    <value>
+        AAEAAAD/////AQAAAAAAAAAMAgAAAEFNaWNyb3NvZnQuTXNhZ2wsIEN1bHR1cmU9bmV1dHJhbCwgUHVi
+        bGljS2V5VG9rZW49NmJhYTJjMTM0NWU4M2I2ZQUBAAAAOE1pY3Jvc29mdC5Nc2FnbC5Db3JlLkdlb21l
+        dHJ5LkN1cnZlcy5QbGFuZVRyYW5zZm9ybWF0aW9uAQAAAAhlbGVtZW50cwMRU3lzdGVtLkRvdWJsZVtd
+        W10CAAAACQMAAAAHAwAAAAEBAAAAAgAAAAcGCQQAAAAJBQAAAA8EAAAAAwAAAAYAAAAAAADwPwAAAAAA
+        AAAAAAAAAAAAAAAPBQAAAAMAAAAGAAAAAAAAAAAAAAAAAADwPwAAAAAAAAAACw==
+</value>
+  </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>

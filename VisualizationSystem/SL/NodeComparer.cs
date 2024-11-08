@@ -7,9 +7,9 @@ public class NodeComparer
 {
     private ComparisonSettings settings;
 
-    public NodeComparer()
+    public NodeComparer(ComparisonSettings comparisonSettings)
     {
-        settings = new ComparisonSettings();
+        settings = comparisonSettings;
     }
 
     public void UpdateSettings(ComparisonSettings comparisonSettings) => settings = comparisonSettings;

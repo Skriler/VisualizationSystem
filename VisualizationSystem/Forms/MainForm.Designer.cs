@@ -34,9 +34,11 @@
             loadToolStripMenuItem = new ToolStripMenuItem();
             showToolStripMenuItem = new ToolStripMenuItem();
             calculateSimilarToolStripMenuItem = new ToolStripMenuItem();
-            dataGridViewNodes = new DataGridView();
             visualizationToolStripMenuItem = new ToolStripMenuItem();
+            buildGraphToolStripMenuItem = new ToolStripMenuItem();
             settingsToolStripMenuItem = new ToolStripMenuItem();
+            dataGridViewNodes = new DataGridView();
+            gViewer = new Microsoft.Msagl.GraphViewerGdi.GViewer();
             menuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridViewNodes).BeginInit();
             SuspendLayout();
@@ -78,6 +80,27 @@
             calculateSimilarToolStripMenuItem.Text = "Calculate similar";
             calculateSimilarToolStripMenuItem.Click += calculateSimilarToolStripMenuItem_Click;
             // 
+            // visualizationToolStripMenuItem
+            // 
+            visualizationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { buildGraphToolStripMenuItem, settingsToolStripMenuItem });
+            visualizationToolStripMenuItem.Name = "visualizationToolStripMenuItem";
+            visualizationToolStripMenuItem.Size = new Size(85, 20);
+            visualizationToolStripMenuItem.Text = "Visualization";
+            // 
+            // buildGraphToolStripMenuItem
+            // 
+            buildGraphToolStripMenuItem.Name = "buildGraphToolStripMenuItem";
+            buildGraphToolStripMenuItem.Size = new Size(136, 22);
+            buildGraphToolStripMenuItem.Text = "Build Graph";
+            buildGraphToolStripMenuItem.Click += buildGraphToolStripMenuItem_Click;
+            // 
+            // settingsToolStripMenuItem
+            // 
+            settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            settingsToolStripMenuItem.Size = new Size(136, 22);
+            settingsToolStripMenuItem.Text = "Settings";
+            settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
+            // 
             // dataGridViewNodes
             // 
             dataGridViewNodes.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -87,25 +110,52 @@
             dataGridViewNodes.TabIndex = 1;
             dataGridViewNodes.Visible = false;
             // 
-            // visualizationToolStripMenuItem
+            // gViewer
             // 
-            visualizationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { settingsToolStripMenuItem });
-            visualizationToolStripMenuItem.Name = "visualizationToolStripMenuItem";
-            visualizationToolStripMenuItem.Size = new Size(85, 20);
-            visualizationToolStripMenuItem.Text = "Visualization";
-            // 
-            // settingsToolStripMenuItem
-            // 
-            settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            settingsToolStripMenuItem.Size = new Size(180, 22);
-            settingsToolStripMenuItem.Text = "Settings";
-            settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
+            gViewer.ArrowheadLength = 10D;
+            gViewer.AsyncLayout = false;
+            gViewer.AutoScroll = true;
+            gViewer.BackwardEnabled = false;
+            gViewer.BuildHitTree = true;
+            gViewer.CurrentLayoutMethod = Microsoft.Msagl.GraphViewerGdi.LayoutMethod.UseSettingsOfTheGraph;
+            gViewer.EdgeInsertButtonVisible = true;
+            gViewer.FileName = "";
+            gViewer.ForwardEnabled = false;
+            gViewer.Graph = null;
+            gViewer.IncrementalDraggingModeAlways = false;
+            gViewer.InsertingEdge = false;
+            gViewer.LayoutAlgorithmSettingsButtonVisible = true;
+            gViewer.LayoutEditingEnabled = true;
+            gViewer.Location = new Point(11, 27);
+            gViewer.LooseOffsetForRouting = 0.25D;
+            gViewer.MouseHitDistance = 0.05D;
+            gViewer.Name = "gViewer";
+            gViewer.NavigationVisible = true;
+            gViewer.NeedToCalculateLayout = true;
+            gViewer.OffsetForRelaxingInRouting = 0.6D;
+            gViewer.PaddingForEdgeRouting = 8D;
+            gViewer.PanButtonPressed = false;
+            gViewer.SaveAsImageEnabled = true;
+            gViewer.SaveAsMsaglEnabled = true;
+            gViewer.SaveButtonVisible = true;
+            gViewer.SaveGraphButtonVisible = true;
+            gViewer.SaveInVectorFormatEnabled = true;
+            gViewer.Size = new Size(777, 411);
+            gViewer.TabIndex = 2;
+            gViewer.TightOffsetForRouting = 0.125D;
+            gViewer.ToolBarIsVisible = true;
+            gViewer.Transform = (Microsoft.Msagl.Core.Geometry.Curves.PlaneTransformation)resources.GetObject("gViewer.Transform");
+            gViewer.UndoRedoButtonsVisible = true;
+            gViewer.WindowZoomButtonPressed = false;
+            gViewer.ZoomF = 1D;
+            gViewer.ZoomWindowThreshold = 0.05D;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(gViewer);
             Controls.Add(dataGridViewNodes);
             Controls.Add(menuStrip);
             Icon = (Icon)resources.GetObject("$this.Icon");
@@ -130,5 +180,7 @@
         private ToolStripMenuItem calculateSimilarToolStripMenuItem;
         private ToolStripMenuItem visualizationToolStripMenuItem;
         private ToolStripMenuItem settingsToolStripMenuItem;
+        private Microsoft.Msagl.GraphViewerGdi.GViewer gViewer;
+        private ToolStripMenuItem buildGraphToolStripMenuItem;
     }
 }
