@@ -36,6 +36,8 @@
             btnSubmit = new Button();
             lblMinMatchingParametersValue = new Label();
             lblDeviationPercentValue = new Label();
+            lblSelectedParameters = new Label();
+            clbSelectedParams = new CheckedListBox();
             ((System.ComponentModel.ISupportInitialize)trcbrMinMatchingParameters).BeginInit();
             ((System.ComponentModel.ISupportInitialize)trcbrDeviationPercent).BeginInit();
             SuspendLayout();
@@ -83,7 +85,7 @@
             // 
             btnSubmit.Location = new Point(6, 228);
             btnSubmit.Name = "btnSubmit";
-            btnSubmit.Size = new Size(147, 29);
+            btnSubmit.Size = new Size(319, 29);
             btnSubmit.TabIndex = 4;
             btnSubmit.Text = "Submit";
             btnSubmit.UseVisualStyleBackColor = true;
@@ -107,11 +109,30 @@
             lblDeviationPercentValue.TabIndex = 6;
             lblDeviationPercentValue.Text = "Value: 0";
             // 
+            // lblSelectedParameters
+            // 
+            lblSelectedParameters.AutoSize = true;
+            lblSelectedParameters.Location = new Point(178, 11);
+            lblSelectedParameters.Name = "lblSelectedParameters";
+            lblSelectedParameters.Size = new Size(147, 15);
+            lblSelectedParameters.TabIndex = 7;
+            lblSelectedParameters.Text = "Min matching parameters ";
+            // 
+            // clbSelectedParams
+            // 
+            clbSelectedParams.FormattingEnabled = true;
+            clbSelectedParams.Location = new Point(178, 41);
+            clbSelectedParams.Name = "clbSelectedParams";
+            clbSelectedParams.Size = new Size(147, 166);
+            clbSelectedParams.TabIndex = 8;
+            // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(165, 272);
+            ClientSize = new Size(348, 272);
+            Controls.Add(clbSelectedParams);
+            Controls.Add(lblSelectedParameters);
             Controls.Add(lblDeviationPercentValue);
             Controls.Add(lblMinMatchingParametersValue);
             Controls.Add(btnSubmit);
@@ -138,5 +159,7 @@
         private Button btnSubmit;
         private Label lblMinMatchingParametersValue;
         private Label lblDeviationPercentValue;
+        private Label lblSelectedParameters;
+        private CheckedListBox clbSelectedParams;
     }
 }

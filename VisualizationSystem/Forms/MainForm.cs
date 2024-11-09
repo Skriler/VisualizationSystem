@@ -74,27 +74,6 @@ public partial class MainForm : Form
         DisableDataGridViewInteractions();
     }
 
-
-    private void calculateSimilarToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (nodeTable.NodeObjects.IsNullOrEmpty())
-        {
-            MessageBox.Show("No data for comparison", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            return;
-        }
-
-        try
-        {
-            var comparisonResults = nodeComparer.GetSimilarNodes(nodeTable);
-            MessageBox.Show("Nodes compared successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Error while comparing nodes: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-    }
-
-
     private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (nodeTable.NodeObjects.IsNullOrEmpty())
@@ -113,7 +92,6 @@ public partial class MainForm : Form
             MessageBox.Show("Settings changed successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
-
 
     private void buildGraphToolStripMenuItem_Click(object sender, EventArgs e)
     {
