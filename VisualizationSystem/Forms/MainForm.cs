@@ -36,10 +36,10 @@ public partial class MainForm : Form
 
     private async void MainForm_Load(object sender, EventArgs e)
     {
-        nodeTable = await nodeRepository.GetTableAsync();
+        LoadTableNamesToMenu();
     }
 
-    private async void loadToolStripMenuItem_Click(object sender, EventArgs e)
+    private async void uploadExcelFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
         LoadExcelData();
         await SaveDataToDatabaseAsync();
@@ -72,6 +72,14 @@ public partial class MainForm : Form
         dataGridViewNodes.DataSource = dataTable;
 
         DisableDataGridViewInteractions();
+    }
+
+    private async void TableMenuItem_Click(object sender, EventArgs e)
+    {
+        if (sender is not ToolStripMenuItem selectedItem)
+            return;
+
+        await LoadNodeTable(selectedItem.Text);
     }
 
     private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -111,6 +119,38 @@ public partial class MainForm : Form
         {
             MessageBox.Show($"Error while visualizing graph: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+    }
+
+    private async void LoadTableNamesToMenu()
+    {
+        loadTableToolStripMenuItem.DropDownItems.Clear();
+
+        var tables = await nodeRepository.GetAllAsync();
+
+        if (!tables.Any())
+        {
+            loadTableToolStripMenuItem.Enabled = false;
+            return;
+        }
+            
+        loadTableToolStripMenuItem.Enabled = true;
+
+        var tableNames = tables
+            .Select(x => x.Name)
+            .ToList();
+
+        ToolStripMenuItem tableMenuItem;
+        foreach (var table in tables)
+        {
+            tableMenuItem = new ToolStripMenuItem(table.Name);
+            tableMenuItem.Click += TableMenuItem_Click;
+            loadTableToolStripMenuItem.DropDownItems.Add(tableMenuItem);
+        }
+    }
+
+    private async Task LoadNodeTable(string tableName)
+    {
+        nodeTable =  await nodeRepository.GetByNameAsync(tableName);
     }
 
     private void LoadExcelData()

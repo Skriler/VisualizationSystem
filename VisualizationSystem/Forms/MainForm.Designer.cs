@@ -31,8 +31,9 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             menuStrip = new MenuStrip();
             dataToolStripMenuItem = new ToolStripMenuItem();
-            loadToolStripMenuItem = new ToolStripMenuItem();
+            uploadExcelFileToolStripMenuItem = new ToolStripMenuItem();
             showToolStripMenuItem = new ToolStripMenuItem();
+            loadTableToolStripMenuItem = new ToolStripMenuItem();
             visualizationToolStripMenuItem = new ToolStripMenuItem();
             buildGraphToolStripMenuItem = new ToolStripMenuItem();
             settingsToolStripMenuItem = new ToolStripMenuItem();
@@ -59,17 +60,17 @@
             // 
             // dataToolStripMenuItem
             // 
-            dataToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { loadToolStripMenuItem, showToolStripMenuItem });
+            dataToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { uploadExcelFileToolStripMenuItem, showToolStripMenuItem, loadTableToolStripMenuItem });
             dataToolStripMenuItem.Name = "dataToolStripMenuItem";
             dataToolStripMenuItem.Size = new Size(43, 20);
             dataToolStripMenuItem.Text = "Data";
             // 
-            // loadToolStripMenuItem
+            // uploadExcelFileToolStripMenuItem
             // 
-            loadToolStripMenuItem.Name = "loadToolStripMenuItem";
-            loadToolStripMenuItem.Size = new Size(180, 22);
-            loadToolStripMenuItem.Text = "Load";
-            loadToolStripMenuItem.Click += loadToolStripMenuItem_Click;
+            uploadExcelFileToolStripMenuItem.Name = "uploadExcelFileToolStripMenuItem";
+            uploadExcelFileToolStripMenuItem.Size = new Size(180, 22);
+            uploadExcelFileToolStripMenuItem.Text = "Upload Excel File";
+            uploadExcelFileToolStripMenuItem.Click += uploadExcelFileToolStripMenuItem_Click;
             // 
             // showToolStripMenuItem
             // 
@@ -77,6 +78,12 @@
             showToolStripMenuItem.Size = new Size(180, 22);
             showToolStripMenuItem.Text = "Show";
             showToolStripMenuItem.Click += showToolStripMenuItem_Click;
+            // 
+            // loadTableToolStripMenuItem
+            // 
+            loadTableToolStripMenuItem.Name = "loadTableToolStripMenuItem";
+            loadTableToolStripMenuItem.Size = new Size(180, 22);
+            loadTableToolStripMenuItem.Text = "Load Table";
             // 
             // visualizationToolStripMenuItem
             // 
@@ -118,34 +125,34 @@
             gViewer.BuildHitTree = true;
             gViewer.CurrentLayoutMethod = Microsoft.Msagl.GraphViewerGdi.LayoutMethod.MDS;
             gViewer.Dock = DockStyle.Fill;
-            gViewer.EdgeInsertButtonVisible = true;
+            gViewer.EdgeInsertButtonVisible = false;
             gViewer.FileName = "";
             gViewer.ForwardEnabled = false;
             gViewer.Graph = null;
             gViewer.IncrementalDraggingModeAlways = false;
             gViewer.InsertingEdge = false;
-            gViewer.LayoutAlgorithmSettingsButtonVisible = true;
+            gViewer.LayoutAlgorithmSettingsButtonVisible = false;
             gViewer.LayoutEditingEnabled = true;
             gViewer.Location = new Point(3, 3);
             gViewer.LooseOffsetForRouting = 0.25D;
             gViewer.MouseHitDistance = 0.05D;
             gViewer.Name = "gViewer";
-            gViewer.NavigationVisible = true;
+            gViewer.NavigationVisible = false;
             gViewer.NeedToCalculateLayout = true;
             gViewer.OffsetForRelaxingInRouting = 0.6D;
             gViewer.PaddingForEdgeRouting = 8D;
             gViewer.PanButtonPressed = false;
             gViewer.SaveAsImageEnabled = true;
             gViewer.SaveAsMsaglEnabled = true;
-            gViewer.SaveButtonVisible = true;
-            gViewer.SaveGraphButtonVisible = true;
+            gViewer.SaveButtonVisible = false;
+            gViewer.SaveGraphButtonVisible = false;
             gViewer.SaveInVectorFormatEnabled = true;
             gViewer.Size = new Size(786, 392);
             gViewer.TabIndex = 2;
             gViewer.TightOffsetForRouting = 0.125D;
             gViewer.ToolBarIsVisible = true;
             gViewer.Transform = (Microsoft.Msagl.Core.Geometry.Curves.PlaneTransformation)resources.GetObject("gViewer.Transform");
-            gViewer.UndoRedoButtonsVisible = true;
+            gViewer.UndoRedoButtonsVisible = false;
             gViewer.WindowZoomButtonPressed = false;
             gViewer.ZoomF = 1D;
             gViewer.ZoomWindowThreshold = 0.05D;
@@ -209,7 +216,7 @@
 
         private MenuStrip menuStrip;
         private ToolStripMenuItem dataToolStripMenuItem;
-        private ToolStripMenuItem loadToolStripMenuItem;
+        private ToolStripMenuItem uploadExcelFileToolStripMenuItem;
         private ToolStripMenuItem showToolStripMenuItem;
         private DataGridView dataGridViewNodes;
         private ToolStripMenuItem visualizationToolStripMenuItem;
@@ -219,5 +226,6 @@
         private TabControl tabControl;
         private TabPage tabPageDataGridView;
         private TabPage tabPageGViewer;
+        private ToolStripMenuItem loadTableToolStripMenuItem;
     }
 }

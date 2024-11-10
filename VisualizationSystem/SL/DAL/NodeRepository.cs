@@ -18,29 +18,41 @@ public class NodeRepository
 
     public async Task AddTableAsync(NodeTable nodeTable)
     {
-        //NormalizeParameterTypes(nodeTable.ParameterTypes);
+        if (nodeTable == null)
+            throw new ArgumentNullException(nameof(nodeTable));
 
-        //foreach (NodeObject node in nodeTable.NodeObjects)
-        //{
-        //    NormalizeNode(node);
-        //}
+        // TODO
+        if (await ExistsAsync(nodeTable.Name))
+            throw new InvalidOperationException($"Table with name '{nodeTable.Name}' already exists.");
 
         db.NodeTable.Add(nodeTable);
-
         await db.SaveChangesAsync();
     }
 
-    public async Task<NodeTable> GetTableAsync()
+    public async Task<bool> ExistsAsync(string tableName)
     {
-        // TODO
-        if (!db.NodeTable.Any())
-            return new NodeTable();
+        if (string.IsNullOrWhiteSpace(tableName)) 
+            throw new ArgumentException("Table name cannot be null or whitespace.", nameof(tableName));
+
+        return await db.NodeTable.AnyAsync(table => table.Name == tableName);
+    }
+
+    public async Task<NodeTable> GetByNameAsync(string tableName)
+    {
+        if (string.IsNullOrWhiteSpace(tableName)) 
+            throw new ArgumentException("Table name cannot be null or whitespace.", nameof(tableName));
 
         return await db.NodeTable
             .Include(table => table.ParameterTypes)
             .Include(table => table.NodeObjects)
             .ThenInclude(node => node.Parameters)
+            .Where(table => table.Name == tableName)
             .FirstAsync();
+    }
+
+    public async Task<List<NodeTable>> GetAllAsync()
+    {
+        return await db.NodeTable.ToListAsync();
     }
 
     //private void NormalizeParameterTypes(List<ParameterType> parameterTypes)
