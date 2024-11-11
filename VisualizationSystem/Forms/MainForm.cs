@@ -5,6 +5,8 @@ using VisualizationSystem.Models.ViewModels;
 using VisualizationSystem.Models.Storages;
 using VisualizationSystem.SL;
 using VisualizationSystem.SL.DAL;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Windows.Documents;
 
 namespace VisualizationSystem.Forms;
 
@@ -34,15 +36,25 @@ public partial class MainForm : Form
         graphBuilder = new GraphBuilder(comparisonSettings);
     }
 
-    private async void MainForm_Load(object sender, EventArgs e)
+    private void MainForm_Load(object sender, EventArgs e)
     {
         LoadTableNamesToMenu();
     }
 
     private async void uploadExcelFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        LoadExcelData();
-        await SaveDataToDatabaseAsync();
+        try
+        {
+            LoadExcelData();
+            await nodeRepository.AddTableAsync(nodeTable);
+            //AddTableToolStripMenuItem(nodeTable.Name);
+
+            MessageBox.Show("File uploaded successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error while uploading data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 
     private void showToolStripMenuItem_Click(object sender, EventArgs e)
@@ -53,33 +65,54 @@ public partial class MainForm : Form
             return;
         }
 
-        var headers =
-            nodeTable
-            .ParameterTypes
-            .Select(p => p.Name)
-            .Where(name => name != null)
-            .Cast<string>();
+        try
+        {
+            ShowTableData(nodeTable);
 
-        NodeObjectViewModel.InitializeHeaders(headers);
-
-        var nodeViewModels = nodeTable.NodeObjects
-            .Select(n => new NodeObjectViewModel(n))
-            .ToList();
-
-        var dataTable = CreateDataTable(nodeViewModels);
-
-        dataGridViewNodes.Visible = true;
-        dataGridViewNodes.DataSource = dataTable;
-
-        DisableDataGridViewInteractions();
+            MessageBox.Show("Data showed successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error while uploading data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 
-    private async void TableMenuItem_Click(object sender, EventArgs e)
+    private async void tableToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (sender is not ToolStripMenuItem selectedItem)
+        if (sender is not ToolStripMenuItem selectedItem || selectedItem.Text == null)
             return;
 
-        await LoadNodeTable(selectedItem.Text);
+        try
+        {
+            nodeTable = await nodeRepository.GetByNameAsync(selectedItem.Text);
+
+            MessageBox.Show("File uploaded successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error while uploading data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private void buildGraphToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        if (nodeTable.NodeObjects.IsNullOrEmpty())
+        {
+            MessageBox.Show("No data to visualize graph", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        try
+        {
+            var comparisonResults = nodeComparer.GetSimilarNodes(nodeTable);
+            gViewer.Graph = graphBuilder.BuildGraph(comparisonResults, nodeTable);
+
+            MessageBox.Show("Graph visualized successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error while visualizing graph: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 
     private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -101,26 +134,6 @@ public partial class MainForm : Form
         }
     }
 
-    private void buildGraphToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (nodeTable.NodeObjects.IsNullOrEmpty())
-        {
-            MessageBox.Show("No data to visualize graph", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            return;
-        }
-
-        try
-        {
-            var comparisonResults = nodeComparer.GetSimilarNodes(nodeTable);
-            gViewer.Graph = graphBuilder.BuildGraph(comparisonResults, nodeTable);
-            MessageBox.Show("Nodes compared successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Error while visualizing graph: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-    }
-
     private async void LoadTableNamesToMenu()
     {
         loadTableToolStripMenuItem.DropDownItems.Clear();
@@ -139,18 +152,17 @@ public partial class MainForm : Form
             .Select(x => x.Name)
             .ToList();
 
-        ToolStripMenuItem tableMenuItem;
         foreach (var table in tables)
         {
-            tableMenuItem = new ToolStripMenuItem(table.Name);
-            tableMenuItem.Click += TableMenuItem_Click;
-            loadTableToolStripMenuItem.DropDownItems.Add(tableMenuItem);
+            AddTableToolStripMenuItem(table.Name);
         }
     }
 
-    private async Task LoadNodeTable(string tableName)
+    private void AddTableToolStripMenuItem(string tableName)
     {
-        nodeTable =  await nodeRepository.GetByNameAsync(tableName);
+        ToolStripMenuItem tableMenuItem = new ToolStripMenuItem(tableName);
+        tableMenuItem.Click += tableToolStripMenuItem_Click;
+        loadTableToolStripMenuItem.DropDownItems.Add(tableMenuItem);
     }
 
     private void LoadExcelData()
@@ -164,16 +176,31 @@ public partial class MainForm : Form
 
             string filePath = openFileDialog.FileName;
 
-            try
-            {
-                nodeTable = ExcelReader.ReadFile(filePath);
-                MessageBox.Show("Data read successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error while reading file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            nodeTable = ExcelReader.ReadFile(filePath);
         }
+    }
+
+    private void ShowTableData(NodeTable table)
+    {
+        var headers =
+            table
+            .ParameterTypes
+            .Select(p => p.Name)
+            .Where(name => name != null)
+            .Cast<string>();
+
+        NodeObjectViewModel.InitializeHeaders(headers);
+
+        var nodeViewModels = nodeTable.NodeObjects
+            .Select(n => new NodeObjectViewModel(n))
+            .ToList();
+
+        var dataTable = CreateDataTable(nodeViewModels);
+
+        dataGridViewNodes.Visible = true;
+        dataGridViewNodes.DataSource = dataTable;
+
+        DisableDataGridViewInteractions();
     }
 
     private DataTable CreateDataTable(List<NodeObjectViewModel> nodeViewModels)
@@ -207,19 +234,6 @@ public partial class MainForm : Form
         openFileDialog.InitialDirectory = InitialDirectory;
         openFileDialog.Filter = ExcelFilterPattern;
         openFileDialog.RestoreDirectory = true;
-    }
-
-    private async Task SaveDataToDatabaseAsync()
-    {
-        try
-        {
-            await nodeRepository.AddTableAsync(nodeTable);
-            MessageBox.Show("Data saved to database successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Error while saving data to database: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
     }
 
     private void DisableDataGridViewInteractions()

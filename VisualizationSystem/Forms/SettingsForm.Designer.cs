@@ -64,7 +64,6 @@
             // 
             trcbrMinMatchingParameters.Location = new Point(11, 41);
             trcbrMinMatchingParameters.Maximum = 60;
-            trcbrMinMatchingParameters.Minimum = 20;
             trcbrMinMatchingParameters.Name = "trcbrMinMatchingParameters";
             trcbrMinMatchingParameters.Size = new Size(147, 45);
             trcbrMinMatchingParameters.TabIndex = 2;

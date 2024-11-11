@@ -7,33 +7,50 @@ namespace VisualizationSystem.SL;
 
 public static class ExcelReader
 {
-    private static readonly short RowHeadersIndex = 2;
-
     static ExcelReader()
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
-    public static NodeTable ReadFile(string filePath)
+    public static NodeTable ReadFile(string filePath, short tableIndex = 0)
     {
         using (var stream = File.Open(filePath, FileMode.Open, FileAccess.Read))
         {
             using (var reader = ExcelReaderFactory.CreateReader(stream))
             {
                 var dataSet = reader.AsDataSet();
-                return ParseDataSet(dataSet);
+                var table = dataSet.Tables[tableIndex];
+
+                int headersRowIndex = FindHeaderRowIndex(table);
+
+                if (headersRowIndex < 0)
+                    throw new Exception("Table must contain header row.");
+
+                return ParseDataTable(table, headersRowIndex);
             }
         }
     }
 
-    private static NodeTable ParseDataSet(DataSet dataSet, short tableIndex = 0)
+    private static int FindHeaderRowIndex(DataTable table)
     {
-        var table = dataSet.Tables[tableIndex];
+        var headersRowIndex = table.AsEnumerable()
+            .Select((row, index) => new { Row = row, Index = index })
+            .FirstOrDefault(r => r.Row.ItemArray.All(cell => IsCellFilled(cell)));
 
+        return headersRowIndex != null ? headersRowIndex.Index : -1;
+    }
+
+    private static bool IsCellFilled(object? cell)
+    {
+        return cell != null && !string.IsNullOrWhiteSpace(cell.ToString());
+    }
+
+    private static NodeTable ParseDataTable(DataTable table, int headersRowIndex)
+    {
         if (table.Rows.Count == 0)
             return new NodeTable();
 
-        var parameterTypes = InitializeParameterTypes(table, RowHeadersIndex);
+        var parameterTypes = InitializeParameterTypes(table, headersRowIndex);
 
         NodeTable nodeTable = new NodeTable
         {
@@ -44,7 +61,7 @@ public static class ExcelReader
         List<NodeObject> nodes = new List<NodeObject>();
 
         NodeObject node;
-        for (int row = RowHeadersIndex + 1; row < table.Rows.Count; ++row)
+        for (int row = headersRowIndex + 1; row < table.Rows.Count; ++row)
         {
             node = ParseDataRow(table.Rows[row], parameterTypes);
             nodes.Add(node);
@@ -55,10 +72,10 @@ public static class ExcelReader
         return nodeTable;
     }
 
-    private static List<ParameterType> InitializeParameterTypes(DataTable table, short rowHeadersIndex)
+    private static List<ParameterType> InitializeParameterTypes(DataTable table, int headersRowIndex)
     {
         var parameterTypes = new List<ParameterType>();
-        var rowHeaders = table.Rows[rowHeadersIndex];
+        var rowHeaders = table.Rows[headersRowIndex];
 
         for (int col = 1; col < table.Columns.Count; ++col)
         {
