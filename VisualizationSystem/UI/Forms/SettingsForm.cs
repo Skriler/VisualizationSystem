@@ -1,6 +1,6 @@
 ﻿using VisualizationSystem.Models.Storages;
 
-namespace VisualizationSystem.Forms;
+namespace VisualizationSystem.UI.Forms;
 
 public partial class SettingsForm : Form
 {

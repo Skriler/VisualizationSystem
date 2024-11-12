@@ -1,4 +1,4 @@
-﻿namespace VisualizationSystem.Forms
+﻿namespace VisualizationSystem.UI.Forms
 {
     partial class SettingsForm
     {

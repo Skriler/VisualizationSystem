@@ -1,4 +1,4 @@
-﻿namespace VisualizationSystem.Forms
+﻿namespace VisualizationSystem.UI.Forms
 {
     partial class MainForm
     {
@@ -37,16 +37,8 @@
             visualizationToolStripMenuItem = new ToolStripMenuItem();
             buildGraphToolStripMenuItem = new ToolStripMenuItem();
             settingsToolStripMenuItem = new ToolStripMenuItem();
-            dataGridViewNodes = new DataGridView();
-            gViewer = new Microsoft.Msagl.GraphViewerGdi.GViewer();
             tabControl = new TabControl();
-            tabPageDataGridView = new TabPage();
-            tabPageGViewer = new TabPage();
             menuStrip.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dataGridViewNodes).BeginInit();
-            tabControl.SuspendLayout();
-            tabPageDataGridView.SuspendLayout();
-            tabPageGViewer.SuspendLayout();
             SuspendLayout();
             // 
             // menuStrip
@@ -68,21 +60,21 @@
             // uploadExcelFileToolStripMenuItem
             // 
             uploadExcelFileToolStripMenuItem.Name = "uploadExcelFileToolStripMenuItem";
-            uploadExcelFileToolStripMenuItem.Size = new Size(180, 22);
+            uploadExcelFileToolStripMenuItem.Size = new Size(163, 22);
             uploadExcelFileToolStripMenuItem.Text = "Upload Excel File";
             uploadExcelFileToolStripMenuItem.Click += uploadExcelFileToolStripMenuItem_Click;
             // 
             // showToolStripMenuItem
             // 
             showToolStripMenuItem.Name = "showToolStripMenuItem";
-            showToolStripMenuItem.Size = new Size(180, 22);
+            showToolStripMenuItem.Size = new Size(163, 22);
             showToolStripMenuItem.Text = "Show";
             showToolStripMenuItem.Click += showToolStripMenuItem_Click;
             // 
             // loadTableToolStripMenuItem
             // 
             loadTableToolStripMenuItem.Name = "loadTableToolStripMenuItem";
-            loadTableToolStripMenuItem.Size = new Size(180, 22);
+            loadTableToolStripMenuItem.Size = new Size(163, 22);
             loadTableToolStripMenuItem.Text = "Load Table";
             // 
             // visualizationToolStripMenuItem
@@ -106,89 +98,17 @@
             settingsToolStripMenuItem.Text = "Settings";
             settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
             // 
-            // dataGridViewNodes
-            // 
-            dataGridViewNodes.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewNodes.Dock = DockStyle.Fill;
-            dataGridViewNodes.Location = new Point(3, 3);
-            dataGridViewNodes.Name = "dataGridViewNodes";
-            dataGridViewNodes.Size = new Size(786, 392);
-            dataGridViewNodes.TabIndex = 1;
-            dataGridViewNodes.Visible = false;
-            // 
-            // gViewer
-            // 
-            gViewer.ArrowheadLength = 10D;
-            gViewer.AsyncLayout = false;
-            gViewer.AutoScroll = true;
-            gViewer.BackwardEnabled = false;
-            gViewer.BuildHitTree = true;
-            gViewer.CurrentLayoutMethod = Microsoft.Msagl.GraphViewerGdi.LayoutMethod.MDS;
-            gViewer.Dock = DockStyle.Fill;
-            gViewer.EdgeInsertButtonVisible = false;
-            gViewer.FileName = "";
-            gViewer.ForwardEnabled = false;
-            gViewer.Graph = null;
-            gViewer.IncrementalDraggingModeAlways = false;
-            gViewer.InsertingEdge = false;
-            gViewer.LayoutAlgorithmSettingsButtonVisible = false;
-            gViewer.LayoutEditingEnabled = true;
-            gViewer.Location = new Point(3, 3);
-            gViewer.LooseOffsetForRouting = 0.25D;
-            gViewer.MouseHitDistance = 0.05D;
-            gViewer.Name = "gViewer";
-            gViewer.NavigationVisible = false;
-            gViewer.NeedToCalculateLayout = true;
-            gViewer.OffsetForRelaxingInRouting = 0.6D;
-            gViewer.PaddingForEdgeRouting = 8D;
-            gViewer.PanButtonPressed = false;
-            gViewer.SaveAsImageEnabled = true;
-            gViewer.SaveAsMsaglEnabled = true;
-            gViewer.SaveButtonVisible = false;
-            gViewer.SaveGraphButtonVisible = false;
-            gViewer.SaveInVectorFormatEnabled = true;
-            gViewer.Size = new Size(786, 392);
-            gViewer.TabIndex = 2;
-            gViewer.TightOffsetForRouting = 0.125D;
-            gViewer.ToolBarIsVisible = true;
-            gViewer.Transform = (Microsoft.Msagl.Core.Geometry.Curves.PlaneTransformation)resources.GetObject("gViewer.Transform");
-            gViewer.UndoRedoButtonsVisible = false;
-            gViewer.WindowZoomButtonPressed = false;
-            gViewer.ZoomF = 1D;
-            gViewer.ZoomWindowThreshold = 0.05D;
-            // 
             // tabControl
             // 
-            tabControl.Controls.Add(tabPageDataGridView);
-            tabControl.Controls.Add(tabPageGViewer);
             tabControl.Dock = DockStyle.Fill;
+            tabControl.DrawMode = TabDrawMode.OwnerDrawFixed;
             tabControl.Location = new Point(0, 24);
             tabControl.Name = "tabControl";
             tabControl.SelectedIndex = 0;
             tabControl.Size = new Size(800, 426);
             tabControl.TabIndex = 3;
-            // 
-            // tabPageDataGridView
-            // 
-            tabPageDataGridView.Controls.Add(dataGridViewNodes);
-            tabPageDataGridView.Location = new Point(4, 24);
-            tabPageDataGridView.Name = "tabPageDataGridView";
-            tabPageDataGridView.Padding = new Padding(3);
-            tabPageDataGridView.Size = new Size(792, 398);
-            tabPageDataGridView.TabIndex = 0;
-            tabPageDataGridView.Text = "Table";
-            tabPageDataGridView.UseVisualStyleBackColor = true;
-            // 
-            // tabPageGViewer
-            // 
-            tabPageGViewer.Controls.Add(gViewer);
-            tabPageGViewer.Location = new Point(4, 24);
-            tabPageGViewer.Name = "tabPageGViewer";
-            tabPageGViewer.Padding = new Padding(3);
-            tabPageGViewer.Size = new Size(792, 398);
-            tabPageGViewer.TabIndex = 1;
-            tabPageGViewer.Text = "Graph";
-            tabPageGViewer.UseVisualStyleBackColor = true;
+            tabControl.DrawItem += tabControl_DrawItem;
+            tabControl.MouseDown += tabControl_MouseDown;
             // 
             // MainForm
             // 
@@ -204,10 +124,6 @@
             Load += MainForm_Load;
             menuStrip.ResumeLayout(false);
             menuStrip.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)dataGridViewNodes).EndInit();
-            tabControl.ResumeLayout(false);
-            tabPageDataGridView.ResumeLayout(false);
-            tabPageGViewer.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -218,14 +134,10 @@
         private ToolStripMenuItem dataToolStripMenuItem;
         private ToolStripMenuItem uploadExcelFileToolStripMenuItem;
         private ToolStripMenuItem showToolStripMenuItem;
-        private DataGridView dataGridViewNodes;
         private ToolStripMenuItem visualizationToolStripMenuItem;
         private ToolStripMenuItem settingsToolStripMenuItem;
-        private Microsoft.Msagl.GraphViewerGdi.GViewer gViewer;
         private ToolStripMenuItem buildGraphToolStripMenuItem;
-        private TabControl tabControl;
-        private TabPage tabPageDataGridView;
-        private TabPage tabPageGViewer;
         private ToolStripMenuItem loadTableToolStripMenuItem;
+        private TabControl tabControl;
     }
 }

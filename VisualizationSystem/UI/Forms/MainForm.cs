@@ -4,11 +4,15 @@ using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.ViewModels;
 using VisualizationSystem.Models.Storages;
 using VisualizationSystem.SL;
-using VisualizationSystem.SL.DAL;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Windows.Documents;
+using Microsoft.Msagl.Drawing;
+using Microsoft.Msagl.GraphViewerGdi;
+using System.Windows.Forms;
+using VisualizationSystem.SL.DAL;
+using VisualizationSystem.UI.Components;
 
-namespace VisualizationSystem.Forms;
+namespace VisualizationSystem.UI.Forms;
 
 public partial class MainForm : Form
 {
@@ -39,6 +43,8 @@ public partial class MainForm : Form
     private void MainForm_Load(object sender, EventArgs e)
     {
         LoadTableNamesToMenu();
+
+        tabControl.Padding = new Point(20, 3);
     }
 
     private async void uploadExcelFileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -67,26 +73,9 @@ public partial class MainForm : Form
 
         try
         {
-            ShowTableData(nodeTable);
+            AddDataGridViewTabPage(nodeTable);
 
             MessageBox.Show("Data showed successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Error while uploading data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-    }
-
-    private async void tableToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (sender is not ToolStripMenuItem selectedItem || selectedItem.Text == null)
-            return;
-
-        try
-        {
-            nodeTable = await nodeRepository.GetByNameAsync(selectedItem.Text);
-
-            MessageBox.Show("File uploaded successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
@@ -105,7 +94,8 @@ public partial class MainForm : Form
         try
         {
             var comparisonResults = nodeComparer.GetSimilarNodes(nodeTable);
-            gViewer.Graph = graphBuilder.BuildGraph(comparisonResults, nodeTable);
+            var graph = graphBuilder.BuildGraph(comparisonResults, nodeTable);
+            AddGViewerTabPage(graph, nodeTable.Name);
 
             MessageBox.Show("Graph visualized successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -134,6 +124,83 @@ public partial class MainForm : Form
         }
     }
 
+    private async void loadTableToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        if (sender is not ToolStripMenuItem selectedItem || string.IsNullOrEmpty(selectedItem.Text))
+            return;
+
+        if (selectedItem.Text == nodeTable.Name)
+        {
+            MessageBox.Show($"Error: Table {nodeTable.Name} is already loaded", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        try
+        {
+            nodeTable = await nodeRepository.GetByNameAsync(selectedItem.Text);
+
+            MessageBox.Show("File uploaded successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error while uploading data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private void tabControl_DrawItem(object sender, DrawItemEventArgs e)
+    {
+        if (tabControl.TabPages[e.Index] is not ClosableTabPage tabPage)
+            return;
+
+        tabPage.DrawTab(tabControl.GetTabRect(e.Index), e.Graphics);
+    }
+
+    private void tabControl_MouseDown(object sender, MouseEventArgs e)
+    {
+        for (int i = 0; i < tabControl.TabPages.Count; i++)
+        {
+            if (tabControl.TabPages[i] is not ClosableTabPage tabPage)
+                continue;
+
+            var tabRect = tabControl.GetTabRect(i);
+
+            if (!tabPage.IsCloseIconClicked(tabRect, e.Location))
+                continue;
+
+            tabControl.TabPages.RemoveAt(i);
+            break;
+        }
+    }
+
+    private void AddDataGridViewTabPage(NodeTable table)
+    {
+        var tabPage = new ClosableTabPage("Table: " + table.Name);
+
+        var dataGridView = new NodeTableDataGridView(table)
+        {
+            Dock = DockStyle.Fill,
+        };
+        tabPage.Controls.Add(dataGridView);
+
+        tabControl.TabPages.Add(tabPage);
+        tabControl.SelectedTab = tabPage;
+    }
+
+    private void AddGViewerTabPage(Graph graph, string tabName)
+    {
+        var tabPage = new ClosableTabPage("Graph: " + tabName);
+
+        GViewer gViewer = new GViewer
+        {
+            Dock = DockStyle.Fill,
+            Graph = graph,
+        };
+        tabPage.Controls.Add(gViewer);
+
+        tabControl.TabPages.Add(tabPage);
+        tabControl.SelectedTab = tabPage;
+    }
+
     private async void LoadTableNamesToMenu()
     {
         loadTableToolStripMenuItem.DropDownItems.Clear();
@@ -145,7 +212,7 @@ public partial class MainForm : Form
             loadTableToolStripMenuItem.Enabled = false;
             return;
         }
-            
+
         loadTableToolStripMenuItem.Enabled = true;
 
         var tableNames = tables
@@ -161,7 +228,7 @@ public partial class MainForm : Form
     private void AddTableToolStripMenuItem(string tableName)
     {
         ToolStripMenuItem tableMenuItem = new ToolStripMenuItem(tableName);
-        tableMenuItem.Click += tableToolStripMenuItem_Click;
+        tableMenuItem.Click += loadTableToolStripMenuItem_Click;
         loadTableToolStripMenuItem.DropDownItems.Add(tableMenuItem);
     }
 
@@ -180,70 +247,11 @@ public partial class MainForm : Form
         }
     }
 
-    private void ShowTableData(NodeTable table)
-    {
-        var headers =
-            table
-            .ParameterTypes
-            .Select(p => p.Name)
-            .Where(name => name != null)
-            .Cast<string>();
-
-        NodeObjectViewModel.InitializeHeaders(headers);
-
-        var nodeViewModels = nodeTable.NodeObjects
-            .Select(n => new NodeObjectViewModel(n))
-            .ToList();
-
-        var dataTable = CreateDataTable(nodeViewModels);
-
-        dataGridViewNodes.Visible = true;
-        dataGridViewNodes.DataSource = dataTable;
-
-        DisableDataGridViewInteractions();
-    }
-
-    private DataTable CreateDataTable(List<NodeObjectViewModel> nodeViewModels)
-    {
-        var dataTable = new DataTable();
-
-        foreach (var header in NodeObjectViewModel.Headers)
-        {
-            dataTable.Columns.Add(header);
-        }
-
-        DataRow row;
-        foreach (var node in nodeViewModels)
-        {
-            row = dataTable.NewRow();
-
-            for (int i = 0; i < node.Parameters.Count; ++i)
-            {
-                row[i] = node.Parameters[i];
-            }
-
-            dataTable.Rows.Add(row);
-        }
-
-        return dataTable;
-    }
-
     private void InitializeFileDialogParameters(OpenFileDialog openFileDialog)
     {
         openFileDialog.Title = FileDialogTitle;
         openFileDialog.InitialDirectory = InitialDirectory;
         openFileDialog.Filter = ExcelFilterPattern;
         openFileDialog.RestoreDirectory = true;
-    }
-
-    private void DisableDataGridViewInteractions()
-    {
-        dataGridViewNodes.ReadOnly = true;
-        dataGridViewNodes.AllowUserToAddRows = false;
-        dataGridViewNodes.AllowUserToDeleteRows = false;
-        dataGridViewNodes.AllowUserToResizeRows = false;
-        dataGridViewNodes.AllowUserToResizeColumns = false;
-        dataGridViewNodes.AllowUserToOrderColumns = false;
-        //dataGridViewNodes.RowHeadersVisible = false;
     }
 }
