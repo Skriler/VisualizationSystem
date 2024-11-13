@@ -1,16 +1,14 @@
 ﻿using System.Data;
 using Microsoft.IdentityModel.Tokens;
 using VisualizationSystem.Models.Entities;
-using VisualizationSystem.Models.ViewModels;
 using VisualizationSystem.Models.Storages;
 using VisualizationSystem.SL;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Windows.Documents;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
-using System.Windows.Forms;
 using VisualizationSystem.SL.DAL;
 using VisualizationSystem.UI.Components;
+
+using Color = System.Drawing.Color;
 
 namespace VisualizationSystem.UI.Forms;
 
@@ -119,7 +117,7 @@ public partial class MainForm : Form
                 return;
 
             nodeComparer.UpdateSettings(comparisonSettings);
-            graphBuilder.Equals(comparisonSettings);
+            graphBuilder.UpdateSettings(comparisonSettings);
             MessageBox.Show("Settings changed successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
@@ -144,6 +142,11 @@ public partial class MainForm : Form
         catch (Exception ex)
         {
             MessageBox.Show($"Error while uploading data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            comparisonSettings.SetDefaultSettings();
+            comparisonSettings.InitializeParameterStatuses(nodeTable.ParameterTypes);
         }
     }
 

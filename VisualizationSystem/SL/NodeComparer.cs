@@ -1,4 +1,5 @@
-﻿using VisualizationSystem.Models.Entities;
+﻿using Microsoft.VisualBasic;
+using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Storages;
 
 namespace VisualizationSystem.SL;
@@ -50,11 +51,17 @@ public class NodeComparer
 
         int similarCount = 0;
 
-        NodeParameter firstParameter, secondParameter;
-        for (int i = 0; i < firstNode.Parameters.Count; ++i)
+        var activeParameterStates = settings.GetActiveParameters();
+        var firstNodeParameters = firstNode.Parameters.ToDictionary(p => p.ParameterType);
+        var secondNodeParameters = secondNode.Parameters.ToDictionary(p => p.ParameterType);
+
+        foreach (var parameterState in activeParameterStates)
         {
-            firstParameter = firstNode.Parameters[i];
-            secondParameter = secondNode.Parameters[i];
+            firstNodeParameters.TryGetValue(parameterState.ParameterType, out var firstParameter);
+            secondNodeParameters.TryGetValue(parameterState.ParameterType, out var secondParameter);
+
+            if (firstParameter == null || secondParameter == null)
+                continue;
 
             if (firstParameter.ParameterType.Id != secondParameter.ParameterType.Id)
                 continue;

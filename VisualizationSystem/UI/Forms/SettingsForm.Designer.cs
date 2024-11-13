@@ -73,7 +73,7 @@
             // trcbrDeviationPercent
             // 
             trcbrDeviationPercent.Location = new Point(6, 141);
-            trcbrDeviationPercent.Maximum = 60;
+            trcbrDeviationPercent.Maximum = 100;
             trcbrDeviationPercent.Name = "trcbrDeviationPercent";
             trcbrDeviationPercent.Size = new Size(147, 45);
             trcbrDeviationPercent.TabIndex = 3;

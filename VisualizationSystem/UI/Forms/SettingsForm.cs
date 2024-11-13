@@ -14,11 +14,18 @@ public partial class SettingsForm : Form
 
         settings = comparisonSettings;
 
-        trcbrMinMatchingParameters.Value = settings.MinMatchingParameters;
+        var activeParametersCount = settings.GetActiveParameters().Count;
+
+        trcbrMinMatchingParameters.Maximum = activeParametersCount;
+        trcbrMinMatchingParameters.Value = 
+            settings.MinMatchingParameters > activeParametersCount ?
+            activeParametersCount : 
+            settings.MinMatchingParameters;
         trcbrDeviationPercent.Value = (int)settings.DeviationPercent;
 
         UpdateLabelValue(lblMinMatchingParametersValue, trcbrMinMatchingParameters);
         UpdateLabelValue(lblDeviationPercentValue, trcbrDeviationPercent);
+        InititalizeClbSelectedParameters(settings);
     }
 
     private void trcbrMinMatchingParameters_Scroll(object sender, EventArgs e)
@@ -35,6 +42,7 @@ public partial class SettingsForm : Form
     {
         settings.MinMatchingParameters = trcbrMinMatchingParameters.Value;
         settings.DeviationPercent = trcbrDeviationPercent.Value;
+        SaveParameterStatesToSettings();
 
         DialogResult = DialogResult.OK;
         Close();
@@ -43,5 +51,30 @@ public partial class SettingsForm : Form
     private void UpdateLabelValue(Label label, TrackBar trackBar)
     {
         label.Text = ValueLabelPrefix + trackBar.Value.ToString();
+    }
+
+    private void InititalizeClbSelectedParameters(ComparisonSettings settings)
+    {
+        foreach (var paramState in settings.ParameterStates)
+        {
+            clbSelectedParams.Items.Add(
+                paramState.ParameterType.Name,
+                paramState.IsActive
+            );
+        }
+    }
+
+    private void SaveParameterStatesToSettings()
+    {
+        foreach (var item in clbSelectedParams.Items.Cast<string>())
+        {
+            var paramState = settings.ParameterStates
+                .FirstOrDefault(p => p.ParameterType.Name == item);
+
+            if (paramState == null)
+                continue;
+
+            paramState.IsActive = clbSelectedParams.CheckedItems.Contains(item);
+        }
     }
 }
