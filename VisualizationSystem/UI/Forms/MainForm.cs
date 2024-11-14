@@ -49,7 +49,9 @@ public partial class MainForm : Form
     {
         try
         {
-            LoadExcelData();
+            if (!TryReadNodeTableFromExcelFile(nodeTable))
+                return;
+
             await nodeRepository.AddTableAsync(nodeTable);
             //AddTableToolStripMenuItem(nodeTable.Name);
 
@@ -235,19 +237,21 @@ public partial class MainForm : Form
         loadTableToolStripMenuItem.DropDownItems.Add(tableMenuItem);
     }
 
-    private void LoadExcelData()
+    private bool TryReadNodeTableFromExcelFile(NodeTable nodeTable)
     {
         using (OpenFileDialog openFileDialog = new OpenFileDialog())
         {
             InitializeFileDialogParameters(openFileDialog);
 
             if (openFileDialog.ShowDialog() != DialogResult.OK)
-                return;
+                return false;
 
             string filePath = openFileDialog.FileName;
 
             nodeTable = ExcelReader.ReadFile(filePath);
         }
+
+        return true;
     }
 
     private void InitializeFileDialogParameters(OpenFileDialog openFileDialog)

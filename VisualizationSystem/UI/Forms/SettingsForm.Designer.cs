@@ -29,136 +29,156 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
-            lblMinMatchingParameters = new Label();
+            lblMinSimilarityPercentage = new Label();
             lblDeviationPercent = new Label();
-            trcbrMinMatchingParameters = new TrackBar();
-            trcbrDeviationPercent = new TrackBar();
             btnSubmit = new Button();
-            lblMinMatchingParametersValue = new Label();
-            lblDeviationPercentValue = new Label();
-            lblSelectedParameters = new Label();
-            clbSelectedParams = new CheckedListBox();
-            ((System.ComponentModel.ISupportInitialize)trcbrMinMatchingParameters).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)trcbrDeviationPercent).BeginInit();
+            panelParameterStates = new Panel();
+            lblWeight = new Label();
+            nudWeight = new NumericUpDown();
+            chkbxIsActive = new CheckBox();
+            cmbNames = new ComboBox();
+            nudMinSimilarityPercentage = new NumericUpDown();
+            nudDeviationPercent = new NumericUpDown();
+            panelParameterStates.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)nudWeight).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)nudMinSimilarityPercentage).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)nudDeviationPercent).BeginInit();
             SuspendLayout();
             // 
-            // lblMinMatchingParameters
+            // lblMinSimilarityPercentage
             // 
-            lblMinMatchingParameters.AutoSize = true;
-            lblMinMatchingParameters.Location = new Point(11, 11);
-            lblMinMatchingParameters.Name = "lblMinMatchingParameters";
-            lblMinMatchingParameters.Size = new Size(147, 15);
-            lblMinMatchingParameters.TabIndex = 0;
-            lblMinMatchingParameters.Text = "Min matching parameters ";
+            lblMinSimilarityPercentage.AutoSize = true;
+            lblMinSimilarityPercentage.Location = new Point(12, 15);
+            lblMinSimilarityPercentage.Name = "lblMinSimilarityPercentage";
+            lblMinSimilarityPercentage.Size = new Size(141, 15);
+            lblMinSimilarityPercentage.TabIndex = 0;
+            lblMinSimilarityPercentage.Text = "Min similarity percentage";
             // 
             // lblDeviationPercent
             // 
             lblDeviationPercent.AutoSize = true;
-            lblDeviationPercent.Location = new Point(29, 123);
+            lblDeviationPercent.Location = new Point(12, 55);
             lblDeviationPercent.Name = "lblDeviationPercent";
             lblDeviationPercent.Size = new Size(100, 15);
             lblDeviationPercent.TabIndex = 1;
             lblDeviationPercent.Text = "Deviation percent";
             // 
-            // trcbrMinMatchingParameters
-            // 
-            trcbrMinMatchingParameters.Location = new Point(11, 41);
-            trcbrMinMatchingParameters.Maximum = 60;
-            trcbrMinMatchingParameters.Name = "trcbrMinMatchingParameters";
-            trcbrMinMatchingParameters.Size = new Size(147, 45);
-            trcbrMinMatchingParameters.TabIndex = 2;
-            trcbrMinMatchingParameters.Value = 20;
-            trcbrMinMatchingParameters.Scroll += trcbrMinMatchingParameters_Scroll;
-            // 
-            // trcbrDeviationPercent
-            // 
-            trcbrDeviationPercent.Location = new Point(6, 141);
-            trcbrDeviationPercent.Maximum = 100;
-            trcbrDeviationPercent.Name = "trcbrDeviationPercent";
-            trcbrDeviationPercent.Size = new Size(147, 45);
-            trcbrDeviationPercent.TabIndex = 3;
-            trcbrDeviationPercent.Value = 20;
-            trcbrDeviationPercent.Scroll += trcbrDeviationPercent_Scroll;
-            // 
             // btnSubmit
             // 
-            btnSubmit.Location = new Point(6, 228);
+            btnSubmit.Location = new Point(12, 195);
             btnSubmit.Name = "btnSubmit";
-            btnSubmit.Size = new Size(319, 29);
+            btnSubmit.Size = new Size(244, 30);
             btnSubmit.TabIndex = 4;
             btnSubmit.Text = "Submit";
             btnSubmit.UseVisualStyleBackColor = true;
             btnSubmit.Click += btnSubmit_Click;
             // 
-            // lblMinMatchingParametersValue
+            // panelParameterStates
             // 
-            lblMinMatchingParametersValue.AutoSize = true;
-            lblMinMatchingParametersValue.Location = new Point(57, 89);
-            lblMinMatchingParametersValue.Name = "lblMinMatchingParametersValue";
-            lblMinMatchingParametersValue.Size = new Size(47, 15);
-            lblMinMatchingParametersValue.TabIndex = 5;
-            lblMinMatchingParametersValue.Text = "Value: 0";
+            panelParameterStates.AccessibleDescription = "";
+            panelParameterStates.AccessibleName = "";
+            panelParameterStates.Controls.Add(lblWeight);
+            panelParameterStates.Controls.Add(nudWeight);
+            panelParameterStates.Controls.Add(chkbxIsActive);
+            panelParameterStates.Controls.Add(cmbNames);
+            panelParameterStates.Location = new Point(10, 92);
+            panelParameterStates.Name = "panelParameterStates";
+            panelParameterStates.Size = new Size(250, 90);
+            panelParameterStates.TabIndex = 9;
             // 
-            // lblDeviationPercentValue
+            // lblWeight
             // 
-            lblDeviationPercentValue.AutoSize = true;
-            lblDeviationPercentValue.Location = new Point(58, 189);
-            lblDeviationPercentValue.Name = "lblDeviationPercentValue";
-            lblDeviationPercentValue.Size = new Size(47, 15);
-            lblDeviationPercentValue.TabIndex = 6;
-            lblDeviationPercentValue.Text = "Value: 0";
+            lblWeight.AutoSize = true;
+            lblWeight.Location = new Point(12, 55);
+            lblWeight.Name = "lblWeight";
+            lblWeight.Size = new Size(48, 15);
+            lblWeight.TabIndex = 3;
+            lblWeight.Text = "Weight:";
             // 
-            // lblSelectedParameters
+            // nudWeight
             // 
-            lblSelectedParameters.AutoSize = true;
-            lblSelectedParameters.Location = new Point(178, 11);
-            lblSelectedParameters.Name = "lblSelectedParameters";
-            lblSelectedParameters.Size = new Size(147, 15);
-            lblSelectedParameters.TabIndex = 7;
-            lblSelectedParameters.Text = "Min matching parameters ";
+            nudWeight.DecimalPlaces = 1;
+            nudWeight.Increment = new decimal(new int[] { 1, 0, 0, 65536 });
+            nudWeight.Location = new Point(65, 52);
+            nudWeight.Name = "nudWeight";
+            nudWeight.Size = new Size(76, 23);
+            nudWeight.TabIndex = 2;
             // 
-            // clbSelectedParams
+            // chkbxIsActive
             // 
-            clbSelectedParams.FormattingEnabled = true;
-            clbSelectedParams.Location = new Point(178, 41);
-            clbSelectedParams.Name = "clbSelectedParams";
-            clbSelectedParams.Size = new Size(147, 166);
-            clbSelectedParams.TabIndex = 8;
+            chkbxIsActive.AutoSize = true;
+            chkbxIsActive.Location = new Point(165, 55);
+            chkbxIsActive.Name = "chkbxIsActive";
+            chkbxIsActive.Size = new Size(70, 19);
+            chkbxIsActive.TabIndex = 1;
+            chkbxIsActive.Text = "Is Active";
+            chkbxIsActive.UseVisualStyleBackColor = true;
+            // 
+            // cmbNames
+            // 
+            cmbNames.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbNames.FormattingEnabled = true;
+            cmbNames.Location = new Point(12, 12);
+            cmbNames.Name = "cmbNames";
+            cmbNames.Size = new Size(232, 23);
+            cmbNames.TabIndex = 0;
+            cmbNames.SelectedIndexChanged += cmbNames_SelectedIndexChanged;
+            // 
+            // nudMinSimilarityPercentage
+            // 
+            nudMinSimilarityPercentage.DecimalPlaces = 1;
+            nudMinSimilarityPercentage.Increment = new decimal(new int[] { 1, 0, 0, 65536 });
+            nudMinSimilarityPercentage.Location = new Point(178, 12);
+            nudMinSimilarityPercentage.Name = "nudMinSimilarityPercentage";
+            nudMinSimilarityPercentage.Size = new Size(76, 23);
+            nudMinSimilarityPercentage.TabIndex = 10;
+            nudMinSimilarityPercentage.Value = new decimal(new int[] { 40, 0, 0, 0 });
+            // 
+            // nudDeviationPercent
+            // 
+            nudDeviationPercent.DecimalPlaces = 1;
+            nudDeviationPercent.Increment = new decimal(new int[] { 1, 0, 0, 65536 });
+            nudDeviationPercent.Location = new Point(178, 52);
+            nudDeviationPercent.Name = "nudDeviationPercent";
+            nudDeviationPercent.Size = new Size(76, 23);
+            nudDeviationPercent.TabIndex = 11;
+            nudDeviationPercent.Value = new decimal(new int[] { 10, 0, 0, 0 });
             // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(348, 272);
-            Controls.Add(clbSelectedParams);
-            Controls.Add(lblSelectedParameters);
-            Controls.Add(lblDeviationPercentValue);
-            Controls.Add(lblMinMatchingParametersValue);
+            ClientSize = new Size(268, 236);
+            Controls.Add(nudDeviationPercent);
+            Controls.Add(nudMinSimilarityPercentage);
+            Controls.Add(panelParameterStates);
             Controls.Add(btnSubmit);
-            Controls.Add(trcbrDeviationPercent);
-            Controls.Add(trcbrMinMatchingParameters);
             Controls.Add(lblDeviationPercent);
-            Controls.Add(lblMinMatchingParameters);
+            Controls.Add(lblMinSimilarityPercentage);
             FormBorderStyle = FormBorderStyle.FixedToolWindow;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "SettingsForm";
             Text = "Settings";
-            ((System.ComponentModel.ISupportInitialize)trcbrMinMatchingParameters).EndInit();
-            ((System.ComponentModel.ISupportInitialize)trcbrDeviationPercent).EndInit();
+            panelParameterStates.ResumeLayout(false);
+            panelParameterStates.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)nudWeight).EndInit();
+            ((System.ComponentModel.ISupportInitialize)nudMinSimilarityPercentage).EndInit();
+            ((System.ComponentModel.ISupportInitialize)nudDeviationPercent).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
 
-        private Label lblMinMatchingParameters;
+        private Label lblMinSimilarityPercentage;
         private Label lblDeviationPercent;
-        private TrackBar trcbrMinMatchingParameters;
-        private TrackBar trcbrDeviationPercent;
         private Button btnSubmit;
-        private Label lblMinMatchingParametersValue;
-        private Label lblDeviationPercentValue;
-        private Label lblSelectedParameters;
-        private CheckedListBox clbSelectedParams;
+        private Panel panelParameterStates;
+        private Label lblWeight;
+        private NumericUpDown nudWeight;
+        private CheckBox chkbxIsActive;
+        private ComboBox cmbNames;
+        private NumericUpDown nudMinSimilarityPercentage;
+        private NumericUpDown nudDeviationPercent;
     }
 }

@@ -34,7 +34,7 @@ public class NodeComparer
                 comparisonResult = new NodeComparisonResult(
                     firstNode,
                     secondNode,
-                    GetSimilarParametersCount(firstNode, secondNode)
+                    GetSimilarityPercentage(firstNode, secondNode)
                 );
 
                 comparisonResults.Add(comparisonResult);
@@ -44,12 +44,13 @@ public class NodeComparer
         return comparisonResults;
     }
 
-    private int GetSimilarParametersCount(NodeObject firstNode, NodeObject secondNode)
+    private float GetSimilarityPercentage(NodeObject firstNode, NodeObject secondNode)
     {
         if (firstNode.Parameters.Count != secondNode.Parameters.Count)
             throw new InvalidOperationException("NodeObjects must have the same number of parameters");
 
-        int similarCount = 0;
+        float totalMatchedWeight = 0;
+        float totalActiveWeight = 0;
 
         var activeParameterStates = settings.GetActiveParameters();
         var firstNodeParameters = firstNode.Parameters.ToDictionary(p => p.ParameterType);
@@ -57,6 +58,8 @@ public class NodeComparer
 
         foreach (var parameterState in activeParameterStates)
         {
+            totalActiveWeight += parameterState.Weight;
+
             firstNodeParameters.TryGetValue(parameterState.ParameterType, out var firstParameter);
             secondNodeParameters.TryGetValue(parameterState.ParameterType, out var secondParameter);
 
@@ -69,10 +72,11 @@ public class NodeComparer
             if (!IsParameterMatch(firstParameter.Value, secondParameter.Value))
                 continue;
 
-            ++similarCount;
+            totalMatchedWeight += parameterState.Weight;
         }
 
-        return similarCount;
+        return totalActiveWeight > 0 ? (totalMatchedWeight / totalActiveWeight) * 100 : 0;
+
     }
 
     private bool IsParameterMatch(string firstValue, string secondValue)

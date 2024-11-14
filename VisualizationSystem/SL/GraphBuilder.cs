@@ -37,7 +37,7 @@ public class GraphBuilder
             AddNode(graph, firstNodeName, GetNewRandomColor(usedColors));
             AddNode(graph, secondNodeName, GetNewRandomColor(usedColors));
 
-            if (comparisonResult.SimilarityCount < settings.MinMatchingParameters)
+            if (comparisonResult.SimilarityPercentage < settings.MinSimilarityPercentage)
                 continue;
 
             AddEdge(graph, firstNodeName, secondNodeName);

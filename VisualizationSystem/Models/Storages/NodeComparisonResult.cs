@@ -6,12 +6,12 @@ public class NodeComparisonResult
 {
     public NodeObject FirstNode { get; private set; }
     public NodeObject SecondNode { get; private set; }
-    public int SimilarityCount { get; private set; }
+    public float SimilarityPercentage { get; private set; }
 
-    public NodeComparisonResult(NodeObject firstNode, NodeObject secondNode, int similarityCount)
+    public NodeComparisonResult(NodeObject firstNode, NodeObject secondNode, float similarityPercentage)
     {
         FirstNode = firstNode;
         SecondNode = secondNode;
-        SimilarityCount = similarityCount;
+        SimilarityPercentage = similarityPercentage;
     }
 }

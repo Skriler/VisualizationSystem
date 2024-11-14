@@ -4,10 +4,10 @@ namespace VisualizationSystem.Models.Storages;
 
 public class ComparisonSettings
 {
-    private readonly int DefaultMinMatchingParameters = 40;
-    private readonly int DefaultDeviationPercent = 10;
+    private readonly float DefaultMinSimilarityPercentage = 55;
+    private readonly float DefaultDeviationPercent = 10;
 
-    public int MinMatchingParameters { get; set; }
+    public float MinSimilarityPercentage { get; set; }
     public float DeviationPercent { get; set; }
     public List<ParameterState> ParameterStates { get; set; } = new List<ParameterState>();
 
@@ -18,7 +18,7 @@ public class ComparisonSettings
 
     public void SetDefaultSettings()
     {
-        MinMatchingParameters = DefaultMinMatchingParameters;
+        MinSimilarityPercentage = DefaultMinSimilarityPercentage;
         DeviationPercent = DefaultDeviationPercent;
         ParameterStates = new List<ParameterState>();
     }

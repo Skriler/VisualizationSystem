@@ -7,6 +7,7 @@ public partial class SettingsForm : Form
     private static readonly string ValueLabelPrefix = "Value: ";
 
     private readonly ComparisonSettings settings;
+    private int previousIndex = -1;
 
     public SettingsForm(ComparisonSettings comparisonSettings)
     {
@@ -14,67 +15,72 @@ public partial class SettingsForm : Form
 
         settings = comparisonSettings;
 
-        var activeParametersCount = settings.GetActiveParameters().Count;
+        nudMinSimilarityPercentage.Value = (decimal)settings.MinSimilarityPercentage;
+        nudDeviationPercent.Value = (decimal)settings.DeviationPercent;
 
-        trcbrMinMatchingParameters.Maximum = activeParametersCount;
-        trcbrMinMatchingParameters.Value = 
-            settings.MinMatchingParameters > activeParametersCount ?
-            activeParametersCount : 
-            settings.MinMatchingParameters;
-        trcbrDeviationPercent.Value = (int)settings.DeviationPercent;
-
-        UpdateLabelValue(lblMinMatchingParametersValue, trcbrMinMatchingParameters);
-        UpdateLabelValue(lblDeviationPercentValue, trcbrDeviationPercent);
-        InititalizeClbSelectedParameters(settings);
+        InititalizeParameterStatesPanel(settings);
     }
 
-    private void trcbrMinMatchingParameters_Scroll(object sender, EventArgs e)
+    private void cmbNames_SelectedIndexChanged(object sender, EventArgs e)
     {
-        UpdateLabelValue(lblMinMatchingParametersValue, trcbrMinMatchingParameters);
-    }
+        if (previousIndex >= 0)
+            SaveParameterState(previousIndex);
 
-    private void trcbrDeviationPercent_Scroll(object sender, EventArgs e)
-    {
-        UpdateLabelValue(lblDeviationPercentValue, trcbrDeviationPercent);
+        UpdateParameterStatesPanel();
     }
 
     private void btnSubmit_Click(object sender, EventArgs e)
     {
-        settings.MinMatchingParameters = trcbrMinMatchingParameters.Value;
-        settings.DeviationPercent = trcbrDeviationPercent.Value;
-        SaveParameterStatesToSettings();
+        settings.MinSimilarityPercentage = (float)nudMinSimilarityPercentage.Value;
+        settings.DeviationPercent = (float)nudDeviationPercent.Value;
+        SaveParameterState(previousIndex);
 
         DialogResult = DialogResult.OK;
         Close();
     }
 
-    private void UpdateLabelValue(Label label, TrackBar trackBar)
+    private void InititalizeParameterStatesPanel(ComparisonSettings settings)
     {
-        label.Text = ValueLabelPrefix + trackBar.Value.ToString();
+        cmbNames.Items.AddRange(
+            settings.ParameterStates
+            .Select(paramState => paramState.ParameterType.Name)
+            .ToArray()
+        );
+
+        if (cmbNames.Items.Count <= 0)
+            return;
+
+        cmbNames.SelectedIndex = 0;
+        UpdateParameterStatesPanel();
     }
 
-    private void InititalizeClbSelectedParameters(ComparisonSettings settings)
+    private void UpdateParameterStatesPanel()
     {
-        foreach (var paramState in settings.ParameterStates)
-        {
-            clbSelectedParams.Items.Add(
-                paramState.ParameterType.Name,
-                paramState.IsActive
-            );
-        }
+        var selectedName = cmbNames.SelectedItem?.ToString();
+        var newSelectedParameterState = settings.ParameterStates
+            .FirstOrDefault(p => p.ParameterType.Name == selectedName);
+
+        if (newSelectedParameterState == null)
+            return;
+
+        nudWeight.Value = (decimal)newSelectedParameterState.Weight;
+        chkbxIsActive.Checked = newSelectedParameterState.IsActive;
+        previousIndex = cmbNames.SelectedIndex;
     }
 
-    private void SaveParameterStatesToSettings()
+    private void SaveParameterState(int index)
     {
-        foreach (var item in clbSelectedParams.Items.Cast<string>())
-        {
-            var paramState = settings.ParameterStates
-                .FirstOrDefault(p => p.ParameterType.Name == item);
+        if (index < 0 || index >= settings.ParameterStates.Count)
+            return;
 
-            if (paramState == null)
-                continue;
+        var parameterName = cmbNames.Items[index]?.ToString();
+        var parameterState = settings.ParameterStates
+            .FirstOrDefault(p => p.ParameterType.Name == parameterName);
 
-            paramState.IsActive = clbSelectedParams.CheckedItems.Contains(item);
-        }
+        if (parameterState == null)
+            return;
+
+        parameterState.Weight = (float)nudWeight.Value;
+        parameterState.IsActive = chkbxIsActive.Checked;
     }
 }
