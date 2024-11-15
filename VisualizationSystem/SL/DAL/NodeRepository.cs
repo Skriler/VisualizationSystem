@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Text.RegularExpressions;
-using System.Xml.Linq;
 using VisualizationSystem.Models.Entities;
 
 namespace VisualizationSystem.SL.DAL;

@@ -120,7 +120,7 @@
             Icon = (Icon)resources.GetObject("$this.Icon");
             MainMenuStrip = menuStrip;
             Name = "MainForm";
-            Text = "Main Form";
+            Text = "Visualization System";
             Load += MainForm_Load;
             menuStrip.ResumeLayout(false);
             menuStrip.PerformLayout();

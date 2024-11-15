@@ -39,6 +39,7 @@
             cmbNames = new ComboBox();
             nudMinSimilarityPercentage = new NumericUpDown();
             nudDeviationPercent = new NumericUpDown();
+            btnSetDefaults = new Button();
             panelParameterStates.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nudWeight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudMinSimilarityPercentage).BeginInit();
@@ -67,7 +68,7 @@
             // 
             btnSubmit.Location = new Point(12, 195);
             btnSubmit.Name = "btnSubmit";
-            btnSubmit.Size = new Size(244, 30);
+            btnSubmit.Size = new Size(120, 30);
             btnSubmit.TabIndex = 4;
             btnSubmit.Text = "Submit";
             btnSubmit.UseVisualStyleBackColor = true;
@@ -144,11 +145,22 @@
             nudDeviationPercent.TabIndex = 11;
             nudDeviationPercent.Value = new decimal(new int[] { 10, 0, 0, 0 });
             // 
+            // btnSetDefaults
+            // 
+            btnSetDefaults.Location = new Point(140, 195);
+            btnSetDefaults.Name = "btnSetDefaults";
+            btnSetDefaults.Size = new Size(120, 30);
+            btnSetDefaults.TabIndex = 12;
+            btnSetDefaults.Text = "Set defaults";
+            btnSetDefaults.UseVisualStyleBackColor = true;
+            btnSetDefaults.Click += btnSetDefaults_Click;
+            // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(268, 236);
+            Controls.Add(btnSetDefaults);
             Controls.Add(nudDeviationPercent);
             Controls.Add(nudMinSimilarityPercentage);
             Controls.Add(panelParameterStates);
@@ -180,5 +192,6 @@
         private ComboBox cmbNames;
         private NumericUpDown nudMinSimilarityPercentage;
         private NumericUpDown nudDeviationPercent;
+        private Button btnSetDefaults;
     }
 }

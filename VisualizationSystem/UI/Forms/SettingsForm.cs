@@ -4,8 +4,6 @@ namespace VisualizationSystem.UI.Forms;
 
 public partial class SettingsForm : Form
 {
-    private static readonly string ValueLabelPrefix = "Value: ";
-
     private readonly ComparisonSettings settings;
     private int previousIndex = -1;
 
@@ -15,9 +13,7 @@ public partial class SettingsForm : Form
 
         settings = comparisonSettings;
 
-        nudMinSimilarityPercentage.Value = (decimal)settings.MinSimilarityPercentage;
-        nudDeviationPercent.Value = (decimal)settings.DeviationPercent;
-
+        InitializeMainControls();
         InititalizeParameterStatesPanel(settings);
     }
 
@@ -37,6 +33,19 @@ public partial class SettingsForm : Form
 
         DialogResult = DialogResult.OK;
         Close();
+    }
+
+    private void btnSetDefaults_Click(object sender, EventArgs e)
+    {
+        settings.ResetToDefaults();
+        InitializeMainControls();
+        UpdateParameterStatesPanel();
+    }
+
+    private void InitializeMainControls()
+    {
+        nudMinSimilarityPercentage.Value = (decimal)settings.MinSimilarityPercentage;
+        nudDeviationPercent.Value = (decimal)settings.DeviationPercent;
     }
 
     private void InititalizeParameterStatesPanel(ComparisonSettings settings)

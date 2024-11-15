@@ -21,8 +21,8 @@
   <ItemGroup>
     <PackageReference Include="ExcelDataReader" Version="3.7.0" />
     <PackageReference Include="ExcelDataReader.DataSet" Version="3.7.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.10" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
     <PackageReference Include="Microsoft.Msagl" Version="1.1.6" />
     <PackageReference Include="Microsoft.Msagl.Drawing" Version="1.1.6" />
     <PackageReference Include="Microsoft.Msagl.GraphViewerGDI" Version="1.1.7" />

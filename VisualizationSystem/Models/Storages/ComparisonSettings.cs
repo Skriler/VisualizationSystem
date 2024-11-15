@@ -4,8 +4,8 @@ namespace VisualizationSystem.Models.Storages;
 
 public class ComparisonSettings
 {
-    private readonly float DefaultMinSimilarityPercentage = 55;
-    private readonly float DefaultDeviationPercent = 10;
+    private static readonly float DefaultMinSimilarityPercentage = 55f;
+    private static readonly float DefaultDeviationPercent = 10f;
 
     public float MinSimilarityPercentage { get; set; }
     public float DeviationPercent { get; set; }
@@ -13,20 +13,30 @@ public class ComparisonSettings
 
     public ComparisonSettings()
     {
-        SetDefaultSettings();
+        ResetCoreValues();
     }
 
-    public void SetDefaultSettings()
+    public void ResetToDefaults()
+    {
+        ResetCoreValues();
+        ResetParameterStates();
+    }
+
+    public void ResetCoreValues()
     {
         MinSimilarityPercentage = DefaultMinSimilarityPercentage;
         DeviationPercent = DefaultDeviationPercent;
-        ParameterStates = new List<ParameterState>();
+    }
+
+    public void ResetParameterStates()
+    {
+        ParameterStates.ForEach(p => p.ResetToDefaults());
     }
 
     public void InitializeParameterStatuses(List<ParameterType> parameterTypes)
     {
         ParameterStates = parameterTypes
-            .Select(name => new ParameterState(name, true))
+            .Select(name => new ParameterState(name))
             .ToList();
     }
 

@@ -8,8 +8,6 @@ using Microsoft.Msagl.GraphViewerGdi;
 using VisualizationSystem.SL.DAL;
 using VisualizationSystem.UI.Components;
 
-using Color = System.Drawing.Color;
-
 namespace VisualizationSystem.UI.Forms;
 
 public partial class MainForm : Form
@@ -135,9 +133,17 @@ public partial class MainForm : Form
             return;
         }
 
+        using var loadingForm = new LoadingForm();
+        loadingForm.Show();
+        loadingForm.BringToFront();
+        Enabled = false;
+
         try
         {
             nodeTable = await nodeRepository.GetByNameAsync(selectedItem.Text);
+
+            comparisonSettings.ResetCoreValues();
+            comparisonSettings.InitializeParameterStatuses(nodeTable.ParameterTypes);
 
             MessageBox.Show("File uploaded successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -147,8 +153,9 @@ public partial class MainForm : Form
         }
         finally
         {
-            comparisonSettings.SetDefaultSettings();
-            comparisonSettings.InitializeParameterStatuses(nodeTable.ParameterTypes);
+            loadingForm.Close();
+            Enabled = true;
+            BringToFront();
         }
     }
 
