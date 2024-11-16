@@ -5,14 +5,14 @@ namespace VisualizationSystem.SL;
 
 public class NodeComparer
 {
-    private ComparisonSettings settings;
+    private UserSettings settings;
 
-    public NodeComparer(ComparisonSettings comparisonSettings)
+    public NodeComparer(UserSettings comparisonSettings)
     {
         settings = comparisonSettings;
     }
 
-    public void UpdateSettings(ComparisonSettings comparisonSettings) => settings = comparisonSettings;
+    public void UpdateSettings(UserSettings comparisonSettings) => settings = comparisonSettings;
 
     public List<NodeComparisonResult> GetSimilarNodes(NodeTable table)
     {
@@ -59,8 +59,8 @@ public class NodeComparer
         {
             totalActiveWeight += parameterState.Weight;
 
-            firstNodeParameters.TryGetValue(parameterState.ParameterType, out var firstParameter);
-            secondNodeParameters.TryGetValue(parameterState.ParameterType, out var secondParameter);
+            firstNodeParameters.TryGetValue(parameterState, out var firstParameter);
+            secondNodeParameters.TryGetValue(parameterState, out var secondParameter);
 
             if (firstParameter == null || secondParameter == null)
                 continue;

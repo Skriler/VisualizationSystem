@@ -1,17 +1,28 @@
-﻿using VisualizationSystem.Models.Entities;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace VisualizationSystem.Models.Storages;
+namespace VisualizationSystem.Models.Entities;
 
-public class ComparisonSettings
+public class UserSettings
 {
     private static readonly float DefaultMinSimilarityPercentage = 55f;
     private static readonly float DefaultDeviationPercent = 10f;
 
-    public float MinSimilarityPercentage { get; set; }
-    public float DeviationPercent { get; set; }
-    public List<ParameterState> ParameterStates { get; set; } = new List<ParameterState>();
+    [Key]
+    public int Id { get; set; }
 
-    public ComparisonSettings()
+    [Required]
+    public float MinSimilarityPercentage { get; set; }
+
+    [Required]
+    public float DeviationPercent { get; set; }
+
+    [Required]
+    public int NodeTableId { get; set; }
+    public NodeTable NodeTable { get; set; } = default!;
+
+    public List<ParameterType> ParameterStates { get; set; } = new List<ParameterType>();
+
+    public UserSettings()
     {
         ResetCoreValues();
     }
@@ -33,14 +44,13 @@ public class ComparisonSettings
         ParameterStates.ForEach(p => p.ResetToDefaults());
     }
 
-    public void InitializeParameterStatuses(List<ParameterType> parameterTypes)
+    public void InitializeParameterStates(NodeTable nodeTable)
     {
-        ParameterStates = parameterTypes
-            .Select(name => new ParameterState(name))
-            .ToList();
+        NodeTable = nodeTable;
+        ParameterStates = nodeTable.ParameterTypes;
     }
 
-    public List<ParameterState> GetActiveParameters()
+    public List<ParameterType> GetActiveParameters()
     {
         return ParameterStates.Where(p => p.IsActive).ToList();
     }

@@ -13,6 +13,8 @@ public class VisualizationSystemDbContext : DbContext
     
     public DbSet<NodeParameter> NodeParameters { get; set; }
 
+    public DbSet<UserSettings> UserSettings { get; set; }
+
     public VisualizationSystemDbContext(DbContextOptions<VisualizationSystemDbContext> options)
         : base(options)
     {

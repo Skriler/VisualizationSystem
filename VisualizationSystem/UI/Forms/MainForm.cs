@@ -1,7 +1,6 @@
 ﻿using System.Data;
 using Microsoft.IdentityModel.Tokens;
 using VisualizationSystem.Models.Entities;
-using VisualizationSystem.Models.Storages;
 using VisualizationSystem.SL;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
@@ -19,7 +18,7 @@ public partial class MainForm : Form
 
     private readonly VisualizationSystemDbContext db;
     private readonly NodeRepository nodeRepository;
-    private readonly ComparisonSettings comparisonSettings;
+    private readonly UserSettings userSettings;
     private readonly NodeComparer nodeComparer;
     private readonly GraphBuilder graphBuilder;
 
@@ -31,9 +30,9 @@ public partial class MainForm : Form
 
         db = context;
         nodeRepository = new NodeRepository(db);
-        comparisonSettings = new ComparisonSettings();
-        nodeComparer = new NodeComparer(comparisonSettings);
-        graphBuilder = new GraphBuilder(comparisonSettings);
+        userSettings = new UserSettings();
+        nodeComparer = new NodeComparer(userSettings);
+        graphBuilder = new GraphBuilder(userSettings);
     }
 
     private void MainForm_Load(object sender, EventArgs e)
@@ -111,13 +110,13 @@ public partial class MainForm : Form
             return;
         }
 
-        using (var settingsForm = new SettingsForm(comparisonSettings))
+        using (var settingsForm = new SettingsForm(userSettings))
         {
             if (settingsForm.ShowDialog() != DialogResult.OK)
                 return;
 
-            nodeComparer.UpdateSettings(comparisonSettings);
-            graphBuilder.UpdateSettings(comparisonSettings);
+            nodeComparer.UpdateSettings(userSettings);
+            graphBuilder.UpdateSettings(userSettings);
             MessageBox.Show("Settings changed successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
@@ -142,8 +141,8 @@ public partial class MainForm : Form
         {
             nodeTable = await nodeRepository.GetByNameAsync(selectedItem.Text);
 
-            comparisonSettings.ResetCoreValues();
-            comparisonSettings.InitializeParameterStatuses(nodeTable.ParameterTypes);
+            userSettings.ResetCoreValues();
+            userSettings.InitializeParameterStates(nodeTable);
 
             MessageBox.Show("File uploaded successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }

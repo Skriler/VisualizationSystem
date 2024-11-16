@@ -11,16 +11,16 @@ public class GraphBuilder
 {
     private readonly Random random;
 
-    private ComparisonSettings settings;
+    private UserSettings settings;
 
-    public GraphBuilder(ComparisonSettings comparisonSettings)
+    public GraphBuilder(UserSettings userSettings)
     {
         random = new Random();
 
-        settings = comparisonSettings;
+        settings = userSettings;
     }
 
-    public void UpdateSettings(ComparisonSettings comparisonSettings) => settings = comparisonSettings;
+    public void UpdateSettings(UserSettings comparisonSettings) => settings = comparisonSettings;
 
     public Graph BuildGraph(List<NodeComparisonResult> comparisonResults, NodeTable table)
     {

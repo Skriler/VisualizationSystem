@@ -1,13 +1,13 @@
-﻿using VisualizationSystem.Models.Storages;
+﻿using VisualizationSystem.Models.Entities;
 
 namespace VisualizationSystem.UI.Forms;
 
 public partial class SettingsForm : Form
 {
-    private readonly ComparisonSettings settings;
+    private readonly UserSettings settings;
     private int previousIndex = -1;
 
-    public SettingsForm(ComparisonSettings comparisonSettings)
+    public SettingsForm(UserSettings comparisonSettings)
     {
         InitializeComponent();
 
@@ -48,11 +48,11 @@ public partial class SettingsForm : Form
         nudDeviationPercent.Value = (decimal)settings.DeviationPercent;
     }
 
-    private void InititalizeParameterStatesPanel(ComparisonSettings settings)
+    private void InititalizeParameterStatesPanel(UserSettings settings)
     {
         cmbNames.Items.AddRange(
             settings.ParameterStates
-            .Select(paramState => paramState.ParameterType.Name)
+            .Select(paramState => paramState.Name)
             .ToArray()
         );
 
@@ -67,7 +67,7 @@ public partial class SettingsForm : Form
     {
         var selectedName = cmbNames.SelectedItem?.ToString();
         var newSelectedParameterState = settings.ParameterStates
-            .FirstOrDefault(p => p.ParameterType.Name == selectedName);
+            .FirstOrDefault(p => p.Name == selectedName);
 
         if (newSelectedParameterState == null)
             return;
@@ -84,7 +84,7 @@ public partial class SettingsForm : Form
 
         var parameterName = cmbNames.Items[index]?.ToString();
         var parameterState = settings.ParameterStates
-            .FirstOrDefault(p => p.ParameterType.Name == parameterName);
+            .FirstOrDefault(p => p.Name == parameterName);
 
         if (parameterState == null)
             return;
