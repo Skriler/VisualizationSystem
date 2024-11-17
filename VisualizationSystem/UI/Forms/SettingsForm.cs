@@ -52,7 +52,7 @@ public partial class SettingsForm : Form
     {
         cmbNames.Items.AddRange(
             settings.ParameterStates
-            .Select(paramState => paramState.Name)
+            .Select(paramState => paramState.ParameterType.Name)
             .ToArray()
         );
 
@@ -67,7 +67,7 @@ public partial class SettingsForm : Form
     {
         var selectedName = cmbNames.SelectedItem?.ToString();
         var newSelectedParameterState = settings.ParameterStates
-            .FirstOrDefault(p => p.Name == selectedName);
+            .FirstOrDefault(p => p.ParameterType.Name == selectedName);
 
         if (newSelectedParameterState == null)
             return;
@@ -84,7 +84,7 @@ public partial class SettingsForm : Form
 
         var parameterName = cmbNames.Items[index]?.ToString();
         var parameterState = settings.ParameterStates
-            .FirstOrDefault(p => p.Name == parameterName);
+            .FirstOrDefault(p => p.ParameterType.Name == parameterName);
 
         if (parameterState == null)
             return;

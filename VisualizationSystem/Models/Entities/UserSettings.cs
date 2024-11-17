@@ -20,10 +20,20 @@ public class UserSettings
     public int NodeTableId { get; set; }
     public NodeTable NodeTable { get; set; } = default!;
 
-    public List<ParameterType> ParameterStates { get; set; } = new List<ParameterType>();
+    public List<ParameterState> ParameterStates { get; set; } = new List<ParameterState>();
 
     public UserSettings()
     {
+        ResetCoreValues();
+    }
+
+    public UserSettings(NodeTable nodeTable)
+    {
+        NodeTable = nodeTable;
+        ParameterStates = nodeTable.ParameterTypes
+            .Select(p => new ParameterState(p, this))
+            .ToList();
+
         ResetCoreValues();
     }
 
@@ -44,13 +54,7 @@ public class UserSettings
         ParameterStates.ForEach(p => p.ResetToDefaults());
     }
 
-    public void InitializeParameterStates(NodeTable nodeTable)
-    {
-        NodeTable = nodeTable;
-        ParameterStates = nodeTable.ParameterTypes;
-    }
-
-    public List<ParameterType> GetActiveParameters()
+    public List<ParameterState> GetActiveParameters()
     {
         return ParameterStates.Where(p => p.IsActive).ToList();
     }

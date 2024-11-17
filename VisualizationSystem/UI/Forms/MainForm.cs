@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using Microsoft.IdentityModel.Tokens;
 using VisualizationSystem.Models.Entities;
 using VisualizationSystem.SL;
 using Microsoft.Msagl.Drawing;
@@ -18,11 +17,10 @@ public partial class MainForm : Form
 
     private readonly VisualizationSystemDbContext db;
     private readonly NodeRepository nodeRepository;
-    private readonly UserSettings userSettings;
-    private readonly NodeComparer nodeComparer;
-    private readonly GraphBuilder graphBuilder;
+    private readonly UserSettingsRepository settingsRepository;
 
-    private NodeTable nodeTable = new NodeTable();
+    private NodeTable table;
+    private UserSettings settings;
 
     public MainForm(VisualizationSystemDbContext context)
     {
@@ -30,9 +28,7 @@ public partial class MainForm : Form
 
         db = context;
         nodeRepository = new NodeRepository(db);
-        userSettings = new UserSettings();
-        nodeComparer = new NodeComparer(userSettings);
-        graphBuilder = new GraphBuilder(userSettings);
+        settingsRepository = new UserSettingsRepository(db);
     }
 
     private void MainForm_Load(object sender, EventArgs e)
@@ -46,10 +42,14 @@ public partial class MainForm : Form
     {
         try
         {
-            if (!TryReadNodeTableFromExcelFile(nodeTable))
+            if (!TryReadNodeTableFromExcelFile(out table))
                 return;
 
-            await nodeRepository.AddTableAsync(nodeTable);
+            await nodeRepository.AddTableAsync(table);
+
+            settings = new UserSettings(table);
+            await settingsRepository.UpdateAsync(settings);
+
             //AddTableToolStripMenuItem(nodeTable.Name);
 
             MessageBox.Show("File uploaded successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -62,7 +62,7 @@ public partial class MainForm : Form
 
     private void showToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (nodeTable.NodeObjects.IsNullOrEmpty())
+        if (table == null)
         {
             MessageBox.Show("No data to show", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
@@ -70,7 +70,7 @@ public partial class MainForm : Form
 
         try
         {
-            AddDataGridViewTabPage(nodeTable);
+            AddDataGridViewTabPage(table);
 
             MessageBox.Show("Data showed successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -82,7 +82,7 @@ public partial class MainForm : Form
 
     private void buildGraphToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (nodeTable.NodeObjects.IsNullOrEmpty())
+        if (table == null)
         {
             MessageBox.Show("No data to visualize graph", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
@@ -90,9 +90,13 @@ public partial class MainForm : Form
 
         try
         {
-            var comparisonResults = nodeComparer.GetSimilarNodes(nodeTable);
-            var graph = graphBuilder.BuildGraph(comparisonResults, nodeTable);
-            AddGViewerTabPage(graph, nodeTable.Name);
+            var nodeComparer = new NodeComparer(settings);
+            var graphBuilder = new GraphBuilder(settings);
+
+            var comparisonResults = nodeComparer.GetSimilarNodes(table);
+            var graph = graphBuilder.BuildGraph(comparisonResults, table);
+
+            AddGViewerTabPage(graph, table.Name);
 
             MessageBox.Show("Graph visualized successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -102,21 +106,20 @@ public partial class MainForm : Form
         }
     }
 
-    private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
+    private async void settingsToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (nodeTable.NodeObjects.IsNullOrEmpty())
+        if (table == null)
         {
             MessageBox.Show("No data to configure", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 
-        using (var settingsForm = new SettingsForm(userSettings))
+        using (var settingsForm = new SettingsForm(settings))
         {
             if (settingsForm.ShowDialog() != DialogResult.OK)
                 return;
 
-            nodeComparer.UpdateSettings(userSettings);
-            graphBuilder.UpdateSettings(userSettings);
+            await settingsRepository.UpdateAsync(settings);
             MessageBox.Show("Settings changed successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
@@ -126,9 +129,9 @@ public partial class MainForm : Form
         if (sender is not ToolStripMenuItem selectedItem || string.IsNullOrEmpty(selectedItem.Text))
             return;
 
-        if (selectedItem.Text == nodeTable.Name)
+        if (selectedItem.Text == table?.Name)
         {
-            MessageBox.Show($"Error: Table {nodeTable.Name} is already loaded", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show($"Error: Table {table.Name} is already loaded", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
 
@@ -139,10 +142,19 @@ public partial class MainForm : Form
 
         try
         {
-            nodeTable = await nodeRepository.GetByNameAsync(selectedItem.Text);
+            var tableName = selectedItem.Text;
 
-            userSettings.ResetCoreValues();
-            userSettings.InitializeParameterStates(nodeTable);
+            table = await nodeRepository.GetByNameAsync(tableName);
+
+            if (await settingsRepository.ExistsAsync(tableName))
+            {
+                settings = await settingsRepository.GetByTableNameAsync(tableName);
+            }
+            else
+            {
+                settings = new UserSettings(table);
+                await settingsRepository.AddAsync(settings);
+            }
 
             MessageBox.Show("File uploaded successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -243,8 +255,10 @@ public partial class MainForm : Form
         loadTableToolStripMenuItem.DropDownItems.Add(tableMenuItem);
     }
 
-    private bool TryReadNodeTableFromExcelFile(NodeTable nodeTable)
+    private bool TryReadNodeTableFromExcelFile(out NodeTable nodeTable)
     {
+        nodeTable = new NodeTable();
+
         using (OpenFileDialog openFileDialog = new OpenFileDialog())
         {
             InitializeFileDialogParameters(openFileDialog);

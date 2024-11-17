@@ -80,10 +80,9 @@ public static class ExcelReader
         for (int col = 1; col < table.Columns.Count; ++col)
         {
             var parameterName = rowHeaders[col]?.ToString() ?? string.Empty;
-
-            var parameterType = new ParameterType
+            var parameterType = new ParameterType()
             {
-                Name = parameterName
+                Name = parameterName,
             };
 
             parameterTypes.Add(parameterType);

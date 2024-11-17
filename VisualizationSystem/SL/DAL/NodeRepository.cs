@@ -5,8 +5,6 @@ namespace VisualizationSystem.SL.DAL;
 
 public class NodeRepository
 {
-    //private static readonly string NormalizationPattern = @"[ ,;]";
-
     private readonly VisualizationSystemDbContext db;
 
     public NodeRepository(VisualizationSystemDbContext context)
@@ -19,7 +17,6 @@ public class NodeRepository
         if (nodeTable == null)
             throw new ArgumentNullException("Table must be initialized.");
 
-        // TODO
         if (await ExistsAsync(nodeTable.Name))
             throw new InvalidOperationException($"Table with name '{nodeTable.Name}' already exists.");
 
@@ -52,30 +49,4 @@ public class NodeRepository
     {
         return await db.NodeTable.ToListAsync();
     }
-
-    //private void NormalizeParameterTypes(List<ParameterType> parameterTypes)
-    //{
-    //    foreach (var parameterType in parameterTypes)
-    //    {
-    //        parameterType.Name = NormalizeString(parameterType.Name);
-    //    }
-    //}
-
-    //private void NormalizeNode(NodeObject node)
-    //{
-    //    node.Name = NormalizeString(node.Name);
-
-    //    foreach (var parameter in node.Parameters)
-    //    {
-    //        parameter.Value = NormalizeString(parameter.Value);
-    //    }
-    //}
-
-    //private string NormalizeString(string? str)
-    //{
-    //    if (string.IsNullOrWhiteSpace(str))
-    //        return string.Empty;
-
-    //    return Regex.Replace(str, NormalizationPattern, "_").Trim();
-    //}
 }

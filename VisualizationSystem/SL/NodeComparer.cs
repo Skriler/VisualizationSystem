@@ -59,8 +59,8 @@ public class NodeComparer
         {
             totalActiveWeight += parameterState.Weight;
 
-            firstNodeParameters.TryGetValue(parameterState, out var firstParameter);
-            secondNodeParameters.TryGetValue(parameterState, out var secondParameter);
+            firstNodeParameters.TryGetValue(parameterState.ParameterType, out var firstParameter);
+            secondNodeParameters.TryGetValue(parameterState.ParameterType, out var secondParameter);
 
             if (firstParameter == null || secondParameter == null)
                 continue;
