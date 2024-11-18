@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using VisualizationSystem.Models.Entities;
 
-namespace VisualizationSystem.SL.DAL;
+namespace VisualizationSystem.Services.DAL;
 
 public class VisualizationSystemDbContext : DbContext
 {

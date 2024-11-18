@@ -1,11 +1,10 @@
 ﻿using Microsoft.Msagl.Drawing;
 using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Storages;
-
 using MsaglColor = Microsoft.Msagl.Drawing.Color;
 using SystemColor = System.Drawing.Color;
 
-namespace VisualizationSystem.SL;
+namespace VisualizationSystem.Services.Utilities;
 
 public class GraphBuilder
 {
@@ -73,7 +72,7 @@ public class GraphBuilder
     private SystemColor GetNewRandomColor(HashSet<SystemColor> usedColors)
     {
         SystemColor randColor;
-        
+
         do
         {
             randColor = SystemColor.FromArgb(random.Next(256), random.Next(256), random.Next(256));

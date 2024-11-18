@@ -1,10 +1,8 @@
-﻿using System.Drawing.Drawing2D;
-
-namespace VisualizationSystem.UI.Forms;
+﻿namespace VisualizationSystem.UI.Forms;
 
 public partial class LoadingForm : Form
 {
-    private static readonly short DefaultBorderThickness = 4;
+    private const short DefaultBorderThickness = 4;
     private static readonly Color DefaultBorderColor = Color.Black;
 
     public LoadingForm()

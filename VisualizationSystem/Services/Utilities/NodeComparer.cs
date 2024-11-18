@@ -1,7 +1,7 @@
 ﻿using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Storages;
 
-namespace VisualizationSystem.SL;
+namespace VisualizationSystem.Services.Utilities;
 
 public class NodeComparer
 {

@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Xml;
 using VisualizationSystem.Models.Entities;
 
-namespace VisualizationSystem.SL.DAL;
+namespace VisualizationSystem.Services.DAL;
 
 public class UserSettingsRepository
 {

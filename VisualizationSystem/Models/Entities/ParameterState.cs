@@ -4,8 +4,8 @@ namespace VisualizationSystem.Models.Entities;
 
 public class ParameterState
 {
-    private static readonly bool DefaultIsActive = true;
-    private static readonly float DefaultWeight = 1;
+    private const bool DefaultIsActive = true;
+    private const float DefaultWeight = 1;
 
     [Key]
     public int Id { get; set; }

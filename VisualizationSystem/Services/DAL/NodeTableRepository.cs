@@ -1,13 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using VisualizationSystem.Models.Entities;
 
-namespace VisualizationSystem.SL.DAL;
+namespace VisualizationSystem.Services.DAL;
 
-public class NodeRepository
+public class NodeTableRepository
 {
     private readonly VisualizationSystemDbContext db;
 
-    public NodeRepository(VisualizationSystemDbContext context)
+    public NodeTableRepository(VisualizationSystemDbContext context)
     {
         db = context;
     }

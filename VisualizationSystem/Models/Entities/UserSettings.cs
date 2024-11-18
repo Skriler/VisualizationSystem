@@ -4,8 +4,8 @@ namespace VisualizationSystem.Models.Entities;
 
 public class UserSettings
 {
-    private static readonly float DefaultMinSimilarityPercentage = 55f;
-    private static readonly float DefaultDeviationPercent = 10f;
+    private const float DefaultMinSimilarityPercentage = 55f;
+    private const float DefaultDeviationPercent = 10f;
 
     [Key]
     public int Id { get; set; }
@@ -20,7 +20,7 @@ public class UserSettings
     public int NodeTableId { get; set; }
     public NodeTable NodeTable { get; set; } = default!;
 
-    public List<ParameterState> ParameterStates { get; set; } = new List<ParameterState>();
+    public List<ParameterState> ParameterStates { get; set; } = new();
 
     public UserSettings()
     {

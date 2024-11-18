@@ -5,9 +5,9 @@ namespace VisualizationSystem.Models.ViewModels;
 
 public class NodeObjectViewModel
 {
-    public static List<string> Headers { get; private set; } = new List<string>();
+    public static List<string> Headers { get; private set; } = new();
 
-    public List<string> Parameters { get; private set; } = new List<string>();
+    public List<string> Parameters { get; private set; } = new();
 
     public NodeObjectViewModel(NodeObject node)
     {
@@ -27,7 +27,7 @@ public class NodeObjectViewModel
 
     private List<string> GetParameters(NodeObject node)
     {
-        if (node == null || node.Parameters.IsNullOrEmpty())
+        if (node.Parameters.IsNullOrEmpty())
             throw new ArgumentNullException(nameof(node));
 
         var parameters = new List<string>

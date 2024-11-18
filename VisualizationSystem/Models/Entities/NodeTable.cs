@@ -10,7 +10,7 @@ public class NodeTable
     [Required]
     public string Name { get; set; } = string.Empty;
 
-    public List<ParameterType> ParameterTypes { get; set; } = new List<ParameterType>();
+    public List<ParameterType> ParameterTypes { get; set; } = new();
 
-    public List<NodeObject> NodeObjects { get; set; } = new List<NodeObject>();
+    public List<NodeObject> NodeObjects { get; set; } = new();
 }

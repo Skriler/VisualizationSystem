@@ -3,7 +3,7 @@ using System.Text;
 using ExcelDataReader;
 using VisualizationSystem.Models.Entities;
 
-namespace VisualizationSystem.SL;
+namespace VisualizationSystem.Services.Utilities;
 
 public static class ExcelReader
 {

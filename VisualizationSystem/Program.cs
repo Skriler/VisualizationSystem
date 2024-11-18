@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using VisualizationSystem.SL.DAL;
+using VisualizationSystem.Services.DAL;
 using VisualizationSystem.UI.Forms;
 
 namespace VisualizationSystem;
