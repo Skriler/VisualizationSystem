@@ -16,7 +16,7 @@ public class TabControlService
 
     public void AddDataGridViewTabPage(NodeTable table)
     {
-        var tabPage = new ClosableTabPage("Table: " + table.Name);
+        var tabPage = new ClosableTabPage($"Table: {table.Name}");
         var dataGridView = new NodeTableDataGridView(table)
         {
             Dock = DockStyle.Fill,
@@ -28,7 +28,7 @@ public class TabControlService
 
     public void AddGViewerTabPage(Graph graph, string tabName)
     {
-        var tabPage = new ClosableTabPage("Graph: " + tabName);
+        var tabPage = new ClosableTabPage($"Graph: {tabName}");
         var gViewer = new GViewer
         {
             Dock = DockStyle.Fill,

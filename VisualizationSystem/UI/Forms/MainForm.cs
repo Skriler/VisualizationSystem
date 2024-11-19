@@ -1,4 +1,6 @@
-﻿using VisualizationSystem.Models.Entities;
+﻿using Microsoft.Msagl.Core.Layout;
+using Microsoft.Msagl.GraphViewerGdi;
+using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Services.Utilities;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.UI;
@@ -88,8 +90,8 @@ public partial class MainForm : Form
             var nodeComparer = new NodeComparer(userSettings);
             var graphBuilder = new GraphBuilder(userSettings);
 
-            var comparisonResults = nodeComparer.GetSimilarNodes(nodeTable);
-            var graph = graphBuilder.BuildGraph(comparisonResults, nodeTable);
+            var similarityResults = nodeComparer.GetSimilarNodes(nodeTable);
+            var graph = graphBuilder.BuildGraph(similarityResults, nodeTable);
 
             tabControlService.AddGViewerTabPage(graph, nodeTable.Name);
 
@@ -188,6 +190,21 @@ public partial class MainForm : Form
         }
     }
 
+    private void gViewer_MouseDoubleClick(object sender, MouseEventArgs e)
+    {
+        if (tabControl.SelectedTab?.Controls[0] is not GViewer gViewer)
+            return;
+
+        var selectedNode = gViewer.GetObjectAt(e.Location);
+        if (selectedNode is not Node clickedNode)
+            return;
+
+        if (clickedNode.UserData is not NodeObject nodeObject)
+            return;
+
+        ShowNodeDetails(nodeObject);
+    }
+
     private async Task LoadTableNamesToMenuAsync()
     {
         loadTableToolStripMenuItem.DropDownItems.Clear();
@@ -218,6 +235,11 @@ public partial class MainForm : Form
         tableMenuItem.Click += loadTableToolStripMenuItem_Click;
 
         loadTableToolStripMenuItem.DropDownItems.Add(tableMenuItem);
+    }
+
+    private void ShowNodeDetails(NodeObject node)
+    {
+
     }
 
     private static void ShowSuccess(string message)

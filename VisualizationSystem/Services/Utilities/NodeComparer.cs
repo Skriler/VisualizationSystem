@@ -14,33 +14,34 @@ public class NodeComparer
 
     public void UpdateSettings(UserSettings comparisonSettings) => settings = comparisonSettings;
 
-    public List<NodeComparisonResult> GetSimilarNodes(NodeTable table)
+    public List<NodeSimilarityResult> GetSimilarNodes(NodeTable table)
     {
-        var comparisonResults = new List<NodeComparisonResult>();
+        var similarityResultsDict = table.NodeObjects
+            .ToDictionary(node => node, node => new NodeSimilarityResult(node));
 
         var nodes = table.NodeObjects;
 
-        NodeObject firstNode, secondNode;
-        NodeComparisonResult comparisonResult;
-
         for (int i = 0; i < nodes.Count; ++i)
         {
+            var firstNode = nodes[i];
+
             for (int j = i + 1; j < nodes.Count; ++j)
             {
-                firstNode = nodes[i];
-                secondNode = nodes[j];
+                var secondNode = nodes[j];
 
-                comparisonResult = new NodeComparisonResult(
-                    firstNode,
-                    secondNode,
-                    GetSimilarityPercentage(firstNode, secondNode)
-                );
+                var similarityPercentage = GetSimilarityPercentage(firstNode, secondNode);
 
-                comparisonResults.Add(comparisonResult);
+                similarityResultsDict[firstNode]
+                    .SimilarNodes
+                    .Add(new SimilarNode(secondNode, similarityPercentage));
+
+                similarityResultsDict[secondNode]
+                    .SimilarNodes
+                    .Add(new SimilarNode(firstNode, similarityPercentage));
             }
         }
 
-        return comparisonResults;
+        return similarityResultsDict.Values.ToList();
     }
 
     private float GetSimilarityPercentage(NodeObject firstNode, NodeObject secondNode)

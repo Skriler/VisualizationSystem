@@ -21,25 +21,36 @@ public class GraphBuilder
 
     public void UpdateSettings(UserSettings comparisonSettings) => settings = comparisonSettings;
 
-    public Graph BuildGraph(List<NodeComparisonResult> comparisonResults, NodeTable table)
+    public Graph BuildGraph(List<NodeSimilarityResult> comparisonResults, NodeTable table)
     {
-        Graph graph = new Graph(table.Name);
-        HashSet<SystemColor> usedColors = new HashSet<SystemColor>();
+        var graph = new Graph(table.Name);
+        var usedColors = new HashSet<SystemColor>();
+        var addedEdges = new HashSet<Tuple<string, string>>();
 
-        string firstNodeName;
-        string secondNodeName;
-        foreach (var comparisonResult in comparisonResults)
+        foreach (var similarityResult in comparisonResults)
         {
-            firstNodeName = comparisonResult.FirstNode.Name;
-            secondNodeName = comparisonResult.SecondNode.Name;
+            var currentNodeName = similarityResult.Node.Name;
+            AddNode(graph, currentNodeName, GetNewRandomColor(usedColors));
 
-            AddNode(graph, firstNodeName, GetNewRandomColor(usedColors));
-            AddNode(graph, secondNodeName, GetNewRandomColor(usedColors));
+            foreach (var similarNode in similarityResult.SimilarNodes)
+            {
+                if (similarNode.SimilarityPercentage < settings.MinSimilarityPercentage)
+                    continue;
 
-            if (comparisonResult.SimilarityPercentage < settings.MinSimilarityPercentage)
-                continue;
+                var similarNodeName = similarNode.Node.Name;
+                AddNode(graph, similarNodeName, GetNewRandomColor(usedColors));
 
-            AddEdge(graph, firstNodeName, secondNodeName);
+                var edgeKey = Tuple.Create(currentNodeName, similarNodeName);
+                var edgeKeyReversed = Tuple.Create(similarNodeName, currentNodeName);
+
+
+                if (addedEdges.Contains(edgeKey) || addedEdges.Contains(edgeKeyReversed))
+                    continue;
+
+                AddEdge(graph, currentNodeName, similarNodeName);
+                addedEdges.Add(edgeKey);
+                addedEdges.Add(edgeKeyReversed);
+            }
         }
 
         return graph;
