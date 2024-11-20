@@ -30,7 +30,7 @@
         {
             lblNodeName = new Label();
             lstNodeParameters = new ListBox();
-            lstSimilarNodes = new ListView();
+            lstSimilarNodes = new ListBox();
             SuspendLayout();
             // 
             // lblNodeName
@@ -46,29 +46,30 @@
             // 
             lstNodeParameters.FormattingEnabled = true;
             lstNodeParameters.ItemHeight = 15;
-            lstNodeParameters.Location = new Point(23, 57);
+            lstNodeParameters.Location = new Point(30, 60);
             lstNodeParameters.Name = "lstNodeParameters";
             lstNodeParameters.Size = new Size(120, 229);
             lstNodeParameters.TabIndex = 1;
             // 
             // lstSimilarNodes
             // 
-            lstSimilarNodes.Location = new Point(191, 57);
+            lstSimilarNodes.FormattingEnabled = true;
+            lstSimilarNodes.ItemHeight = 15;
+            lstSimilarNodes.Location = new Point(180, 60);
             lstSimilarNodes.Name = "lstSimilarNodes";
-            lstSimilarNodes.Size = new Size(121, 229);
+            lstSimilarNodes.Size = new Size(120, 229);
             lstSimilarNodes.TabIndex = 2;
-            lstSimilarNodes.UseCompatibleStateImageBehavior = false;
             // 
             // NodeDetailsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(344, 309);
+            ClientSize = new Size(324, 309);
             Controls.Add(lstSimilarNodes);
             Controls.Add(lstNodeParameters);
             Controls.Add(lblNodeName);
             Name = "NodeDetailsForm";
-            Text = "NodeInfo";
+            Text = "Node name";
             ResumeLayout(false);
             PerformLayout();
         }
@@ -77,6 +78,6 @@
 
         private Label lblNodeName;
         private ListBox lstNodeParameters;
-        private ListView lstSimilarNodes;
+        private ListBox lstSimilarNodes;
     }
 }

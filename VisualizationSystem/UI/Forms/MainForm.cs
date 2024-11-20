@@ -15,6 +15,8 @@ public partial class MainForm : Form
 
     private readonly FileService fileService;
     private readonly TabControlService tabControlService;
+    private readonly NodeComparer nodeComparer;
+    private readonly GraphBuilder graphBuilder;
 
     private NodeTable? nodeTable;
     private UserSettings userSettings;
@@ -28,6 +30,10 @@ public partial class MainForm : Form
 
         fileService = new FileService();
         tabControlService = new TabControlService(tabControl);
+
+        userSettings = new UserSettings();
+        nodeComparer = new NodeComparer(userSettings);
+        graphBuilder = new GraphBuilder(userSettings);
     }
 
     private async void MainForm_Load(object sender, EventArgs e)
@@ -39,24 +45,10 @@ public partial class MainForm : Form
 
     private async void uploadExcelFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        try
-        {
-            if (!fileService.TryReadNodeTableFromExcelFile(out nodeTable))
-                return;
+        if (!await TryUploadFileAsync())
+            return;
 
-            await nodeRepository.AddTableAsync(nodeTable);
-
-            userSettings = new UserSettings(nodeTable);
-            await settingsRepository.UpdateAsync(userSettings);
-
-            //AddTableToolStripMenuItem(nodeTable.Name);
-
-            ShowSuccess("File uploaded successfully!");
-        }
-        catch (Exception ex)
-        {
-            ShowError("Error while uploading data", ex);
-        }
+        ShowSuccess("File uploaded successfully!");
     }
 
     private void showToolStripMenuItem_Click(object sender, EventArgs e)
@@ -87,14 +79,7 @@ public partial class MainForm : Form
 
         try
         {
-            var nodeComparer = new NodeComparer(userSettings);
-            var graphBuilder = new GraphBuilder(userSettings);
-
-            var similarityResults = nodeComparer.GetSimilarNodes(nodeTable);
-            var graph = graphBuilder.BuildGraph(similarityResults, nodeTable);
-
-            tabControlService.AddGViewerTabPage(graph, nodeTable.Name);
-
+            UpdateOrCreateGraphTab();
         }
         catch (Exception ex)
         {
@@ -116,6 +101,7 @@ public partial class MainForm : Form
                 return;
 
             await settingsRepository.UpdateAsync(userSettings);
+            ApplySettingsToComponents();
         }
     }
 
@@ -130,39 +116,7 @@ public partial class MainForm : Form
             return;
         }
 
-        using var loadingForm = new LoadingForm();
-        loadingForm.Show();
-        loadingForm.BringToFront();
-        Enabled = false;
-
-        try
-        {
-            var tableName = selectedItem.Text;
-
-            nodeTable = await nodeRepository.GetByNameAsync(tableName);
-
-            if (await settingsRepository.ExistsAsync(tableName))
-            {
-                userSettings = await settingsRepository.GetByTableNameAsync(tableName);
-            }
-            else
-            {
-                userSettings = new UserSettings(nodeTable);
-                await settingsRepository.AddAsync(userSettings);
-            }
-
-            ShowSuccess("File uploaded successfully!");
-        }
-        catch (Exception ex)
-        {
-            ShowError("Error while uploading data", ex);
-        }
-        finally
-        {
-            loadingForm.Close();
-            Enabled = true;
-            BringToFront();
-        }
+        await LoadTableAsync(selectedItem.Text);
     }
 
     private void tabControl_DrawItem(object sender, DrawItemEventArgs e)
@@ -185,24 +139,33 @@ public partial class MainForm : Form
             if (!tabPage.IsCloseIconClicked(tabRect, e.Location))
                 continue;
 
-            tabControl.TabPages.RemoveAt(i);
+            tabControlService.RemoveTabPage(tabPage.Text);
             break;
         }
     }
 
-    private void gViewer_MouseDoubleClick(object sender, MouseEventArgs e)
+    private async Task<bool> TryUploadFileAsync()
     {
-        if (tabControl.SelectedTab?.Controls[0] is not GViewer gViewer)
-            return;
+        try
+        {
+            if (!fileService.TryReadNodeTableFromExcelFile(out nodeTable))
+                return false;
 
-        var selectedNode = gViewer.GetObjectAt(e.Location);
-        if (selectedNode is not Node clickedNode)
-            return;
+            await nodeRepository.AddTableAsync(nodeTable);
 
-        if (clickedNode.UserData is not NodeObject nodeObject)
-            return;
+            userSettings.InitializeNodeTableData(nodeTable);
+            await settingsRepository.AddAsync(userSettings);
+            ApplySettingsToComponents();
 
-        ShowNodeDetails(nodeObject);
+            //AddTableToolStripMenuItem(nodeTable.Name);
+        }
+        catch (Exception ex)
+        {
+            ShowError("Error while uploading data", ex);
+            return false;
+        }
+
+        return true;
     }
 
     private async Task LoadTableNamesToMenuAsync()
@@ -237,9 +200,74 @@ public partial class MainForm : Form
         loadTableToolStripMenuItem.DropDownItems.Add(tableMenuItem);
     }
 
-    private void ShowNodeDetails(NodeObject node)
+    private void UpdateOrCreateGraphTab()
     {
+        var similarityResults = nodeComparer.GetSimilarNodes(nodeTable);
+        var graph = graphBuilder.BuildGraph(nodeTable.Name, similarityResults);
 
+        tabControlService.AddOrUpdateGViewerTabPage(graph, nodeTable.Name, OnNodeClick);
+    }
+
+    private async Task LoadTableAsync(string tableName)
+    {
+        using var loadingForm = new LoadingForm();
+        loadingForm.Show();
+        loadingForm.BringToFront();
+        Enabled = false;
+
+        try
+        {
+            nodeTable = await nodeRepository.GetByNameAsync(tableName);
+
+            await LoadUserSettingsAsync();
+            ApplySettingsToComponents();
+
+            ShowSuccess("File uploaded successfully!");
+        }
+        catch (Exception ex)
+        {
+            ShowError("Error while uploading data", ex);
+        }
+        finally
+        {
+            loadingForm.Close();
+            Enabled = true;
+            BringToFront();
+        }
+    }
+
+    private async Task LoadUserSettingsAsync()
+    {
+        if (await settingsRepository.ExistsAsync(nodeTable.Name))
+        {
+            userSettings = await settingsRepository.GetByTableNameAsync(nodeTable.Name);
+        }
+        else
+        {
+            userSettings.InitializeNodeTableData(nodeTable);
+            await settingsRepository.AddAsync(userSettings);
+            ApplySettingsToComponents();
+        }
+    }
+
+    private void ApplySettingsToComponents()
+    {
+        nodeComparer.UpdateSettings(userSettings);
+        graphBuilder.UpdateSettings(userSettings);
+
+        if (!tabControlService.IsTabPageOpen(userSettings.NodeTable.Name))
+            return;
+
+        UpdateOrCreateGraphTab();
+    }
+
+    private void OnNodeClick(string clickedNodeId)
+    {
+        if (!graphBuilder.NodeDataMap.TryGetValue(clickedNodeId, out var nodeData))
+            return;
+
+        var detailsForm = new NodeDetailsForm(nodeData);
+        detailsForm.Show();
     }
 
     private static void ShowSuccess(string message)

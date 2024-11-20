@@ -1,4 +1,5 @@
 ﻿using Microsoft.Msagl.Drawing;
+using Microsoft.Msagl.Layout.MDS;
 using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Storages;
 using MsaglColor = Microsoft.Msagl.Drawing.Color;
@@ -10,31 +11,40 @@ public class GraphBuilder
 {
     private readonly Random random;
 
-    private UserSettings settings;
+    public UserSettings Settings { get; private set; }
 
-    public GraphBuilder(UserSettings userSettings)
+    public Dictionary<string, NodeSimilarityResult> NodeDataMap { get; private set; }
+
+    public GraphBuilder(UserSettings settings)
     {
         random = new Random();
-
-        settings = userSettings;
+        Settings = settings;
+        NodeDataMap = new Dictionary<string, NodeSimilarityResult>();
     }
 
-    public void UpdateSettings(UserSettings comparisonSettings) => settings = comparisonSettings;
+    public void UpdateSettings(UserSettings settings) => Settings = settings;
 
-    public Graph BuildGraph(List<NodeSimilarityResult> comparisonResults, NodeTable table)
+    public Graph BuildGraph(string name, List<NodeSimilarityResult> similarityResults)
     {
-        var graph = new Graph(table.Name);
+        NodeDataMap.Clear();
+
+        var graph = new Graph(name)
+        {
+            LayoutAlgorithmSettings = new MdsLayoutSettings(),
+        };
+
         var usedColors = new HashSet<SystemColor>();
         var addedEdges = new HashSet<Tuple<string, string>>();
 
-        foreach (var similarityResult in comparisonResults)
+        foreach (var similarityResult in similarityResults)
         {
             var currentNodeName = similarityResult.Node.Name;
-            AddNode(graph, currentNodeName, GetNewRandomColor(usedColors));
+            var node = AddNode(graph, currentNodeName, GetNewRandomColor(usedColors));
+            NodeDataMap[node.Id] = similarityResult;
 
             foreach (var similarNode in similarityResult.SimilarNodes)
             {
-                if (similarNode.SimilarityPercentage < settings.MinSimilarityPercentage)
+                if (similarNode.SimilarityPercentage < Settings.MinSimilarityPercentage)
                     continue;
 
                 var similarNodeName = similarNode.Node.Name;
@@ -42,7 +52,6 @@ public class GraphBuilder
 
                 var edgeKey = Tuple.Create(currentNodeName, similarNodeName);
                 var edgeKeyReversed = Tuple.Create(similarNodeName, currentNodeName);
-
 
                 if (addedEdges.Contains(edgeKey) || addedEdges.Contains(edgeKeyReversed))
                     continue;
@@ -56,28 +65,28 @@ public class GraphBuilder
         return graph;
     }
 
-    private bool AddNode(Graph graph, string nodeName, SystemColor nodeColor)
+    private Node AddNode(Graph graph, string nodeName, SystemColor nodeColor)
     {
         var node = graph.FindNode(nodeName);
 
         if (node != null)
-            return false;
+            return node;
 
         node = graph.AddNode(nodeName);
         node.LabelText = nodeName;
         node.Attr.FillColor = new MsaglColor(nodeColor.R, nodeColor.G, nodeColor.B);
 
-        return true;
+        return node;
     }
 
-    private bool AddEdge(Graph graph, string firstNodeName, string secondNodeName)
+    private Edge AddEdge(Graph graph, string firstNodeName, string secondNodeName)
     {
         var edge = graph.AddEdge(firstNodeName, secondNodeName);
 
         edge.Attr.ArrowheadAtSource = ArrowStyle.None;
         edge.Attr.ArrowheadAtTarget = ArrowStyle.None;
 
-        return true;
+        return edge;
     }
 
     private SystemColor GetNewRandomColor(HashSet<SystemColor> usedColors)

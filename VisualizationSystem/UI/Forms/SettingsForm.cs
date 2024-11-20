@@ -14,7 +14,7 @@ public partial class SettingsForm : Form
         settings = comparisonSettings;
 
         InitializeMainControls();
-        InitializeParameterStatesPanel(settings);
+        InitializeParameterStatesPanel();
     }
 
     private void cmbNames_SelectedIndexChanged(object sender, EventArgs e)
@@ -48,7 +48,7 @@ public partial class SettingsForm : Form
         nudDeviationPercent.Value = (decimal)settings.DeviationPercent;
     }
 
-    private void InitializeParameterStatesPanel(UserSettings settings)
+    private void InitializeParameterStatesPanel()
     {
         cmbNames.Items.AddRange(
             settings.ParameterStates

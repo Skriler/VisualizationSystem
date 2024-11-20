@@ -27,7 +27,7 @@ public class UserSettings
         ResetCoreValues();
     }
 
-    public UserSettings(NodeTable nodeTable)
+    public void InitializeNodeTableData(NodeTable nodeTable)
     {
         NodeTable = nodeTable;
         ParameterStates = nodeTable.ParameterTypes

@@ -5,14 +5,14 @@ namespace VisualizationSystem.Services.Utilities;
 
 public class NodeComparer
 {
-    private UserSettings settings;
+    public UserSettings Settings { get; private set; }
 
-    public NodeComparer(UserSettings comparisonSettings)
+    public NodeComparer(UserSettings settings)
     {
-        settings = comparisonSettings;
+        Settings = settings;
     }
 
-    public void UpdateSettings(UserSettings comparisonSettings) => settings = comparisonSettings;
+    public void UpdateSettings(UserSettings settings) => Settings = settings;
 
     public List<NodeSimilarityResult> GetSimilarNodes(NodeTable table)
     {
@@ -52,7 +52,7 @@ public class NodeComparer
         float totalMatchedWeight = 0;
         float totalActiveWeight = 0;
 
-        var activeParameterStates = settings.GetActiveParameters();
+        var activeParameterStates = Settings.GetActiveParameters();
         var firstNodeParameters = firstNode.Parameters.ToDictionary(p => p.ParameterType);
         var secondNodeParameters = secondNode.Parameters.ToDictionary(p => p.ParameterType);
 
@@ -88,7 +88,7 @@ public class NodeComparer
             double.TryParse(secondValue, out double secondNumber))
         {
             double maxNumber = Math.Max(firstNumber, secondNumber);
-            double tolerance = maxNumber * settings.DeviationPercent / 100;
+            double tolerance = maxNumber * Settings.DeviationPercent / 100;
 
             return Math.Abs(firstNumber - secondNumber) <= tolerance;
         }

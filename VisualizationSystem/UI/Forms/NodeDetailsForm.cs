@@ -1,13 +1,35 @@
-﻿using VisualizationSystem.Models.Entities;
+﻿using VisualizationSystem.Models.Storages;
 
 namespace VisualizationSystem.UI.Forms;
 
 public partial class NodeDetailsForm : Form
 {
-    public NodeDetailsForm(NodeObject node)
+    private readonly NodeSimilarityResult similarityResult;
+
+    public NodeDetailsForm(NodeSimilarityResult nodeSimilarityResult)
     {
         InitializeComponent();
 
-        Text = $"Details for {node.Name}";
+        similarityResult = nodeSimilarityResult;
+        Text = $"Details for {similarityResult.Node.Name}";
+
+        InitializeControls();
+    }
+
+    public void InitializeControls()
+    {
+        lblNodeName.Text = $"Node Name: {similarityResult.Node.Name}";
+
+        lstNodeParameters.Items.Clear();
+        foreach (var parameter in similarityResult.Node.Parameters)
+        {
+            lstNodeParameters.Items.Add($"{parameter.ParameterType.Name}: {parameter.Value}");
+        }
+
+        lstSimilarNodes.Items.Clear();
+        foreach (var similarNode in similarityResult.SimilarNodes)
+        {
+            lstSimilarNodes.Items.Add($"{similarNode.Node.Name} - Similarity: {similarNode.SimilarityPercentage}%");
+        }
     }
 }
