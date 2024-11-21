@@ -1,9 +1,7 @@
 ﻿using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
 using VisualizationSystem.Models.Entities;
-using VisualizationSystem.Models.Storages;
 using VisualizationSystem.UI.Components;
-using VisualizationSystem.UI.Forms;
 
 namespace VisualizationSystem.Services.UI;
 
@@ -11,7 +9,6 @@ public class TabControlService
 {
     private readonly TabControl tabControl;
     private readonly Dictionary<string, TabPage> gViewerTabPageMap;
-    private Action<string> OnNodeClick;
 
     public TabControlService(TabControl tabControl)
     {
@@ -43,8 +40,7 @@ public class TabControlService
             Graph = graph,
         };
 
-        OnNodeClick = onNodeClick;
-        gViewer.MouseClick += GViewer_MouseClick;
+        gViewer.MouseClick += (sender, e) => HandleNodeClick(sender, e, onNodeClick);
 
         tabPage.Controls.Add(gViewer);
         AddTabPage(tabPage);
@@ -88,7 +84,7 @@ public class TabControlService
         return gViewerTabPageMap.ContainsKey(tabName);
     }
 
-    private void GViewer_MouseClick(object sender, MouseEventArgs e)
+    private void HandleNodeClick(object sender, MouseEventArgs e, Action<string> onNodeClick)
     {
         if (sender is not GViewer viewer)
             return;
@@ -98,6 +94,6 @@ public class TabControlService
         if (clickedObject is not DNode clickedNode)
             return;
 
-        OnNodeClick?.Invoke(clickedNode.Node.Id);
+        onNodeClick?.Invoke(clickedNode.Node.Id);
     }
 }

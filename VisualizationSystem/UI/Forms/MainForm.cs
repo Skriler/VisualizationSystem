@@ -1,6 +1,4 @@
-﻿using Microsoft.Msagl.Core.Layout;
-using Microsoft.Msagl.GraphViewerGdi;
-using VisualizationSystem.Models.Entities;
+﻿using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Services.Utilities;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.UI;
@@ -205,7 +203,7 @@ public partial class MainForm : Form
         var similarityResults = nodeComparer.GetSimilarNodes(nodeTable);
         var graph = graphBuilder.BuildGraph(nodeTable.Name, similarityResults);
 
-        tabControlService.AddOrUpdateGViewerTabPage(graph, nodeTable.Name, OnNodeClick);
+        tabControlService.AddOrUpdateGViewerTabPage(graph, nodeTable.Name, OpenNodeDetailsForm);
     }
 
     private async Task LoadTableAsync(string tableName)
@@ -261,13 +259,14 @@ public partial class MainForm : Form
         UpdateOrCreateGraphTab();
     }
 
-    private void OnNodeClick(string clickedNodeId)
+    private void OpenNodeDetailsForm(string nodeName)
     {
-        if (!graphBuilder.NodeDataMap.TryGetValue(clickedNodeId, out var nodeData))
+        if (!graphBuilder.NodeDataMap.TryGetValue(nodeName, out var nodeData))
             return;
 
-        var detailsForm = new NodeDetailsForm(nodeData);
+        var detailsForm = new NodeDetailsForm(nodeData, OpenNodeDetailsForm);
         detailsForm.Show();
+        detailsForm.BringToFront();
     }
 
     private static void ShowSuccess(string message)

@@ -28,56 +28,125 @@
         /// </summary>
         private void InitializeComponent()
         {
-            lblNodeName = new Label();
-            lstNodeParameters = new ListBox();
-            lstSimilarNodes = new ListBox();
+            sqlCommand1 = new Microsoft.Data.SqlClient.SqlCommand();
+            dgvNodeParameters = new DataGridView();
+            Parameter = new DataGridViewTextBoxColumn();
+            Value = new DataGridViewTextBoxColumn();
+            dgvSimilarNodes = new DataGridView();
+            Node = new DataGridViewLinkColumn();
+            SimilarityPercent = new DataGridViewTextBoxColumn();
+            lblNodeParameters = new Label();
+            lblSimilarNodes = new Label();
+            ((System.ComponentModel.ISupportInitialize)dgvNodeParameters).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvSimilarNodes).BeginInit();
             SuspendLayout();
             // 
-            // lblNodeName
+            // sqlCommand1
             // 
-            lblNodeName.AutoSize = true;
-            lblNodeName.Location = new Point(23, 21);
-            lblNodeName.Name = "lblNodeName";
-            lblNodeName.Size = new Size(69, 15);
-            lblNodeName.TabIndex = 0;
-            lblNodeName.Text = "Node name";
+            sqlCommand1.CommandTimeout = 30;
+            sqlCommand1.EnableOptimizedParameterBinding = false;
             // 
-            // lstNodeParameters
+            // dgvNodeParameters
             // 
-            lstNodeParameters.FormattingEnabled = true;
-            lstNodeParameters.ItemHeight = 15;
-            lstNodeParameters.Location = new Point(30, 60);
-            lstNodeParameters.Name = "lstNodeParameters";
-            lstNodeParameters.Size = new Size(120, 229);
-            lstNodeParameters.TabIndex = 1;
+            dgvNodeParameters.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvNodeParameters.Columns.AddRange(new DataGridViewColumn[] { Parameter, Value });
+            dgvNodeParameters.Location = new Point(20, 40);
+            dgvNodeParameters.Name = "dgvNodeParameters";
+            dgvNodeParameters.Size = new Size(350, 400);
+            dgvNodeParameters.TabIndex = 5;
             // 
-            // lstSimilarNodes
+            // Parameter
             // 
-            lstSimilarNodes.FormattingEnabled = true;
-            lstSimilarNodes.ItemHeight = 15;
-            lstSimilarNodes.Location = new Point(180, 60);
-            lstSimilarNodes.Name = "lstSimilarNodes";
-            lstSimilarNodes.Size = new Size(120, 229);
-            lstSimilarNodes.TabIndex = 2;
+            Parameter.FillWeight = 150F;
+            Parameter.HeaderText = "Parameter";
+            Parameter.Name = "Parameter";
+            Parameter.ReadOnly = true;
+            Parameter.Resizable = DataGridViewTriState.False;
+            Parameter.Width = 150;
+            // 
+            // Value
+            // 
+            Value.FillWeight = 150F;
+            Value.HeaderText = "Value";
+            Value.Name = "Value";
+            Value.ReadOnly = true;
+            Value.Resizable = DataGridViewTriState.False;
+            Value.Width = 150;
+            // 
+            // dgvSimilarNodes
+            // 
+            dgvSimilarNodes.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvSimilarNodes.Columns.AddRange(new DataGridViewColumn[] { Node, SimilarityPercent });
+            dgvSimilarNodes.Location = new Point(400, 40);
+            dgvSimilarNodes.Name = "dgvSimilarNodes";
+            dgvSimilarNodes.Size = new Size(350, 400);
+            dgvSimilarNodes.TabIndex = 6;
+            // 
+            // Node
+            // 
+            Node.FillWeight = 150F;
+            Node.HeaderText = "Node";
+            Node.Name = "Node";
+            Node.ReadOnly = true;
+            Node.Resizable = DataGridViewTriState.False;
+            Node.SortMode = DataGridViewColumnSortMode.Automatic;
+            Node.Width = 150;
+            // 
+            // SimilarityPercent
+            // 
+            SimilarityPercent.FillWeight = 150F;
+            SimilarityPercent.HeaderText = "Similarity %";
+            SimilarityPercent.Name = "SimilarityPercent";
+            SimilarityPercent.ReadOnly = true;
+            SimilarityPercent.Resizable = DataGridViewTriState.False;
+            SimilarityPercent.Width = 150;
+            // 
+            // lblNodeParameters
+            // 
+            lblNodeParameters.AutoSize = true;
+            lblNodeParameters.Location = new Point(20, 12);
+            lblNodeParameters.Name = "lblNodeParameters";
+            lblNodeParameters.Size = new Size(187, 15);
+            lblNodeParameters.TabIndex = 7;
+            lblNodeParameters.Text = "Node parameters (Type and Value)";
+            // 
+            // lblSimilarNodes
+            // 
+            lblSimilarNodes.AutoSize = true;
+            lblSimilarNodes.Location = new Point(400, 12);
+            lblSimilarNodes.Name = "lblSimilarNodes";
+            lblSimilarNodes.Size = new Size(203, 15);
+            lblSimilarNodes.TabIndex = 8;
+            lblSimilarNodes.Text = "Similar nodes (Sorted by similarity %)";
             // 
             // NodeDetailsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(324, 309);
-            Controls.Add(lstSimilarNodes);
-            Controls.Add(lstNodeParameters);
-            Controls.Add(lblNodeName);
+            ClientSize = new Size(764, 461);
+            Controls.Add(lblSimilarNodes);
+            Controls.Add(lblNodeParameters);
+            Controls.Add(dgvSimilarNodes);
+            Controls.Add(dgvNodeParameters);
+            FormBorderStyle = FormBorderStyle.FixedToolWindow;
             Name = "NodeDetailsForm";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Node name";
+            ((System.ComponentModel.ISupportInitialize)dgvNodeParameters).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvSimilarNodes).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
-
-        private Label lblNodeName;
-        private ListBox lstNodeParameters;
-        private ListBox lstSimilarNodes;
+        private Microsoft.Data.SqlClient.SqlCommand sqlCommand1;
+        private DataGridView dgvNodeParameters;
+        private DataGridView dgvSimilarNodes;
+        private DataGridViewTextBoxColumn Parameter;
+        private DataGridViewTextBoxColumn Value;
+        private DataGridViewLinkColumn Node;
+        private DataGridViewTextBoxColumn SimilarityPercent;
+        private Label lblNodeParameters;
+        private Label lblSimilarNodes;
     }
 }

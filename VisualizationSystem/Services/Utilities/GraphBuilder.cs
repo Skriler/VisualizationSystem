@@ -10,37 +10,55 @@ namespace VisualizationSystem.Services.Utilities;
 public class GraphBuilder
 {
     private readonly Random random;
+    private readonly Dictionary<string, SystemColor> nodeColors = new();
 
     public UserSettings Settings { get; private set; }
 
-    public Dictionary<string, NodeSimilarityResult> NodeDataMap { get; private set; }
+    public Dictionary<string, NodeSimilarityResult> NodeDataMap { get; } = new();
 
     public GraphBuilder(UserSettings settings)
     {
         random = new Random();
         Settings = settings;
-        NodeDataMap = new Dictionary<string, NodeSimilarityResult>();
     }
 
     public void UpdateSettings(UserSettings settings) => Settings = settings;
 
     public Graph BuildGraph(string name, List<NodeSimilarityResult> similarityResults)
     {
-        NodeDataMap.Clear();
-
         var graph = new Graph(name)
         {
             LayoutAlgorithmSettings = new MdsLayoutSettings(),
         };
 
-        var usedColors = new HashSet<SystemColor>();
-        var addedEdges = new HashSet<Tuple<string, string>>();
+        AddNodesToGraph(graph, similarityResults);
+        AddEdgesToGraph(graph, similarityResults);
+
+        return graph;
+    }
+
+    private void AddNodesToGraph(Graph graph, List<NodeSimilarityResult> similarityResults)
+    {
+        NodeDataMap.Clear();
 
         foreach (var similarityResult in similarityResults)
         {
             var currentNodeName = similarityResult.Node.Name;
-            var node = AddNode(graph, currentNodeName, GetNewRandomColor(usedColors));
-            NodeDataMap[node.Id] = similarityResult;
+            var nodeColor = GetNodeColor(currentNodeName);
+
+            AddNode(graph, currentNodeName, nodeColor);
+
+            NodeDataMap[currentNodeName] = similarityResult;
+        }
+    }
+
+    private void AddEdgesToGraph(Graph graph, List<NodeSimilarityResult> similarityResults)
+    {
+        var addedEdges = new HashSet<(string, string)>();
+
+        foreach (var similarityResult in similarityResults)
+        {
+            var currentNodeName = similarityResult.Node.Name;
 
             foreach (var similarNode in similarityResult.SimilarNodes)
             {
@@ -48,10 +66,9 @@ public class GraphBuilder
                     continue;
 
                 var similarNodeName = similarNode.Node.Name;
-                AddNode(graph, similarNodeName, GetNewRandomColor(usedColors));
 
-                var edgeKey = Tuple.Create(currentNodeName, similarNodeName);
-                var edgeKeyReversed = Tuple.Create(similarNodeName, currentNodeName);
+                var edgeKey = (currentNodeName, similarNodeName);
+                var edgeKeyReversed = (similarNodeName, currentNodeName);
 
                 if (addedEdges.Contains(edgeKey) || addedEdges.Contains(edgeKeyReversed))
                     continue;
@@ -61,8 +78,6 @@ public class GraphBuilder
                 addedEdges.Add(edgeKeyReversed);
             }
         }
-
-        return graph;
     }
 
     private Node AddNode(Graph graph, string nodeName, SystemColor nodeColor)
@@ -89,16 +104,29 @@ public class GraphBuilder
         return edge;
     }
 
-    private SystemColor GetNewRandomColor(HashSet<SystemColor> usedColors)
+    private SystemColor GetNodeColor(string nodeName)
+    {
+        if (nodeColors.TryGetValue(nodeName, out SystemColor nodeColor))
+            return nodeColor;
+
+        var newColor = GetNewRandomColor();
+        nodeColors[nodeName] = newColor;
+
+        return newColor;
+    }
+
+    private SystemColor GetNewRandomColor()
     {
         SystemColor randColor;
 
         do
         {
-            randColor = SystemColor.FromArgb(random.Next(256), random.Next(256), random.Next(256));
-        } while (usedColors.Contains(randColor));
-
-        usedColors.Add(randColor);
+            randColor = SystemColor.FromArgb(
+                random.Next(256), 
+                random.Next(256), 
+                random.Next(256)
+                );
+        } while (nodeColors.Values.Contains(randColor));
 
         return randColor;
     }
