@@ -12,23 +12,39 @@ public static class ExcelReader
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
+    public static List<string> GetColumnHeaders(string filePath, short tableIndex = 0)
+    {
+        using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
+        using var reader = ExcelReaderFactory.CreateReader(stream);
+
+        var dataSet = reader.AsDataSet();
+        var table = dataSet.Tables[tableIndex];
+
+        var headersRowIndex = FindHeaderRowIndex(table);
+
+        if (headersRowIndex < 0)
+            throw new Exception("Table must contain a header row.");
+
+        return table.Rows[headersRowIndex]
+            .ItemArray
+            .Select(cell => cell?.ToString() ?? string.Empty)
+            .ToList();
+    }
+
     public static NodeTable ReadFile(string filePath, short tableIndex = 0)
     {
-        using (var stream = File.Open(filePath, FileMode.Open, FileAccess.Read))
-        {
-            using (var reader = ExcelReaderFactory.CreateReader(stream))
-            {
-                var dataSet = reader.AsDataSet();
-                var table = dataSet.Tables[tableIndex];
+        using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
+        using var reader = ExcelReaderFactory.CreateReader(stream);
 
-                int headersRowIndex = FindHeaderRowIndex(table);
+        var dataSet = reader.AsDataSet();
+        var table = dataSet.Tables[tableIndex];
 
-                if (headersRowIndex < 0)
-                    throw new Exception("Table must contain header row.");
+        int headersRowIndex = FindHeaderRowIndex(table);
 
-                return ParseDataTable(table, headersRowIndex);
-            }
-        }
+        if (headersRowIndex < 0)
+            throw new Exception("Table must contain header row.");
+
+        return ParseDataTable(table, headersRowIndex);
     }
 
     private static int FindHeaderRowIndex(DataTable table)
