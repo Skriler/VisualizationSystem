@@ -1,6 +1,6 @@
 ﻿namespace VisualizationSystem.UI.Forms
 {
-    partial class ColumnSelectionForm
+    partial class ListSelectionForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,18 +28,19 @@
         /// </summary>
         private void InitializeComponent()
         {
-            cmbColumnNames = new ComboBox();
+            cmbItems = new ComboBox();
             btnSubmit = new Button();
-            lblSelectColumn = new Label();
+            lblSelectItem = new Label();
             SuspendLayout();
             // 
-            // cmbColumnNames
+            // cmbItems
             // 
-            cmbColumnNames.FormattingEnabled = true;
-            cmbColumnNames.Location = new Point(12, 43);
-            cmbColumnNames.Name = "cmbColumnNames";
-            cmbColumnNames.Size = new Size(235, 23);
-            cmbColumnNames.TabIndex = 0;
+            cmbItems.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbItems.FormattingEnabled = true;
+            cmbItems.Location = new Point(12, 43);
+            cmbItems.Name = "cmbItems";
+            cmbItems.Size = new Size(235, 23);
+            cmbItems.TabIndex = 0;
             // 
             // btnSubmit
             // 
@@ -51,34 +52,36 @@
             btnSubmit.UseVisualStyleBackColor = true;
             btnSubmit.Click += btnSubmit_Click;
             // 
-            // lblSelectColumn
+            // lblSelectItem
             // 
-            lblSelectColumn.AutoSize = true;
-            lblSelectColumn.Location = new Point(12, 14);
-            lblSelectColumn.Name = "lblSelectColumn";
-            lblSelectColumn.Size = new Size(82, 15);
-            lblSelectColumn.TabIndex = 6;
-            lblSelectColumn.Text = "Select column";
+            lblSelectItem.AutoSize = true;
+            lblSelectItem.Location = new Point(12, 14);
+            lblSelectItem.Name = "lblSelectItem";
+            lblSelectItem.Size = new Size(82, 15);
+            lblSelectItem.TabIndex = 6;
+            lblSelectItem.Text = "Select column";
             // 
-            // ColumnSelectionForm
+            // ListSelectionForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(259, 123);
-            Controls.Add(lblSelectColumn);
+            Controls.Add(lblSelectItem);
             Controls.Add(btnSubmit);
-            Controls.Add(cmbColumnNames);
+            Controls.Add(cmbItems);
             FormBorderStyle = FormBorderStyle.None;
-            Name = "ColumnSelectionForm";
+            Name = "ListSelectionForm";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Select column name";
+            Paint += ColumnSelectionForm_Paint;
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
 
-        private ComboBox cmbColumnNames;
+        private ComboBox cmbItems;
         private Button btnSubmit;
-        private Label lblSelectColumn;
+        private Label lblSelectItem;
     }
 }

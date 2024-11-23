@@ -146,8 +146,6 @@ public partial class MainForm : Form
     {
         try
         {
-            
-
             if (!fileService.TryReadNodeTableFromExcelFile(out nodeTable))
                 return false;
 

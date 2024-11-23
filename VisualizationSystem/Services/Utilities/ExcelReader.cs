@@ -14,37 +14,41 @@ public static class ExcelReader
 
     public static List<string> GetColumnHeaders(string filePath, short tableIndex = 0)
     {
-        using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
-        using var reader = ExcelReaderFactory.CreateReader(stream);
-
-        var dataSet = reader.AsDataSet();
-        var table = dataSet.Tables[tableIndex];
-
+        var table = GetExcelTable(filePath, tableIndex);
         var headersRowIndex = FindHeaderRowIndex(table);
 
         if (headersRowIndex < 0)
             throw new Exception("Table must contain a header row.");
 
-        return table.Rows[headersRowIndex]
-            .ItemArray
-            .Select(cell => cell?.ToString() ?? string.Empty)
-            .ToList();
+        return GetRowValues(table.Rows[headersRowIndex]);
     }
 
-    public static NodeTable ReadFile(string filePath, short tableIndex = 0)
+    public static NodeTable ReadFile(string filePath, int nameColumnIndex, short tableIndex = 0)
+    {
+        var table = GetExcelTable(filePath, tableIndex);
+        var headersRowIndex = FindHeaderRowIndex(table);
+
+        if (headersRowIndex < 0)
+            throw new Exception("Table must contain header row.");
+
+        return ParseNodeTable(table, headersRowIndex, nameColumnIndex);
+    }
+
+    private static DataTable GetExcelTable(string filePath, short tableIndex)
     {
         using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
         using var reader = ExcelReaderFactory.CreateReader(stream);
 
         var dataSet = reader.AsDataSet();
-        var table = dataSet.Tables[tableIndex];
 
-        int headersRowIndex = FindHeaderRowIndex(table);
+        return dataSet.Tables[tableIndex];
+    }
 
-        if (headersRowIndex < 0)
-            throw new Exception("Table must contain header row.");
-
-        return ParseDataTable(table, headersRowIndex);
+    private static List<string> GetRowValues(DataRow row)
+    {
+        return row.ItemArray
+            .Select(cell => cell?.ToString() ?? string.Empty)
+            .ToList();
     }
 
     private static int FindHeaderRowIndex(DataTable table)
@@ -61,25 +65,24 @@ public static class ExcelReader
         return cell != null && !string.IsNullOrWhiteSpace(cell.ToString());
     }
 
-    private static NodeTable ParseDataTable(DataTable table, int headersRowIndex)
+    private static NodeTable ParseNodeTable(DataTable table, int headersRowIndex, int nameColumnIndex)
     {
         if (table.Rows.Count == 0)
             return new NodeTable();
 
         var parameterTypes = InitializeParameterTypes(table, headersRowIndex);
 
-        NodeTable nodeTable = new NodeTable
+        var nodeTable = new NodeTable
         {
             Name = table.TableName,
             ParameterTypes = parameterTypes
         };
 
-        List<NodeObject> nodes = new List<NodeObject>();
+        var nodes = new List<NodeObject>();
 
-        NodeObject node;
         for (int row = headersRowIndex + 1; row < table.Rows.Count; ++row)
         {
-            node = ParseDataRow(table.Rows[row], parameterTypes);
+            var node = ParseDataRow(table.Rows[row], parameterTypes, nameColumnIndex);
             nodes.Add(node);
         }
 
@@ -93,12 +96,11 @@ public static class ExcelReader
         var parameterTypes = new List<ParameterType>();
         var rowHeaders = table.Rows[headersRowIndex];
 
-        for (int col = 1; col < table.Columns.Count; ++col)
+        for (int col = 0; col < table.Columns.Count; ++col)
         {
-            var parameterName = rowHeaders[col]?.ToString() ?? string.Empty;
             var parameterType = new ParameterType()
             {
-                Name = parameterName,
+                Name = rowHeaders[col].ToString() ?? string.Empty,
             };
 
             parameterTypes.Add(parameterType);
@@ -107,22 +109,25 @@ public static class ExcelReader
         return parameterTypes;
     }
 
-    private static NodeObject ParseDataRow(DataRow rowData, List<ParameterType> parameterTypes)
+    private static NodeObject ParseDataRow(DataRow rowData, List<ParameterType> parameterTypes, int nameColumnIndex)
     {
-        NodeObject node = new NodeObject()
+        var node = new NodeObject()
         {
-            Name = rowData[0].ToString() ?? string.Empty
+            Name = rowData[nameColumnIndex].ToString() ?? string.Empty
         };
 
-        var rowAmount = rowData.Table.Columns.Count;
-        for (int col = 1; col < rowAmount; ++col)
+        var colAmount = rowData.Table.Columns.Count;
+        for (int col = 0; col < colAmount; ++col)
         {
+            if (col == nameColumnIndex)
+                continue;
+
             var parameterValue = rowData[col]?.ToString() ?? string.Empty;
 
             node.Parameters.Add(new NodeParameter
             {
                 Value = parameterValue,
-                ParameterType = parameterTypes[col - 1]
+                ParameterType = parameterTypes[col]
             });
         }
 
