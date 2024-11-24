@@ -26,12 +26,12 @@ public static class ExcelReader
     public static NodeTable ReadFile(string filePath, int nameColumnIndex, short tableIndex = 0)
     {
         var table = GetExcelTable(filePath, tableIndex);
-        var headersRowIndex = FindHeaderRowIndex(table);
+        var headerRowIndex = FindHeaderRowIndex(table);
 
-        if (headersRowIndex < 0)
+        if (headerRowIndex < 0)
             throw new Exception("Table must contain header row.");
 
-        return ParseNodeTable(table, headersRowIndex, nameColumnIndex);
+        return ParseNodeTable(table, headerRowIndex, nameColumnIndex);
     }
 
     private static DataTable GetExcelTable(string filePath, short tableIndex)
@@ -53,11 +53,11 @@ public static class ExcelReader
 
     private static int FindHeaderRowIndex(DataTable table)
     {
-        var headersRowIndex = table.AsEnumerable()
+        var headerRowIndex = table.AsEnumerable()
             .Select((row, index) => new { Row = row, Index = index })
-            .FirstOrDefault(r => r.Row.ItemArray.All(cell => IsCellFilled(cell)));
+            .FirstOrDefault(r => r.Row.ItemArray.All(IsCellFilled));
 
-        return headersRowIndex != null ? headersRowIndex.Index : -1;
+        return headerRowIndex?.Index ?? -1;
     }
 
     private static bool IsCellFilled(object? cell)
@@ -65,42 +65,43 @@ public static class ExcelReader
         return cell != null && !string.IsNullOrWhiteSpace(cell.ToString());
     }
 
-    private static NodeTable ParseNodeTable(DataTable table, int headersRowIndex, int nameColumnIndex)
+    private static NodeTable ParseNodeTable(DataTable table, int headerRowIndex, int nameColumnIndex)
     {
         if (table.Rows.Count == 0)
             return new NodeTable();
 
-        var parameterTypes = InitializeParameterTypes(table, headersRowIndex);
+        var parameterTypes = ParseParameterTypes(table, headerRowIndex);
+        var nodes = ParseNodes(table, parameterTypes, headerRowIndex, nameColumnIndex);
+
+        var duplicateNames = nodes
+            .GroupBy(node => node.Name)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToList();
+
+        if (duplicateNames.Any())
+            throw new InvalidOperationException($"Name duplication: {string.Join(", ", duplicateNames)}");
 
         var nodeTable = new NodeTable
         {
             Name = table.TableName,
-            ParameterTypes = parameterTypes
+            ParameterTypes = parameterTypes,
+            NodeObjects = nodes,
         };
-
-        var nodes = new List<NodeObject>();
-
-        for (int row = headersRowIndex + 1; row < table.Rows.Count; ++row)
-        {
-            var node = ParseDataRow(table.Rows[row], parameterTypes, nameColumnIndex);
-            nodes.Add(node);
-        }
-
-        nodeTable.NodeObjects = nodes;
 
         return nodeTable;
     }
 
-    private static List<ParameterType> InitializeParameterTypes(DataTable table, int headersRowIndex)
+    private static List<ParameterType> ParseParameterTypes(DataTable table, int headerRowIndex)
     {
         var parameterTypes = new List<ParameterType>();
-        var rowHeaders = table.Rows[headersRowIndex];
+        var headerRow = table.Rows[headerRowIndex];
 
         for (int col = 0; col < table.Columns.Count; ++col)
         {
             var parameterType = new ParameterType()
             {
-                Name = rowHeaders[col].ToString() ?? string.Empty,
+                Name = headerRow[col].ToString() ?? string.Empty,
             };
 
             parameterTypes.Add(parameterType);
@@ -109,11 +110,29 @@ public static class ExcelReader
         return parameterTypes;
     }
 
-    private static NodeObject ParseDataRow(DataRow rowData, List<ParameterType> parameterTypes, int nameColumnIndex)
+    private static List<NodeObject> ParseNodes(DataTable table, List<ParameterType> parameterTypes, int headerRowIndex, int nameColumnIndex)
     {
-        var node = new NodeObject()
+        var nodes = new List<NodeObject>();
+
+        for (int row = headerRowIndex + 1; row < table.Rows.Count; ++row)
         {
-            Name = rowData[nameColumnIndex].ToString() ?? string.Empty
+            var node = ParseNode(table.Rows[row], parameterTypes, nameColumnIndex);
+            nodes.Add(node);
+        }
+
+        return nodes;
+    }
+
+    private static NodeObject ParseNode(DataRow rowData, List<ParameterType> parameterTypes, int nameColumnIndex)
+    {
+        var name = rowData[nameColumnIndex]?.ToString()?.Trim();
+
+        if (string.IsNullOrEmpty(name))
+            throw new InvalidOperationException("The name column cannot contain an empty string");
+
+        var node = new NodeObject
+        {
+            Name = name
         };
 
         var colAmount = rowData.Table.Columns.Count;

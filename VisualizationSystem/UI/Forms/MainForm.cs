@@ -8,10 +8,11 @@ namespace VisualizationSystem.UI.Forms;
 
 public partial class MainForm : Form
 {
+    private readonly string FormTitle;
+
     private readonly NodeTableRepository nodeRepository;
     private readonly UserSettingsRepository settingsRepository;
 
-    private readonly FileService fileService;
     private readonly TabControlService tabControlService;
     private readonly NodeComparer nodeComparer;
     private readonly GraphBuilder graphBuilder;
@@ -23,10 +24,11 @@ public partial class MainForm : Form
     {
         InitializeComponent();
 
+        FormTitle = Text;
+
         nodeRepository = new NodeTableRepository(context);
         settingsRepository = new UserSettingsRepository(context);
 
-        fileService = new FileService();
         tabControlService = new TabControlService(tabControl);
 
         userSettings = new UserSettings();
@@ -59,7 +61,7 @@ public partial class MainForm : Form
 
         try
         {
-            tabControlService.AddDataGridViewTabPage(nodeTable);
+            tabControlService.AddOrUpdateDataGridViewTabPage(nodeTable, nodeTable.Name);
         }
         catch (Exception ex)
         {
@@ -137,7 +139,7 @@ public partial class MainForm : Form
             if (!tabPage.IsCloseIconClicked(tabRect, e.Location))
                 continue;
 
-            tabControlService.RemoveTabPage(tabPage.Text);
+            tabControlService.RemoveTabPage(tabPage);
             break;
         }
     }
@@ -146,16 +148,16 @@ public partial class MainForm : Form
     {
         try
         {
-            if (!fileService.TryReadNodeTableFromExcelFile(out nodeTable))
+            if (!FileService.TryReadNodeTableFromExcelFile(out nodeTable))
                 return false;
 
             await nodeRepository.AddTableAsync(nodeTable);
+            await LoadUserSettingsAsync();
 
-            userSettings.InitializeNodeTableData(nodeTable);
-            await settingsRepository.AddAsync(userSettings);
-            ApplySettingsToComponents();
+            AddTableToolStripMenuItem(nodeTable.Name);
+            loadTableToolStripMenuItem.Enabled = true;
 
-            //AddTableToolStripMenuItem(nodeTable.Name);
+            UpdateFormTitle();
         }
         catch (Exception ex)
         {
@@ -178,8 +180,6 @@ public partial class MainForm : Form
             return;
         }
 
-        loadTableToolStripMenuItem.Enabled = true;
-
         var tableNames = tables
             .Select(x => x.Name)
             .ToList();
@@ -188,6 +188,8 @@ public partial class MainForm : Form
         {
             AddTableToolStripMenuItem(tableName);
         }
+
+        loadTableToolStripMenuItem.Enabled = true;
     }
 
     private void AddTableToolStripMenuItem(string tableName)
@@ -211,14 +213,13 @@ public partial class MainForm : Form
         using var loadingForm = new LoadingForm();
         loadingForm.Show();
         loadingForm.BringToFront();
+
         Enabled = false;
 
         try
         {
             nodeTable = await nodeRepository.GetByNameAsync(tableName);
-
             await LoadUserSettingsAsync();
-            ApplySettingsToComponents();
 
             ShowSuccess("File uploaded successfully!");
         }
@@ -229,8 +230,10 @@ public partial class MainForm : Form
         finally
         {
             loadingForm.Close();
+
             Enabled = true;
             BringToFront();
+            UpdateFormTitle();
         }
     }
 
@@ -242,7 +245,9 @@ public partial class MainForm : Form
         }
         else
         {
+            userSettings = new UserSettings();
             userSettings.InitializeNodeTableData(nodeTable);
+
             await settingsRepository.AddAsync(userSettings);
             ApplySettingsToComponents();
         }
@@ -267,6 +272,11 @@ public partial class MainForm : Form
         var detailsForm = new NodeDetailsForm(nodeData, OpenNodeDetailsForm);
         detailsForm.Show();
         detailsForm.BringToFront();
+    }
+
+    private void UpdateFormTitle()
+    {
+        Text = nodeTable == null ? FormTitle : FormTitle + $" (Current table: {nodeTable.Name})";
     }
 
     private static void ShowSuccess(string message)

@@ -43,11 +43,11 @@
             // lblLoading
             // 
             lblLoading.AutoSize = true;
-            lblLoading.Location = new Point(21, 18);
+            lblLoading.Location = new Point(50, 18);
             lblLoading.Name = "lblLoading";
-            lblLoading.Size = new Size(144, 15);
+            lblLoading.Size = new Size(85, 15);
             lblLoading.TabIndex = 1;
-            lblLoading.Text = "Loading data from excel...";
+            lblLoading.Text = "Loading data...";
             // 
             // LoadingForm
             // 
