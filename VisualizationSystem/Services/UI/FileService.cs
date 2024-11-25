@@ -1,7 +1,11 @@
-﻿using VisualizationSystem.Models.Entities;
+﻿using System.Data;
+using System.Windows.Forms;
+using System.Xml;
+using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Storages;
 using VisualizationSystem.Services.Utilities;
 using VisualizationSystem.UI.Forms;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace VisualizationSystem.Services.UI;
 
@@ -12,20 +16,46 @@ public static class FileService
     private const string ExcelFilterPattern
         = "Excel Workbook(*.xlsx)|*.xlsx|Excel 97- Excel 2003 Workbook(*.xls)|*.xls";
 
-    public static bool TryReadNodeTableFromExcelFile(out NodeTable nodeTable)
+    public static bool TryReadNodeTableFromExcelFile(out List<NodeTable> nodeTables)
     {
-        nodeTable = new NodeTable();
+        nodeTables = new List<NodeTable>();
 
         if (!TryGetExcelFilePath(out var filePath))
             return false;
 
-        var columnHeaders = ExcelReader.GetColumnHeaders(filePath);
-        
-        if (!TryGetSelectedNameColumn(out var selectedNameColumn, columnHeaders))
-            return false;
+        var tables = ExcelParser.GetExcelTables(filePath);
 
-        nodeTable = ExcelReader.ReadFile(filePath, selectedNameColumn.SelectedIndex);
+        foreach (var table in tables)
+        {
+            if (!TryParseExcelTable(table, out var nodeTable))
+                continue;
+
+            nodeTables.Add(nodeTable);
+        }
+
         return true;
+    }
+
+    private static bool TryParseExcelTable(DataTable dataTable, out NodeTable nodeTable)
+    {
+        nodeTable = new NodeTable();
+
+        try
+        {
+            var columnHeaders = ExcelParser.GetColumnHeaders(dataTable);
+
+            if (!TryGetSelectedNameColumn(out var selectedNameColumn, columnHeaders, dataTable.TableName))
+                return false;
+
+            nodeTable = ExcelParser.ParseTable(dataTable, selectedNameColumn.SelectedIndex);
+            return true;
+        }
+        catch (Exception e)
+        {
+            MessageBox.Show($"Error while parsing data: {e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        return false;
     }
 
     private static bool TryGetExcelFilePath(out string filePath)
@@ -45,11 +75,11 @@ public static class FileService
         return true;
     }
 
-    private static bool TryGetSelectedNameColumn(out ListSelectionResult columnSelectionResult, List<string> items)
+    private static bool TryGetSelectedNameColumn(out ListSelectionResult columnSelectionResult, List<string> items, string tableName)
     {
         columnSelectionResult = new ListSelectionResult();
 
-        using (var listSelectionForm = new ListSelectionForm("name column", items))
+        using (var listSelectionForm = new ListSelectionForm($"name column at table {tableName}", items))
         {
             if (listSelectionForm.ShowDialog() != DialogResult.OK)
                 return false;

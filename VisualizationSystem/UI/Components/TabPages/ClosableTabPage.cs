@@ -1,17 +1,21 @@
-﻿namespace VisualizationSystem.UI.Components;
+﻿namespace VisualizationSystem.UI.Components.TabPages;
 
-public class ClosableTabPage : TabPage
+public abstract class ClosableTabPageBase : TabPage
 {
-    private readonly int CloseIconSize = 15;
+    private const int CloseIconSize = 15;
 
-    public ClosableTabPage(string text) : base(text)
+    protected ClosableTabPageBase(string text) : base(text)
     { }
+
+    protected abstract void InitializeContent();
+
+    public abstract void UpdateContent(object newData);
 
     public void DrawTab(Rectangle tabRect, Graphics g)
     {
         TextRenderer.DrawText(
-            g, 
-            Text, 
+            g,
+            Text,
             Font,
             tabRect,
             ForeColor
@@ -20,9 +24,9 @@ public class ClosableTabPage : TabPage
         var closeIconRect = GetCloseIconRect(tabRect);
 
         g.DrawString(
-            "x", 
-            Font, 
-            Brushes.Black, 
+            "x",
+            Font,
+            Brushes.Black,
             closeIconRect.Location
         );
     }
@@ -37,9 +41,9 @@ public class ClosableTabPage : TabPage
     private Rectangle GetCloseIconRect(Rectangle tabRect)
     {
         return new Rectangle(
-            tabRect.Right - CloseIconSize, 
-            tabRect.Top + (tabRect.Height - CloseIconSize) / 2, 
-            CloseIconSize, 
+            tabRect.Right - CloseIconSize,
+            tabRect.Top + (tabRect.Height - CloseIconSize) / 2,
+            CloseIconSize,
             CloseIconSize
         );
     }

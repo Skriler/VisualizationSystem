@@ -1,62 +1,68 @@
 ﻿using System.Data;
 using VisualizationSystem.Models.Entities;
-using VisualizationSystem.Models.ViewModels;
 
 namespace VisualizationSystem.UI.Components;
 
 public class NodeTableDataGridView : DataGridView
 {
-    public NodeTableDataGridView(NodeTable table)
+    public NodeTable NodeTable { get; private set; }
+
+    public NodeTableDataGridView(NodeTable nodeTable)
     {
-        InitializeWithNodeTable(table);
+        NodeTable = nodeTable;
+        InitializeTable();
+
+        SetReadOnly();
     }
 
-    private void InitializeWithNodeTable(NodeTable table)
+    public void UpdateTable(NodeTable nodeTable)
     {
-        var headers =
-            table
-            .ParameterTypes
-            .Select(p => p.Name)
-            .Where(name => name != null)
-            .Cast<string>();
-
-        NodeObjectViewModel.InitializeHeaders(headers);
-
-        var nodeViewModels = table.NodeObjects
-            .Select(n => new NodeObjectViewModel(n))
-            .ToList();
-
-        DataSource = CreateDataTable(nodeViewModels);
-
-        DisableUserInteractions();
+        NodeTable = nodeTable;
+        InitializeTable();
     }
 
-    private DataTable CreateDataTable(List<NodeObjectViewModel> nodeViewModels)
+    private void InitializeTable()
     {
         var dataTable = new DataTable();
 
-        foreach (var header in NodeObjectViewModel.Headers)
+        AddColumns(dataTable);
+        FillRowsWithData(dataTable);
+
+        DataSource = dataTable;
+    }
+
+    private void AddColumns(DataTable dataTable)
+    {
+        dataTable.Columns.Add("Name");
+
+        var parameterNames = NodeTable.ParameterTypes
+            .Where(p => !string.IsNullOrEmpty(p.Name))
+            .Select(p => p.Name)
+            .ToList();
+
+        foreach (var parameterName in parameterNames)
         {
-            dataTable.Columns.Add(header);
+            dataTable.Columns.Add(parameterName);
         }
+    }
 
-        DataRow row;
-        foreach (var node in nodeViewModels)
+    private void FillRowsWithData(DataTable dataTable)
+    {
+        foreach (var node in NodeTable.NodeObjects)
         {
-            row = dataTable.NewRow();
+            var row = dataTable.NewRow();
+            row["Name"] = node.Name ?? string.Empty;
 
-            for (int i = 0; i < node.Parameters.Count; ++i)
+            foreach (var parameter in node.Parameters)
             {
-                row[i] = node.Parameters[i];
+                row[parameter.ParameterType.Name] = parameter.Value ?? string.Empty;
             }
 
             dataTable.Rows.Add(row);
         }
-
-        return dataTable;
     }
 
-    private void DisableUserInteractions()
+    private void SetReadOnly()
     {
         ReadOnly = true;
         AllowUserToAddRows = false;

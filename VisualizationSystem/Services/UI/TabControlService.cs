@@ -1,136 +1,92 @@
-﻿using Microsoft.Msagl.Drawing;
-using Microsoft.Msagl.GraphViewerGdi;
-using System.Windows.Automation;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Msagl.Drawing;
 using VisualizationSystem.Models.Entities;
-using VisualizationSystem.Models.Storages;
-using VisualizationSystem.UI.Components;
+using VisualizationSystem.UI.Components.TabPages;
 
 namespace VisualizationSystem.Services.UI;
 
 public class TabControlService
 {
     private readonly TabControl tabControl;
-    private readonly List<TabPageInfo> tabPages;
+    private readonly Dictionary<string, ClosableTabPageBase> tabPages;
 
     public TabControlService(TabControl tabControl)
     {
         this.tabControl = tabControl;
-        tabPages = new List<TabPageInfo>();
+        tabPages = new Dictionary<string, ClosableTabPageBase>();
     }
 
-    public void AddOrUpdateDataGridViewTabPage(NodeTable table, string tabName)
+    private static string GetDataGridViewTabId(string tableName) => $"Table: {tableName}";
+
+    private static string GetGViewerTabId(string tableName) => $"Graph: {tableName}";
+
+    public void AddDataGridViewTabPage(NodeTable table)
     {
-        if (TryUpdateExistingTabPage(
-                tabName, 
-                TabControlType.DataGridView, 
-                tabPage => UpdateDataGridViewTab(tabPage, table))
-            )
+        var id = GetDataGridViewTabId(table.Name);
+
+        if (TryUpdateTabPage(id, table))
             return;
 
-        var tabPage = new ClosableTabPage($"Table: {table.Name}");
-        var dataGridView = new NodeTableDataGridView(table)
-        {
-            Dock = DockStyle.Fill,
-        };
-
-        tabPage.Controls.Add(dataGridView);
-        AddTabPage(tabPage);
-
-        tabPages.Add(new TabPageInfo(tabPage, TabControlType.DataGridView, tabName));
+        var tabPage = new ClosableDataGridViewTabPage(id, table);
+        AddTabPage(id, tabPage);
     }
 
-    public void AddOrUpdateGViewerTabPage(Graph graph, string tabName, Action<string> onNodeClick)
+    public void AddGViewerTabPage(Graph graph, string tableName, Action<string> onNodeClick)
     {
-        if (TryUpdateExistingTabPage(
-                tabName, 
-                TabControlType.GViewer, 
-                tabPage => UpdateGViewerTab(tabPage, graph))
-            )
+        var id = GetGViewerTabId(tableName);
+
+        if (TryUpdateTabPage(id, graph))
             return;
 
-        var tabPage = new ClosableTabPage($"Graph: {tabName}");
-        var gViewer = new GViewer
-        {
-            Dock = DockStyle.Fill,
-            Graph = graph,
-        };
-
-        gViewer.MouseClick += (sender, e) => HandleNodeClick(sender, e, onNodeClick);
-
-        tabPage.Controls.Add(gViewer);
-        AddTabPage(tabPage);
-
-        tabPages.Add(new TabPageInfo(tabPage, TabControlType.GViewer, tabName));
+        var tabPage = new ClosableGViewerTabPage(id, graph, onNodeClick);
+        AddTabPage(id, tabPage);
     }
 
-    private void AddTabPage(ClosableTabPage tabPage)
+    public void UpdateDataGridViewTabPageIfOpen(NodeTable table)
     {
-        tabControl.TabPages.Add(tabPage);
-        tabControl.SelectedTab = tabPage;
+        var id = GetDataGridViewTabId(table.Name);
+
+        TryUpdateTabPage(id, table, false);
     }
 
-    private bool TryUpdateExistingTabPage(string tabName, TabControlType controlType, Action<TabPage> updateAction)
+    public void UpdateGViewerTabPageIfOpen(Graph graph, string tableName)
     {
-        var existingTabInfo = tabPages
-            .FirstOrDefault(t => t.ControlType == controlType && t.Name == tabName);
+        var id = GetGViewerTabId(tableName);
 
-        if (existingTabInfo == null)
-            return false;
-
-        updateAction(existingTabInfo.Page);
-        tabControl.SelectedTab = existingTabInfo.Page;
-
-        return true;
-    }
-
-    private void UpdateDataGridViewTab(TabPage tabPage, NodeTable table)
-    {
-        var dataGridView = tabPage.Controls.OfType<DataGridView>().FirstOrDefault();
-
-        if (dataGridView == null)
-            return;
-
-        dataGridView.DataSource = table;
-        dataGridView.Refresh();
-    }
-
-    private void UpdateGViewerTab(TabPage tabPage, Graph graph)
-    {
-        var gViewer = tabPage.Controls.OfType<GViewer>().FirstOrDefault();
-
-        if (gViewer == null)
-            return;
-
-        gViewer.Graph = graph;
-        gViewer.Refresh();
+        TryUpdateTabPage(id, graph, false);
     }
 
     public void RemoveTabPage(TabPage tabPage)
     {
-        var tabInfo = tabPages.FirstOrDefault(t => t.Page == tabPage);
+        var tabPageId = tabPages
+            .Where(kvp => kvp.Value == tabPage)
+            .Select(kvp => kvp.Key)
+            .FirstOrDefault();
 
-        if (tabInfo == null)
+        if (tabPageId == null)
             return;
 
         tabControl.TabPages.Remove(tabPage);
-        tabPages.Remove(tabInfo);
+        tabPages.Remove(tabPageId);
     }
 
-    public bool IsTabPageOpen(string tabName)
+    private void AddTabPage(string tabId, ClosableTabPageBase tabPage)
     {
-        return tabPages.Any(t => t.Name == tabName);
+        tabControl.TabPages.Add(tabPage);
+        tabPages.Add(tabId, tabPage);
+        tabControl.SelectedTab = tabPage;
     }
 
-    private void HandleNodeClick(object sender, MouseEventArgs e, Action<string> onNodeClick)
+    private bool TryUpdateTabPage(string tabId, object newData, bool setActive = true)
     {
-        if (sender is not GViewer viewer)
-            return;
+        if (!tabPages.TryGetValue(tabId, out var existingTabPage))
+            return false;
 
-        var clickedObject = viewer.GetObjectAt(e.Location);
+        existingTabPage.UpdateContent(newData);
 
-        if (clickedObject is not DNode clickedNode)
-            return;
+        if (setActive)
+            tabControl.SelectedTab = existingTabPage;
 
-        onNodeClick?.Invoke(clickedNode.Node.Id);
+        return true;
     }
 }

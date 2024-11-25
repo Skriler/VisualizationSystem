@@ -5,16 +5,27 @@ using VisualizationSystem.Models.Entities;
 
 namespace VisualizationSystem.Services.Utilities;
 
-public static class ExcelReader
+public static class ExcelParser
 {
-    static ExcelReader()
+    static ExcelParser()
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
-    public static List<string> GetColumnHeaders(string filePath, short tableIndex = 0)
+    public static List<DataTable> GetExcelTables(string filePath)
     {
-        var table = GetExcelTable(filePath, tableIndex);
+        using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
+        using var reader = ExcelReaderFactory.CreateReader(stream);
+
+        var dataSet = reader.AsDataSet();
+
+        return dataSet.Tables
+            .Cast<DataTable>()
+            .ToList();
+    }
+
+    public static List<string> GetColumnHeaders(DataTable table)
+    {
         var headersRowIndex = FindHeaderRowIndex(table);
 
         if (headersRowIndex < 0)
@@ -23,25 +34,14 @@ public static class ExcelReader
         return GetRowValues(table.Rows[headersRowIndex]);
     }
 
-    public static NodeTable ReadFile(string filePath, int nameColumnIndex, short tableIndex = 0)
+    public static NodeTable ParseTable(DataTable table, int nameColumnIndex)
     {
-        var table = GetExcelTable(filePath, tableIndex);
         var headerRowIndex = FindHeaderRowIndex(table);
 
         if (headerRowIndex < 0)
             throw new Exception("Table must contain header row.");
 
         return ParseNodeTable(table, headerRowIndex, nameColumnIndex);
-    }
-
-    private static DataTable GetExcelTable(string filePath, short tableIndex)
-    {
-        using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
-        using var reader = ExcelReaderFactory.CreateReader(stream);
-
-        var dataSet = reader.AsDataSet();
-
-        return dataSet.Tables[tableIndex];
     }
 
     private static List<string> GetRowValues(DataRow row)
@@ -70,7 +70,7 @@ public static class ExcelReader
         if (table.Rows.Count == 0)
             return new NodeTable();
 
-        var parameterTypes = ParseParameterTypes(table, headerRowIndex);
+        var parameterTypes = ParseParameterTypes(table, headerRowIndex, nameColumnIndex);
         var nodes = ParseNodes(table, parameterTypes, headerRowIndex, nameColumnIndex);
 
         var duplicateNames = nodes
@@ -82,17 +82,21 @@ public static class ExcelReader
         if (duplicateNames.Any())
             throw new InvalidOperationException($"Name duplication: {string.Join(", ", duplicateNames)}");
 
+        var parameterTypesWithoutName = parameterTypes
+            .Where((value, index) => index != nameColumnIndex)
+            .ToList();
+
         var nodeTable = new NodeTable
         {
             Name = table.TableName,
-            ParameterTypes = parameterTypes,
+            ParameterTypes = parameterTypesWithoutName,
             NodeObjects = nodes,
         };
 
         return nodeTable;
     }
 
-    private static List<ParameterType> ParseParameterTypes(DataTable table, int headerRowIndex)
+    private static List<ParameterType> ParseParameterTypes(DataTable table, int headerRowIndex, int nameColumnIndex)
     {
         var parameterTypes = new List<ParameterType>();
         var headerRow = table.Rows[headerRowIndex];
@@ -125,7 +129,7 @@ public static class ExcelReader
 
     private static NodeObject ParseNode(DataRow rowData, List<ParameterType> parameterTypes, int nameColumnIndex)
     {
-        var name = rowData[nameColumnIndex]?.ToString()?.Trim();
+        var name = rowData[nameColumnIndex].ToString()?.Trim();
 
         if (string.IsNullOrEmpty(name))
             throw new InvalidOperationException("The name column cannot contain an empty string");
@@ -141,11 +145,9 @@ public static class ExcelReader
             if (col == nameColumnIndex)
                 continue;
 
-            var parameterValue = rowData[col]?.ToString() ?? string.Empty;
-
             node.Parameters.Add(new NodeParameter
             {
-                Value = parameterValue,
+                Value = rowData[col].ToString() ?? string.Empty,
                 ParameterType = parameterTypes[col]
             });
         }

@@ -20,7 +20,7 @@ public class NodeTableRepository
         if (await ExistsAsync(nodeTable.Name))
             throw new InvalidOperationException($"Table with name '{nodeTable.Name}' already exists.");
 
-        db.NodeTable.Add(nodeTable);
+        db.NodeTables.Add(nodeTable);
         await db.SaveChangesAsync();
     }
 
@@ -29,7 +29,7 @@ public class NodeTableRepository
         if (string.IsNullOrWhiteSpace(tableName)) 
             throw new ArgumentException("Table name cannot be null or whitespace.", tableName);
 
-        return await db.NodeTable.AnyAsync(table => table.Name == tableName);
+        return await db.NodeTables.AnyAsync(table => table.Name == tableName);
     }
 
     public async Task<NodeTable> GetByNameAsync(string tableName)
@@ -37,7 +37,7 @@ public class NodeTableRepository
         if (string.IsNullOrWhiteSpace(tableName)) 
             throw new ArgumentException("Table name cannot be null or whitespace.", tableName);
 
-        return await db.NodeTable
+        return await db.NodeTables
             .Include(table => table.ParameterTypes)
             .Include(table => table.NodeObjects)
             .ThenInclude(node => node.Parameters)
@@ -47,6 +47,6 @@ public class NodeTableRepository
 
     public async Task<List<NodeTable>> GetAllAsync()
     {
-        return await db.NodeTable.ToListAsync();
+        return await db.NodeTables.ToListAsync();
     }
 }

@@ -1,8 +1,9 @@
-﻿using VisualizationSystem.Models.Entities;
+﻿using Microsoft.Msagl.Drawing;
+using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Services.Utilities;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.UI;
-using VisualizationSystem.UI.Components;
+using VisualizationSystem.UI.Components.TabPages;
 
 namespace VisualizationSystem.UI.Forms;
 
@@ -19,6 +20,7 @@ public partial class MainForm : Form
 
     private NodeTable? nodeTable;
     private UserSettings userSettings;
+    private Graph graph;
 
     public MainForm(VisualizationSystemDbContext context)
     {
@@ -61,7 +63,7 @@ public partial class MainForm : Form
 
         try
         {
-            tabControlService.AddOrUpdateDataGridViewTabPage(nodeTable, nodeTable.Name);
+            AddDataGridViewTab();
         }
         catch (Exception ex)
         {
@@ -79,7 +81,7 @@ public partial class MainForm : Form
 
         try
         {
-            UpdateOrCreateGraphTab();
+            AddGraphTab();
         }
         catch (Exception ex)
         {
@@ -121,7 +123,7 @@ public partial class MainForm : Form
 
     private void tabControl_DrawItem(object sender, DrawItemEventArgs e)
     {
-        if (tabControl.TabPages[e.Index] is not ClosableTabPage tabPage)
+        if (tabControl.TabPages[e.Index] is not ClosableTabPageBase tabPage)
             return;
 
         tabPage.DrawTab(tabControl.GetTabRect(e.Index), e.Graphics);
@@ -131,7 +133,7 @@ public partial class MainForm : Form
     {
         for (var i = 0; i < tabControl.TabPages.Count; i++)
         {
-            if (tabControl.TabPages[i] is not ClosableTabPage tabPage)
+            if (tabControl.TabPages[i] is not ClosableTabPageBase tabPage)
                 continue;
 
             var tabRect = tabControl.GetTabRect(i);
@@ -148,15 +150,13 @@ public partial class MainForm : Form
     {
         try
         {
-            if (!FileService.TryReadNodeTableFromExcelFile(out nodeTable))
+            if (!FileService.TryReadNodeTableFromExcelFile(out var tables))
                 return false;
 
-            await nodeRepository.AddTableAsync(nodeTable);
+            await AddLoadedNodeTablesAsync(tables);
+
+            nodeTable = tables.Last();
             await LoadUserSettingsAsync();
-
-            AddTableToolStripMenuItem(nodeTable.Name);
-            loadTableToolStripMenuItem.Enabled = true;
-
             UpdateFormTitle();
         }
         catch (Exception ex)
@@ -166,6 +166,20 @@ public partial class MainForm : Form
         }
 
         return true;
+    }
+
+    private async Task AddLoadedNodeTablesAsync(List<NodeTable> loadedTables)
+    {
+        if (loadedTables.Count < 0)
+            return;
+
+        foreach (var loadedTable in loadedTables)
+        {
+            await nodeRepository.AddTableAsync(loadedTable);
+            AddTableToolStripMenuItem(loadedTable.Name);
+        }
+
+        loadTableToolStripMenuItem.Enabled = true;
     }
 
     private async Task LoadTableNamesToMenuAsync()
@@ -200,12 +214,21 @@ public partial class MainForm : Form
         loadTableToolStripMenuItem.DropDownItems.Add(tableMenuItem);
     }
 
-    private void UpdateOrCreateGraphTab()
+    private void AddDataGridViewTab()
+    {
+        tabControlService.AddDataGridViewTabPage(nodeTable);
+    }
+
+    private void AddGraphTab()
+    {
+        CreateGraph();
+        tabControlService.AddGViewerTabPage(graph, nodeTable.Name, OpenNodeDetailsForm);
+    }
+
+    private void CreateGraph()
     {
         var similarityResults = nodeComparer.GetSimilarNodes(nodeTable);
-        var graph = graphBuilder.BuildGraph(nodeTable.Name, similarityResults);
-
-        tabControlService.AddOrUpdateGViewerTabPage(graph, nodeTable.Name, OpenNodeDetailsForm);
+        graph = graphBuilder.BuildGraph(nodeTable.Name, similarityResults);
     }
 
     private async Task LoadTableAsync(string tableName)
@@ -249,8 +272,9 @@ public partial class MainForm : Form
             userSettings.InitializeNodeTableData(nodeTable);
 
             await settingsRepository.AddAsync(userSettings);
-            ApplySettingsToComponents();
         }
+
+        ApplySettingsToComponents();
     }
 
     private void ApplySettingsToComponents()
@@ -258,10 +282,9 @@ public partial class MainForm : Form
         nodeComparer.UpdateSettings(userSettings);
         graphBuilder.UpdateSettings(userSettings);
 
-        if (!tabControlService.IsTabPageOpen(userSettings.NodeTable.Name))
-            return;
-
-        UpdateOrCreateGraphTab();
+        CreateGraph();
+        tabControlService.UpdateDataGridViewTabPageIfOpen(nodeTable);
+        tabControlService.UpdateGViewerTabPageIfOpen(graph, nodeTable.Name);
     }
 
     private void OpenNodeDetailsForm(string nodeName)
