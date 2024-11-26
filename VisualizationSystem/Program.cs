@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VisualizationSystem.Services.DAL;
+using VisualizationSystem.Services.UI;
+using VisualizationSystem.Services.Utilities;
 using VisualizationSystem.UI.Forms;
 
 namespace VisualizationSystem;
@@ -39,5 +41,14 @@ internal static class Program
         );
 
         services.AddTransient<MainForm>();
+
+        services.AddScoped<NodeTableRepository>();
+        services.AddScoped<UserSettingsRepository>();
+        services.AddScoped<NodeComparer>();
+        services.AddScoped<GraphBuilder>();
+
+        services.AddSingleton<NodeTableMapper>();
+        services.AddSingleton<ExcelReader>();
+        services.AddSingleton<FileService>();
     }
 }

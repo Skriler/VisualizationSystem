@@ -11,31 +11,42 @@ public partial class MainForm : Form
 {
     private readonly string FormTitle;
 
-    private readonly NodeTableRepository nodeRepository;
-    private readonly UserSettingsRepository settingsRepository;
+    private readonly NodeTableRepository _nodeRepository;
+    private readonly UserSettingsRepository _settingsRepository;
 
-    private readonly TabControlService tabControlService;
-    private readonly NodeComparer nodeComparer;
-    private readonly GraphBuilder graphBuilder;
+    private readonly FileService _fileService;
+    private readonly NodeComparer _nodeComparer;
+    private readonly GraphBuilder _graphBuilder;
+    private readonly TabControlService _tabControlService;
 
     private NodeTable? nodeTable;
     private UserSettings userSettings;
     private Graph graph;
 
-    public MainForm(VisualizationSystemDbContext context)
+    public MainForm(
+        NodeTableRepository nodeRepository,
+        UserSettingsRepository settingsRepository,
+        FileService fileService,
+        NodeComparer nodeComparer,
+        GraphBuilder graphBuilder
+        )
     {
         InitializeComponent();
 
         FormTitle = Text;
 
-        nodeRepository = new NodeTableRepository(context);
-        settingsRepository = new UserSettingsRepository(context);
+        _nodeRepository = nodeRepository;
+        _settingsRepository = settingsRepository;
 
-        tabControlService = new TabControlService(tabControl);
+        _nodeComparer = nodeComparer;
+        _graphBuilder = graphBuilder;
+        _fileService = fileService;
+
+        
+        
+        _tabControlService = new TabControlService(tabControl);
 
         userSettings = new UserSettings();
-        nodeComparer = new NodeComparer(userSettings);
-        graphBuilder = new GraphBuilder(userSettings);
     }
 
     private async void MainForm_Load(object sender, EventArgs e)
@@ -150,7 +161,7 @@ public partial class MainForm : Form
     {
         try
         {
-            if (!FileService.TryReadNodeTableFromExcelFile(out var tables))
+            if (!_fileService.TryReadNodeTableFromExcelFile(out var tables))
                 return false;
 
             await AddLoadedNodeTablesAsync(tables);
