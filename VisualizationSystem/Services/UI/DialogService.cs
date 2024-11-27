@@ -2,35 +2,32 @@
 using VisualizationSystem.UI.Forms;
 
 namespace VisualizationSystem.Services.UI;
-public class FileDialogService
+
+public class DialogService
 {
     private const string FileDialogTitle = "Select an Excel File";
     private const string InitialDirectory = "D:\\";
     private const string ExcelFilterPattern
         = "Excel Workbook(*.xlsx)|*.xlsx|Excel 97- Excel 2003 Workbook(*.xls)|*.xls";
 
-    public OpenFileDialog ExcelOpenFileDialog { get; }
-
-    public FileDialogService()
-    {
-        ExcelOpenFileDialog = new OpenFileDialog();
-
-        InitializeFileDialogParameters();
-    }
-
-    public bool TryOpenFileDialog(out string filePath)
+    public bool TryOpenExcelFileDialog(out string filePath)
     {
         filePath = string.Empty;
 
-        if (ExcelOpenFileDialog.ShowDialog() != DialogResult.OK)
-            return false;
+        using (var excelOpenFileDialog = new OpenFileDialog())
+        {
+            ConfigureFileDialog(excelOpenFileDialog);
 
-        filePath = ExcelOpenFileDialog.FileName;
+            if (excelOpenFileDialog.ShowDialog() != DialogResult.OK)
+                return false;
+
+            filePath = excelOpenFileDialog.FileName;
+        }
 
         return true;
     }
 
-    public bool TrySelectNameColumn(out ListSelectionResult selectedColumnResult, List<string> items, string tableName)
+    public bool TryOpenNameColumnSelectionForm(out ListSelectionResult selectedColumnResult, List<string> items, string tableName)
     {
         selectedColumnResult = new ListSelectionResult();
 
@@ -45,11 +42,11 @@ public class FileDialogService
         return true;
     }
 
-    private void InitializeFileDialogParameters()
+    private void ConfigureFileDialog(OpenFileDialog excelOpenFileDialog)
     {
-        ExcelOpenFileDialog.Title = FileDialogTitle;
-        ExcelOpenFileDialog.InitialDirectory = InitialDirectory;
-        ExcelOpenFileDialog.Filter = ExcelFilterPattern;
-        ExcelOpenFileDialog.RestoreDirectory = true;
+        excelOpenFileDialog.Title = FileDialogTitle;
+        excelOpenFileDialog.InitialDirectory = InitialDirectory;
+        excelOpenFileDialog.Filter = ExcelFilterPattern;
+        excelOpenFileDialog.RestoreDirectory = true;
     }
 }

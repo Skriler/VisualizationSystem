@@ -11,13 +11,14 @@ public partial class MainForm : Form
 {
     private readonly string FormTitle;
 
-    private readonly NodeTableRepository _nodeRepository;
-    private readonly UserSettingsRepository _settingsRepository;
+    private readonly NodeTableRepository nodeRepository;
+    private readonly UserSettingsRepository settingsRepository;
 
-    private readonly FileService _fileService;
-    private readonly NodeComparer _nodeComparer;
-    private readonly GraphBuilder _graphBuilder;
-    private readonly TabControlService _tabControlService;
+    private readonly ExcelDataImporter fileService;
+    private readonly NodeComparer nodeComparer;
+    private readonly GraphBuilder graphBuilder;
+
+    private readonly TabControlService tabControlService;
 
     private NodeTable? nodeTable;
     private UserSettings userSettings;
@@ -26,7 +27,7 @@ public partial class MainForm : Form
     public MainForm(
         NodeTableRepository nodeRepository,
         UserSettingsRepository settingsRepository,
-        FileService fileService,
+        ExcelDataImporter fileService,
         NodeComparer nodeComparer,
         GraphBuilder graphBuilder
         )
@@ -35,18 +36,14 @@ public partial class MainForm : Form
 
         FormTitle = Text;
 
-        _nodeRepository = nodeRepository;
-        _settingsRepository = settingsRepository;
+        this.nodeRepository = nodeRepository;
+        this.settingsRepository = settingsRepository;
+        this.fileService = fileService;
+        this.nodeComparer = nodeComparer;
+        this.graphBuilder = graphBuilder;
 
-        _nodeComparer = nodeComparer;
-        _graphBuilder = graphBuilder;
-        _fileService = fileService;
+        tabControlService = new TabControlService(tabControl);
 
-        
-        
-        _tabControlService = new TabControlService(tabControl);
-
-        userSettings = new UserSettings();
     }
 
     private async void MainForm_Load(object sender, EventArgs e)
@@ -161,7 +158,7 @@ public partial class MainForm : Form
     {
         try
         {
-            if (!_fileService.TryReadNodeTableFromExcelFile(out var tables))
+            if (!fileService.TryReadNodeTableFromExcelFile(out var tables))
                 return false;
 
             await AddLoadedNodeTablesAsync(tables);

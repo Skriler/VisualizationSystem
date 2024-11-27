@@ -16,10 +16,9 @@ public class GraphBuilder
 
     public Dictionary<string, NodeSimilarityResult> NodeDataMap { get; } = new();
 
-    public GraphBuilder(UserSettings settings)
+    public GraphBuilder()
     {
         random = new Random();
-        Settings = settings;
     }
 
     public void UpdateSettings(UserSettings settings) => Settings = settings;
@@ -122,8 +121,8 @@ public class GraphBuilder
         do
         {
             randColor = SystemColor.FromArgb(
-                random.Next(256), 
-                random.Next(256), 
+                random.Next(256),
+                random.Next(256),
                 random.Next(256)
                 );
         } while (nodeColors.Values.Contains(randColor));

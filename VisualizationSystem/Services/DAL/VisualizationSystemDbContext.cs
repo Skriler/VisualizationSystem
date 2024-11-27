@@ -3,7 +3,7 @@ using VisualizationSystem.Models.Entities;
 
 namespace VisualizationSystem.Services.DAL;
 
-public class VisualizationSystemDbContext : DbContext
+public sealed class VisualizationSystemDbContext : DbContext
 {
     public DbSet<NodeTable> NodeTables { get; set; }
 

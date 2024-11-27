@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.UI;
 using VisualizationSystem.Services.Utilities;
+using VisualizationSystem.Services.Utilities.Comparers;
 using VisualizationSystem.UI.Forms;
 
 namespace VisualizationSystem;
@@ -40,15 +41,18 @@ internal static class Program
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))
         );
 
-        services.AddTransient<MainForm>();
-
         services.AddScoped<NodeTableRepository>();
         services.AddScoped<UserSettingsRepository>();
-        services.AddScoped<NodeComparer>();
-        services.AddScoped<GraphBuilder>();
 
-        services.AddSingleton<NodeTableMapper>();
+        services.AddSingleton<DialogService>();
         services.AddSingleton<ExcelReader>();
-        services.AddSingleton<FileService>();
+        services.AddSingleton<NodeTableMapper>();
+        services.AddSingleton<ExcelDataImporter>();
+        services.AddSingleton<NodeComparer>();
+        services.AddSingleton<GraphBuilder>();
+
+        services.AddSingleton<ICompare, DefaultComparer>();
+
+        services.AddTransient<MainForm>();
     }
 }

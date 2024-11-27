@@ -1,15 +1,18 @@
 ﻿using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Storages;
+using VisualizationSystem.Services.Utilities.Comparers;
 
 namespace VisualizationSystem.Services.Utilities;
 
 public class NodeComparer
 {
+    private readonly ICompare comparer;
+
     public UserSettings Settings { get; private set; }
 
-    public NodeComparer(UserSettings settings)
+    public NodeComparer(ICompare comparer)
     {
-        Settings = settings;
+        this.comparer = comparer;
     }
 
     public void UpdateSettings(UserSettings settings) => Settings = settings;
@@ -69,7 +72,7 @@ public class NodeComparer
             if (firstParameter.ParameterType.Id != secondParameter.ParameterType.Id)
                 continue;
 
-            if (!IsParameterMatch(firstParameter.Value, secondParameter.Value))
+            if (!comparer.Compare(firstParameter.Value, secondParameter.Value, Settings.DeviationPercent))
                 continue;
 
             totalMatchedWeight += parameterState.Weight;
@@ -77,22 +80,5 @@ public class NodeComparer
 
         return totalActiveWeight > 0 ? (totalMatchedWeight / totalActiveWeight) * 100 : 0;
 
-    }
-
-    private bool IsParameterMatch(string firstValue, string secondValue)
-    {
-        if (string.IsNullOrWhiteSpace(firstValue) || string.IsNullOrWhiteSpace(secondValue))
-            return false;
-
-        if (double.TryParse(firstValue, out double firstNumber) && 
-            double.TryParse(secondValue, out double secondNumber))
-        {
-            double maxNumber = Math.Max(firstNumber, secondNumber);
-            double tolerance = maxNumber * Settings.DeviationPercent / 100;
-
-            return Math.Abs(firstNumber - secondNumber) <= tolerance;
-        }
-
-        return firstValue == secondValue;
     }
 }
