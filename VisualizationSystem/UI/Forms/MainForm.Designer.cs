@@ -46,7 +46,7 @@
             menuStrip.Items.AddRange(new ToolStripItem[] { dataToolStripMenuItem, visualizationToolStripMenuItem });
             menuStrip.Location = new Point(0, 0);
             menuStrip.Name = "menuStrip";
-            menuStrip.Size = new Size(800, 24);
+            menuStrip.Size = new Size(884, 24);
             menuStrip.TabIndex = 0;
             menuStrip.Text = "menuStrip1";
             // 
@@ -105,7 +105,7 @@
             tabControl.Location = new Point(0, 24);
             tabControl.Name = "tabControl";
             tabControl.SelectedIndex = 0;
-            tabControl.Size = new Size(800, 426);
+            tabControl.Size = new Size(884, 637);
             tabControl.TabIndex = 3;
             tabControl.DrawItem += tabControl_DrawItem;
             tabControl.MouseDown += tabControl_MouseDown;
@@ -114,7 +114,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(884, 661);
             Controls.Add(tabControl);
             Controls.Add(menuStrip);
             Icon = (Icon)resources.GetObject("$this.Icon");

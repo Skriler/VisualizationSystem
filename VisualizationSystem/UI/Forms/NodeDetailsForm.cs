@@ -48,7 +48,7 @@ public partial class NodeDetailsForm : Form
         }
 
         dgvSimilarNodes.Sort(
-            dgvSimilarNodes.Columns[1], 
+            dgvSimilarNodes.Columns[1],
             System.ComponentModel.ListSortDirection.Descending
             );
 

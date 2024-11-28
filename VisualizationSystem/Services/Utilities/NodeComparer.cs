@@ -44,7 +44,17 @@ public class NodeComparer
             }
         }
 
-        return similarityResultsDict.Values.ToList();
+        var similarityResults = new List<NodeSimilarityResult>();
+
+        similarityResultsDict.Values
+            .ToList()
+            .ForEach(similarityResult =>
+            {
+                similarityResult.UpdateSimilarNodesAboveThreshold(Settings.MinSimilarityPercentage);
+                similarityResults.Add(similarityResult);
+            });
+
+        return similarityResults;
     }
 
     private float GetSimilarityPercentage(NodeObject firstNode, NodeObject secondNode)

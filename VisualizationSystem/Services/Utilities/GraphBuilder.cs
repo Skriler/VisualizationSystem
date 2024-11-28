@@ -45,7 +45,13 @@ public class GraphBuilder
             var currentNodeName = similarityResult.Node.Name;
             var nodeColor = GetNodeColor(currentNodeName);
 
-            AddNode(graph, currentNodeName, nodeColor);
+            AddNode(
+                graph, 
+                currentNodeName, 
+                nodeColor, 
+                similarityResult.SimilarNodesAboveThreshold, 
+                similarityResult.SimilarNodes.Count
+                );
 
             NodeDataMap[currentNodeName] = similarityResult;
         }
@@ -72,14 +78,14 @@ public class GraphBuilder
                 if (addedEdges.Contains(edgeKey) || addedEdges.Contains(edgeKeyReversed))
                     continue;
 
-                AddEdge(graph, currentNodeName, similarNodeName);
+                AddEdge(graph, currentNodeName, similarNodeName, similarNode.SimilarityPercentage);
                 addedEdges.Add(edgeKey);
                 addedEdges.Add(edgeKeyReversed);
             }
         }
     }
 
-    private Node AddNode(Graph graph, string nodeName, SystemColor nodeColor)
+    private Node AddNode(Graph graph, string nodeName, SystemColor nodeColor, int edgesCount, int maxEdges)
     {
         var node = graph.FindNode(nodeName);
 
@@ -90,15 +96,23 @@ public class GraphBuilder
         node.LabelText = nodeName;
         node.Attr.FillColor = new MsaglColor(nodeColor.R, nodeColor.G, nodeColor.B);
 
+        node.Attr.LabelMargin = (int)GetNodeSize(edgesCount, maxEdges);
+
         return node;
     }
 
-    private Edge AddEdge(Graph graph, string firstNodeName, string secondNodeName)
+    private Edge AddEdge(Graph graph, string firstNodeName, string secondNodeName, float similarityPercentage)
     {
         var edge = graph.AddEdge(firstNodeName, secondNodeName);
 
         edge.Attr.ArrowheadAtSource = ArrowStyle.None;
         edge.Attr.ArrowheadAtTarget = ArrowStyle.None;
+
+        //edge.Attr.Length = 1.0 / similarityPercentage;
+
+        edge.Attr.Color = CalculateEdgeColor(similarityPercentage, Settings.MinSimilarityPercentage);
+
+        //edge.LabelText = $"{similarityPercentage:F1}%";
 
         return edge;
     }
@@ -128,5 +142,22 @@ public class GraphBuilder
         } while (nodeColors.Values.Contains(randColor));
 
         return randColor;
+    }
+
+    private MsaglColor CalculateEdgeColor(float similarityPercentage, float minSimilarityThreshold)
+    {
+        var normalizedSimilarity = (similarityPercentage - minSimilarityThreshold) / (100 - minSimilarityThreshold);
+
+        // Interpolation between red (when the closest is 0) and green (when the closest is 100)
+        var red = (byte)(255 * (1 - normalizedSimilarity)); // Red decreases from 255 to 0
+        var green = (byte)(255 * normalizedSimilarity);     // Green increases from 0 to 255
+        const byte blue = 0;                                // Blue stays at 0
+
+        return new MsaglColor(red, green, blue);
+    }
+
+    private double GetNodeSize(int connectionCount, int maxConnections)
+    {
+        return 1 + (connectionCount / (double)maxConnections) * 20;
     }
 }

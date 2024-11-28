@@ -27,7 +27,7 @@ public sealed class ClosableGViewerTabPage : ClosableTabPageBase
             Graph = DisplayedGraph,
         };
 
-        gViewer.MouseClick += HandleGViewerNodeClick;
+        gViewer.DoubleClick += HandleGViewerNodeDoubleClick;
         Controls.Add(gViewer);
     }
 
@@ -41,12 +41,12 @@ public sealed class ClosableGViewerTabPage : ClosableTabPageBase
         gViewer.Refresh();
     }
 
-    private void HandleGViewerNodeClick(object? sender, MouseEventArgs e)
+    private void HandleGViewerNodeDoubleClick(object? sender, EventArgs e)
     {
-        if (sender is not GViewer viewer)
+        if (sender is not GViewer viewer || e is not MouseEventArgs mouseEventArgs)
             return;
 
-        var clickedObject = viewer.GetObjectAt(e.Location);
+        var clickedObject = viewer.GetObjectAt(mouseEventArgs.Location);
 
         if (clickedObject is not DNode clickedNode)
             return;
