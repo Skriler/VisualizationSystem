@@ -3,7 +3,6 @@ using Microsoft.Msagl.Layout.MDS;
 using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Storages;
 using MsaglColor = Microsoft.Msagl.Drawing.Color;
-using Rectangle = Microsoft.Msagl.Core.Geometry.Rectangle;
 using SystemColor = System.Drawing.Color;
 
 namespace VisualizationSystem.Services.Utilities;

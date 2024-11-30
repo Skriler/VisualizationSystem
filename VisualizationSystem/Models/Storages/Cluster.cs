@@ -21,4 +21,9 @@ public class Cluster
         
         Nodes.Add(node);
     }
+
+    public void Merge(Cluster targetCluster)
+    {
+        Nodes.AddRange(targetCluster.Nodes);
+    }
 }

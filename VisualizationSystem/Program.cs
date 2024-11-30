@@ -4,7 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.UI;
 using VisualizationSystem.Services.Utilities;
+using VisualizationSystem.Services.Utilities.Clusterers;
 using VisualizationSystem.Services.Utilities.Comparers;
+using VisualizationSystem.Services.Utilities.ExcelHandlers;
+using VisualizationSystem.Services.Utilities.Mappers;
 using VisualizationSystem.UI.Forms;
 
 namespace VisualizationSystem;
@@ -52,6 +55,7 @@ internal static class Program
         services.AddSingleton<GraphBuilder>();
 
         services.AddSingleton<ICompare, DefaultComparer>();
+        services.AddSingleton<IClusterize, AgglomerativeClusterer>();
 
         services.AddTransient<MainForm>();
     }

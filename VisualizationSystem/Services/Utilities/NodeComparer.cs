@@ -1,5 +1,6 @@
 ﻿using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Storages;
+using VisualizationSystem.Services.Utilities.Clusterers;
 using VisualizationSystem.Services.Utilities.Comparers;
 
 namespace VisualizationSystem.Services.Utilities;
@@ -7,12 +8,14 @@ namespace VisualizationSystem.Services.Utilities;
 public class NodeComparer
 {
     private readonly ICompare comparer;
+    private readonly IClusterize clusterer;
 
     public UserSettings Settings { get; private set; }
 
-    public NodeComparer(ICompare comparer)
+    public NodeComparer(ICompare comparer, IClusterize clusterer)
     {
         this.comparer = comparer;
+        this.clusterer = clusterer;
     }
 
     public void UpdateSettings(UserSettings settings) => Settings = settings;
@@ -44,17 +47,21 @@ public class NodeComparer
             }
         }
 
-        var similarityResults = new List<NodeSimilarityResult>();
+        var similarityResults = similarityResultsDict.Values.ToList();
 
-        similarityResultsDict.Values
-            .ToList()
-            .ForEach(similarityResult =>
-            {
-                similarityResult.UpdateSimilarNodesAboveThreshold(Settings.MinSimilarityPercentage);
-                similarityResults.Add(similarityResult);
-            });
+        similarityResults.ForEach(similarityResult =>
+        {
+            similarityResult.UpdateSimilarNodesAboveThreshold(Settings.MinSimilarityPercentage);
+        });
 
         return similarityResults;
+    }
+
+    public List<Cluster> GetClusters(List<NodeSimilarityResult> similarityResults, float minSimilarityThreshold)
+    {
+        var clusters = clusterer.Cluster(similarityResults, minSimilarityThreshold);
+
+        return clusters;
     }
 
     private float GetSimilarityPercentage(NodeObject firstNode, NodeObject secondNode)

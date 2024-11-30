@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using VisualizationSystem.Models.Entities;
 
-namespace VisualizationSystem.Services.Utilities;
+namespace VisualizationSystem.Services.Utilities.Mappers;
 
 public class NodeTableMapper
 {

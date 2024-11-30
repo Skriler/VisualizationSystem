@@ -1,8 +1,9 @@
 ﻿using System.Data;
 using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Services.UI;
+using VisualizationSystem.Services.Utilities.Mappers;
 
-namespace VisualizationSystem.Services.Utilities;
+namespace VisualizationSystem.Services.Utilities.ExcelHandlers;
 
 public class ExcelDataImporter
 {
@@ -46,8 +47,8 @@ public class ExcelDataImporter
             var columnHeaders = nodeTableMapper.GetColumnHeaders(dataTable);
 
             if (!dialogService.TryOpenNameColumnSelectionForm(
-                    out var selectedNameColumn, 
-                    columnHeaders, 
+                    out var selectedNameColumn,
+                    columnHeaders,
                     dataTable.TableName)
                 )
                 return false;

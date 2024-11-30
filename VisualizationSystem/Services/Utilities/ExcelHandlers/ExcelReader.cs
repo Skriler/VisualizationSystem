@@ -2,7 +2,7 @@
 using System.Text;
 using ExcelDataReader;
 
-namespace VisualizationSystem.Services.Utilities;
+namespace VisualizationSystem.Services.Utilities.ExcelHandlers;
 
 public class ExcelReader
 {

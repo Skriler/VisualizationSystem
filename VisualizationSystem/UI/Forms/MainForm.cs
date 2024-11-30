@@ -4,6 +4,7 @@ using VisualizationSystem.Services.Utilities;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.UI;
 using VisualizationSystem.UI.Components.TabPages;
+using VisualizationSystem.Services.Utilities.ExcelHandlers;
 
 namespace VisualizationSystem.UI.Forms;
 
@@ -236,6 +237,7 @@ public partial class MainForm : Form
     private void CreateGraph()
     {
         var similarityResults = nodeComparer.GetSimilarNodes(nodeTable);
+        var clusters = nodeComparer.GetClusters(similarityResults, 0.5f);
         graph = graphBuilder.BuildGraph(nodeTable.Name, similarityResults);
     }
 
