@@ -238,7 +238,7 @@ public partial class MainForm : Form
     {
         var similarityResults = nodeComparer.GetSimilarNodes(nodeTable);
         var clusters = nodeComparer.GetClusters(similarityResults, 0.5f);
-        graph = graphBuilder.BuildGraph(nodeTable.Name, similarityResults);
+        graph = graphBuilder.BuildGraph(nodeTable.Name, similarityResults, clusters);
     }
 
     private async Task LoadTableAsync(string tableName)

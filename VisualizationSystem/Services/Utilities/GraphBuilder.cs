@@ -4,6 +4,8 @@ using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Storages;
 using MsaglColor = Microsoft.Msagl.Drawing.Color;
 using SystemColor = System.Drawing.Color;
+using MsaglCluster = Microsoft.Msagl.Core.Layout.Cluster;
+using SystemCluster = VisualizationSystem.Models.Storages.Cluster;
 
 namespace VisualizationSystem.Services.Utilities;
 
@@ -23,7 +25,7 @@ public class GraphBuilder
 
     public void UpdateSettings(UserSettings settings) => Settings = settings;
 
-    public Graph BuildGraph(string name, List<NodeSimilarityResult> similarityResults)
+    public Graph BuildGraph(string name, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters)
     {
         var graph = new Graph(name)
         {
@@ -32,9 +34,7 @@ public class GraphBuilder
 
         AddNodes(graph, similarityResults);
         AddEdges(graph, similarityResults);
-
-        var clusters = CreateClusters(similarityResults);
-        AddClusters(graph, clusters, similarityResults.Count);
+        AddClusters(graph, clusters);
 
         return graph;
     }
@@ -87,64 +87,30 @@ public class GraphBuilder
             }
         }
     }
-
-    private List<Cluster> CreateClusters(List<NodeSimilarityResult> similarityResults, float thresholdBoost = 10f)
+    private void AddClusters(Graph graph, List<Cluster> clusters)
     {
-        var clusterThreshold = Math.Min(100, Settings.MinSimilarityPercentage + thresholdBoost);
+        var rootSubgraph = new Subgraph("Main");
 
-        var clusters = new List<Cluster>();
-        var visitedNodes = new HashSet<string>();
-
-        foreach (var similarityResult in similarityResults)
-        {
-            if (visitedNodes.Contains(similarityResult.Node.Name))
-                continue;
-
-            var cluster = new Cluster();
-            cluster.AddNode(similarityResult.Node);
-            visitedNodes.Add(similarityResult.Node.Name);
-
-            foreach (var similarNode in similarityResult.SimilarNodes)
-            {
-                if (visitedNodes.Contains(similarNode.Node.Name))
-                    continue;
-
-                if (similarNode.SimilarityPercentage < clusterThreshold)
-                    continue;
-
-                cluster.AddNode(similarNode.Node);
-                visitedNodes.Add(similarNode.Node.Name);
-            }
-
-            clusters.Add(cluster);
-        }
-
-        return clusters;
-    }
-
-    private void AddClusters(Graph graph, List<Cluster> clusters, int totalNodeCount)
-    {
         foreach (var cluster in clusters)
         {
             var subgraph = new Subgraph(cluster.Id.ToString());
-            subgraph.Attr.Shape = Shape.Circle;
-            subgraph.Attr.LabelMargin = cluster.Id;
-            subgraph.Attr.Padding = 2;
-            subgraph.Attr.FillColor = MsaglColor.AliceBlue;
-
-            foreach (var node in cluster.Nodes)
+            subgraph.Attr.FillColor = MsaglColor.GreenYellow;
+            subgraph.LabelText = $"Cluster: {cluster.Id.ToString()}";
+            
+            foreach (var nodeObject in cluster.Nodes)
             {
-                var nodeName = node.Name;
+                var node = graph.FindNode(nodeObject.Name);
 
-                if (graph.FindNode(nodeName) is not Node graphNode)
+                if (node == null)
                     continue;
 
-                subgraph.AddNode(graphNode);
-                // TODO: Add Edges
+                subgraph.AddNode(node);
             }
 
-            graph.SubgraphMap.Add(cluster.Id.ToString(), subgraph);
+            rootSubgraph.AddSubgraph(subgraph);
         }
+
+        graph.RootSubgraph = rootSubgraph;
     }
 
     private Node AddNode(Graph graph, string nodeName, SystemColor nodeColor, int edgesCount, int maxEdges)

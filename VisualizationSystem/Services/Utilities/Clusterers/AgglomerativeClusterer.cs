@@ -15,18 +15,18 @@ public class AgglomerativeClusterer : IClusterize
             .Select(sr => new Cluster() { Nodes = { sr.Node } })
             .ToList();
 
+        var isMerged = new bool[clusters.Count];
         var similarityMatrix = BuildSimilarityMatrix(similarityResults);
 
         while (clusters.Count > 1)
         {
-            var similarCluster = FindMostSimilarClusters(similarityMatrix, clusters);
+            var similarCluster = FindMostSimilarClusters(similarityMatrix, clusters, isMerged);
 
             if (similarCluster.Similarity < minSimilarityThreshold)
                 break;
 
-            clusters[similarCluster.FirstClusterId]
-                .Merge(clusters[similarCluster.SecondClusterId]);
-            clusters.RemoveAt(similarCluster.SecondClusterId);
+            clusters[similarCluster.FirstClusterId].Merge(clusters[similarCluster.SecondClusterId]);
+            isMerged[similarCluster.SecondClusterId] = true;
 
             UpdateSimilarityMatrix(
                 similarityMatrix,
@@ -35,6 +35,8 @@ public class AgglomerativeClusterer : IClusterize
                 similarCluster.SecondClusterId
                 );
         }
+
+        clusters = clusters.Where((cluster, index) => !isMerged[index]).ToList();
 
         return clusters;
     }
@@ -64,17 +66,18 @@ public class AgglomerativeClusterer : IClusterize
         return matrix;
     }
 
-    private ClusterSimilarityResult FindMostSimilarClusters(float[,] similarityMatrix, List<Cluster> clusters)
+    private ClusterSimilarityResult FindMostSimilarClusters(float[,] similarityMatrix, List<Cluster> clusters, bool[] isMerged)
     {
         var clusterSimilarity = new ClusterSimilarityResult();
 
-        for (int i = 0; i < clusters.Count; i++)
+        for (int i = 0; i < clusters.Count; ++i)
         {
-            var sttr = clusters[i].Id;
+            if (isMerged[i])
+                continue;
 
-            for (int j = i + 1; j < clusters.Count; j++)
+            for (int j = i + 1; j < clusters.Count; ++j)
             {
-                if (similarityMatrix[i, j] == -1)
+                if (isMerged[j])
                     continue;
 
                 var similarity = ComputeClusterSimilarity(similarityMatrix, clusters[i], clusters[j]);
@@ -98,7 +101,7 @@ public class AgglomerativeClusterer : IClusterize
         var totalSimilarity = (
             from firstId in firstIds
             from secondId in secondIds
-            select similarityMatrix[firstId, secondId]
+            select similarityMatrix[firstId - 1, secondId - 1]
             ).Sum();
 
         return totalSimilarity / count;
