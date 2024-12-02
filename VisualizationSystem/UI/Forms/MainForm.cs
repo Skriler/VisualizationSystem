@@ -5,6 +5,7 @@ using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.UI;
 using VisualizationSystem.UI.Components.TabPages;
 using VisualizationSystem.Services.Utilities.ExcelHandlers;
+using VisualizationSystem.Services.Utilities.GraphBuilders;
 
 namespace VisualizationSystem.UI.Forms;
 
@@ -17,7 +18,7 @@ public partial class MainForm : Form
 
     private readonly ExcelDataImporter fileService;
     private readonly NodeComparer nodeComparer;
-    private readonly GraphBuilder graphBuilder;
+    private readonly IGraphBuilder<Graph> graphBuilder;
 
     private readonly TabControlService tabControlService;
 
@@ -30,7 +31,7 @@ public partial class MainForm : Form
         UserSettingsRepository settingsRepository,
         ExcelDataImporter fileService,
         NodeComparer nodeComparer,
-        GraphBuilder graphBuilder
+        GraphBuilder<Graph> graphBuilder
         )
     {
         InitializeComponent();
@@ -238,7 +239,7 @@ public partial class MainForm : Form
     {
         var similarityResults = nodeComparer.GetSimilarNodes(nodeTable);
         var clusters = nodeComparer.GetClusters(similarityResults, 0.5f);
-        graph = graphBuilder.BuildGraph(nodeTable.Name, similarityResults, clusters);
+        graph = graphBuilder.Build(nodeTable.Name, similarityResults, clusters);
     }
 
     private async Task LoadTableAsync(string tableName)

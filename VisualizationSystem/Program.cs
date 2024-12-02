@@ -1,12 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Msagl.Drawing;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.UI;
 using VisualizationSystem.Services.Utilities;
 using VisualizationSystem.Services.Utilities.Clusterers;
 using VisualizationSystem.Services.Utilities.Comparers;
 using VisualizationSystem.Services.Utilities.ExcelHandlers;
+using VisualizationSystem.Services.Utilities.GraphBuilders;
 using VisualizationSystem.Services.Utilities.Mappers;
 using VisualizationSystem.UI.Forms;
 
@@ -52,10 +54,10 @@ internal static class Program
         services.AddSingleton<NodeTableMapper>();
         services.AddSingleton<ExcelDataImporter>();
         services.AddSingleton<NodeComparer>();
-        services.AddSingleton<GraphBuilder>();
 
         services.AddSingleton<ICompare, DefaultComparer>();
         services.AddSingleton<IClusterize, AgglomerativeClusterer>();
+        services.AddSingleton<IGraphBuilder<Graph>, MsaglGraphBuilder>();
 
         services.AddTransient<MainForm>();
     }
