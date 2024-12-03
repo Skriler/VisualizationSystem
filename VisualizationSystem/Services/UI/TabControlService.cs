@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+﻿using DotNetGraph.Core;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Msagl.Drawing;
 using VisualizationSystem.Models.Entities;
 using VisualizationSystem.UI.Components.TabPages;

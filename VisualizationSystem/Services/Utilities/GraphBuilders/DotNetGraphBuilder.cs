@@ -54,7 +54,7 @@ public sealed class DotNetGraphBuilder : GraphBuilder<DotGraph>
             .WithColor(new DotColor(nodeColor.A, nodeColor.G, nodeColor.B))
             .WithWidth(nodeSize);
 
-        return;
+        graph.Add(node);
     }
 
     protected override void AddEdge(DotGraph graph, string firstNodeName, string secondNodeName, float similarityPercentage)
@@ -66,5 +66,7 @@ public sealed class DotNetGraphBuilder : GraphBuilder<DotGraph>
             .From(firstNodeName)
             .To(secondNodeName)
             .WithColor(new DotColor(edgeColor.R, edgeColor.G, edgeColor.B));
+
+        graph.Add(edge);
     }
 }

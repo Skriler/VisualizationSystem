@@ -38,6 +38,7 @@
             buildGraphToolStripMenuItem = new ToolStripMenuItem();
             settingsToolStripMenuItem = new ToolStripMenuItem();
             tabControl = new TabControl();
+            saveGraphImageToolStripMenuItem = new ToolStripMenuItem();
             menuStrip.SuspendLayout();
             SuspendLayout();
             // 
@@ -52,7 +53,7 @@
             // 
             // dataToolStripMenuItem
             // 
-            dataToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { uploadExcelFileToolStripMenuItem, showToolStripMenuItem, loadTableToolStripMenuItem });
+            dataToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { uploadExcelFileToolStripMenuItem, showToolStripMenuItem, loadTableToolStripMenuItem, saveGraphImageToolStripMenuItem });
             dataToolStripMenuItem.Name = "dataToolStripMenuItem";
             dataToolStripMenuItem.Size = new Size(43, 20);
             dataToolStripMenuItem.Text = "Data";
@@ -60,21 +61,21 @@
             // uploadExcelFileToolStripMenuItem
             // 
             uploadExcelFileToolStripMenuItem.Name = "uploadExcelFileToolStripMenuItem";
-            uploadExcelFileToolStripMenuItem.Size = new Size(163, 22);
+            uploadExcelFileToolStripMenuItem.Size = new Size(180, 22);
             uploadExcelFileToolStripMenuItem.Text = "Upload Excel File";
             uploadExcelFileToolStripMenuItem.Click += uploadExcelFileToolStripMenuItem_Click;
             // 
             // showToolStripMenuItem
             // 
             showToolStripMenuItem.Name = "showToolStripMenuItem";
-            showToolStripMenuItem.Size = new Size(163, 22);
+            showToolStripMenuItem.Size = new Size(180, 22);
             showToolStripMenuItem.Text = "Show";
             showToolStripMenuItem.Click += showToolStripMenuItem_Click;
             // 
             // loadTableToolStripMenuItem
             // 
             loadTableToolStripMenuItem.Name = "loadTableToolStripMenuItem";
-            loadTableToolStripMenuItem.Size = new Size(163, 22);
+            loadTableToolStripMenuItem.Size = new Size(180, 22);
             loadTableToolStripMenuItem.Text = "Load Table";
             // 
             // visualizationToolStripMenuItem
@@ -110,6 +111,13 @@
             tabControl.DrawItem += tabControl_DrawItem;
             tabControl.MouseDown += tabControl_MouseDown;
             // 
+            // saveGraphImageToolStripMenuItem
+            // 
+            saveGraphImageToolStripMenuItem.Name = "saveGraphImageToolStripMenuItem";
+            saveGraphImageToolStripMenuItem.Size = new Size(180, 22);
+            saveGraphImageToolStripMenuItem.Text = "Save graph image";
+            saveGraphImageToolStripMenuItem.Click += saveGraphImageToolStripMenuItem_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -139,5 +147,6 @@
         private ToolStripMenuItem buildGraphToolStripMenuItem;
         private ToolStripMenuItem loadTableToolStripMenuItem;
         private TabControl tabControl;
+        private ToolStripMenuItem saveGraphImageToolStripMenuItem;
     }
 }

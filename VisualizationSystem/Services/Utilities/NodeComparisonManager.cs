@@ -5,14 +5,16 @@ using VisualizationSystem.Services.Utilities.Comparers;
 
 namespace VisualizationSystem.Services.Utilities;
 
-public class NodeComparer
+public class NodeComparisonManager
 {
     private readonly ICompare comparer;
     private readonly IClusterize clusterer;
 
+    public List<NodeSimilarityResult> SimilarityResults { get; private set; }
+    public List<Cluster> Clusters { get; private set; }
     public UserSettings Settings { get; private set; }
 
-    public NodeComparer(ICompare comparer, IClusterize clusterer)
+    public NodeComparisonManager(ICompare comparer, IClusterize clusterer)
     {
         this.comparer = comparer;
         this.clusterer = clusterer;
@@ -20,7 +22,7 @@ public class NodeComparer
 
     public void UpdateSettings(UserSettings settings) => Settings = settings;
 
-    public List<NodeSimilarityResult> GetSimilarNodes(NodeTable table)
+    public void CalculateSimilarNodes(NodeTable table)
     {
         var similarityResultsDict = table.NodeObjects
             .ToDictionary(node => node, node => new NodeSimilarityResult(node));
@@ -47,21 +49,20 @@ public class NodeComparer
             }
         }
 
-        var similarityResults = similarityResultsDict.Values.ToList();
+        SimilarityResults = similarityResultsDict.Values.ToList();
 
-        similarityResults.ForEach(similarityResult =>
+        SimilarityResults.ForEach(similarityResult =>
         {
             similarityResult.UpdateSimilarNodesAboveThreshold(Settings.MinSimilarityPercentage);
         });
-
-        return similarityResults;
     }
 
-    public List<Cluster> GetClusters(List<NodeSimilarityResult> similarityResults, float minSimilarityThreshold)
+    public void CalculateClusters(float minSimilarityThreshold)
     {
-        var clusters = clusterer.Cluster(similarityResults, minSimilarityThreshold);
+        if (SimilarityResults.Count <= 0)
+            throw new InvalidOperationException("Node analysis must be performed first before calculating clusters.");
 
-        return clusters;
+        Clusters = clusterer.Cluster(SimilarityResults, minSimilarityThreshold);
     }
 
     private float GetSimilarityPercentage(NodeObject firstNode, NodeObject secondNode)

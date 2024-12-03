@@ -1,3 +1,4 @@
+using DotNetGraph.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,11 +54,13 @@ internal static class Program
         services.AddSingleton<ExcelReader>();
         services.AddSingleton<NodeTableMapper>();
         services.AddSingleton<ExcelDataImporter>();
-        services.AddSingleton<NodeComparer>();
+        services.AddSingleton<NodeComparisonManager>();
+        services.AddSingleton<GraphSaveManager>();
 
         services.AddSingleton<ICompare, DefaultComparer>();
         services.AddSingleton<IClusterize, AgglomerativeClusterer>();
         services.AddSingleton<IGraphBuilder<Graph>, MsaglGraphBuilder>();
+        services.AddSingleton<IGraphBuilder<DotGraph>, DotNetGraphBuilder>();
 
         services.AddTransient<MainForm>();
     }

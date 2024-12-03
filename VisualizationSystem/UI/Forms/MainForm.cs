@@ -17,7 +17,8 @@ public partial class MainForm : Form
     private readonly UserSettingsRepository settingsRepository;
 
     private readonly ExcelDataImporter fileService;
-    private readonly NodeComparer nodeComparer;
+    private readonly NodeComparisonManager nodeComparisonManager;
+    private readonly GraphSaveManager graphSaveManager;
     private readonly IGraphBuilder<Graph> graphBuilder;
 
     private readonly TabControlService tabControlService;
@@ -30,8 +31,9 @@ public partial class MainForm : Form
         NodeTableRepository nodeRepository,
         UserSettingsRepository settingsRepository,
         ExcelDataImporter fileService,
-        NodeComparer nodeComparer,
-        GraphBuilder<Graph> graphBuilder
+        NodeComparisonManager nodeComparer,
+        GraphSaveManager graphSaveService,
+        IGraphBuilder<Graph> graphBuilder
         )
     {
         InitializeComponent();
@@ -41,7 +43,8 @@ public partial class MainForm : Form
         this.nodeRepository = nodeRepository;
         this.settingsRepository = settingsRepository;
         this.fileService = fileService;
-        this.nodeComparer = nodeComparer;
+        this.nodeComparisonManager = nodeComparer;
+        this.graphSaveManager = graphSaveService;
         this.graphBuilder = graphBuilder;
 
         tabControlService = new TabControlService(tabControl);
@@ -74,6 +77,28 @@ public partial class MainForm : Form
         try
         {
             AddDataGridViewTab();
+        }
+        catch (Exception ex)
+        {
+            ShowError("Error while showing data", ex);
+        }
+    }
+
+    private async void saveGraphImageToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        if (nodeTable == null)
+        {
+            ShowWarning("No data to save");
+            return;
+        }
+
+        try
+        {
+            await graphSaveManager.SaveGraphAsync(
+                nodeTable.Name, 
+                nodeComparisonManager.SimilarityResults, 
+                nodeComparisonManager.Clusters
+                );
         }
         catch (Exception ex)
         {
@@ -237,9 +262,13 @@ public partial class MainForm : Form
 
     private void CreateGraph()
     {
-        var similarityResults = nodeComparer.GetSimilarNodes(nodeTable);
-        var clusters = nodeComparer.GetClusters(similarityResults, 0.5f);
-        graph = graphBuilder.Build(nodeTable.Name, similarityResults, clusters);
+        nodeComparisonManager.CalculateSimilarNodes(nodeTable);
+        nodeComparisonManager.CalculateClusters(0.5f);
+        graph = graphBuilder.Build(
+            nodeTable.Name, 
+            nodeComparisonManager.SimilarityResults, 
+            nodeComparisonManager.Clusters
+            );
     }
 
     private async Task LoadTableAsync(string tableName)
@@ -290,7 +319,7 @@ public partial class MainForm : Form
 
     private void ApplySettingsToComponents()
     {
-        nodeComparer.UpdateSettings(userSettings);
+        nodeComparisonManager.UpdateSettings(userSettings);
         graphBuilder.UpdateSettings(userSettings);
 
         CreateGraph();
