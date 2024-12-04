@@ -45,7 +45,7 @@ public class MsaglGraphBuilder : GraphBuilder<Graph>
             rootSubgraph.AddSubgraph(subgraph);
         }
 
-        graph.RootSubgraph = rootSubgraph;
+        graph.RootSubgraph.AddSubgraph(rootSubgraph);
     }
 
     protected override void AddNode(Graph graph, string nodeName, SystemColor nodeColor, int edgesCount, int maxEdges)
@@ -55,11 +55,17 @@ public class MsaglGraphBuilder : GraphBuilder<Graph>
         if (node != null)
             return;
 
-        node = graph.AddNode(nodeName);
+        node = new Node(nodeName)
+        {
+            LabelText = nodeName,
+            Attr =
+            {
+                FillColor = new MsaglColor(nodeColor.R, nodeColor.G, nodeColor.B),
+                //LabelMargin = (int)GetNodeSize(edgesCount, maxEdges)
+            }
+        };
 
-        node.LabelText = nodeName;
-        node.Attr.FillColor = new MsaglColor(nodeColor.R, nodeColor.G, nodeColor.B);
-        node.Attr.LabelMargin = (int)GetNodeSize(edgesCount, maxEdges);
+        graph.AddNode(node);
     }
 
     protected override void AddEdge(Graph graph, string firstNodeName, string secondNodeName, float similarityPercentage)

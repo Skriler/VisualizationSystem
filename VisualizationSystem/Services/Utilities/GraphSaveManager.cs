@@ -1,5 +1,6 @@
 ﻿using DotNetGraph.Compilation;
 using DotNetGraph.Core;
+using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Storages;
 using VisualizationSystem.Services.Utilities.GraphBuilders;
 
@@ -13,6 +14,8 @@ public class GraphSaveManager
     {
         this.graphBuilder = graphBuilder;
     }
+
+    public void UpdateSettings(UserSettings settings) => graphBuilder.UpdateSettings(settings);
 
     public async Task SaveGraphAsync(string name, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters)
     {

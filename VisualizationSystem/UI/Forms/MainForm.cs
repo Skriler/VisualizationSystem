@@ -321,6 +321,7 @@ public partial class MainForm : Form
     {
         nodeComparisonManager.UpdateSettings(userSettings);
         graphBuilder.UpdateSettings(userSettings);
+        graphSaveManager.UpdateSettings(userSettings);
 
         CreateGraph();
         tabControlService.UpdateDataGridViewTabPageIfOpen(nodeTable);
