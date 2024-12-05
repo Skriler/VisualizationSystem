@@ -40,10 +40,13 @@
             nudMinSimilarityPercentage = new NumericUpDown();
             nudDeviationPercent = new NumericUpDown();
             btnSetDefaults = new Button();
+            panel1 = new Panel();
+            chkbxUseClustering = new CheckBox();
             panelParameterStates.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nudWeight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudMinSimilarityPercentage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudDeviationPercent).BeginInit();
+            panel1.SuspendLayout();
             SuspendLayout();
             // 
             // lblMinSimilarityPercentage
@@ -66,7 +69,7 @@
             // 
             // btnSubmit
             // 
-            btnSubmit.Location = new Point(12, 195);
+            btnSubmit.Location = new Point(10, 298);
             btnSubmit.Name = "btnSubmit";
             btnSubmit.Size = new Size(120, 30);
             btnSubmit.TabIndex = 4;
@@ -147,7 +150,7 @@
             // 
             // btnSetDefaults
             // 
-            btnSetDefaults.Location = new Point(140, 195);
+            btnSetDefaults.Location = new Point(140, 298);
             btnSetDefaults.Name = "btnSetDefaults";
             btnSetDefaults.Size = new Size(120, 30);
             btnSetDefaults.TabIndex = 12;
@@ -155,11 +158,32 @@
             btnSetDefaults.UseVisualStyleBackColor = true;
             btnSetDefaults.Click += btnSetDefaults_Click;
             // 
+            // panel1
+            // 
+            panel1.AccessibleDescription = "";
+            panel1.AccessibleName = "";
+            panel1.Controls.Add(chkbxUseClustering);
+            panel1.Location = new Point(10, 195);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(250, 90);
+            panel1.TabIndex = 10;
+            // 
+            // chkbxUseClustering
+            // 
+            chkbxUseClustering.AutoSize = true;
+            chkbxUseClustering.Location = new Point(135, 55);
+            chkbxUseClustering.Name = "chkbxUseClustering";
+            chkbxUseClustering.Size = new Size(102, 19);
+            chkbxUseClustering.TabIndex = 1;
+            chkbxUseClustering.Text = "Use Clustering";
+            chkbxUseClustering.UseVisualStyleBackColor = true;
+            // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(268, 236);
+            ClientSize = new Size(268, 341);
+            Controls.Add(panel1);
             Controls.Add(btnSetDefaults);
             Controls.Add(nudDeviationPercent);
             Controls.Add(nudMinSimilarityPercentage);
@@ -176,6 +200,8 @@
             ((System.ComponentModel.ISupportInitialize)nudWeight).EndInit();
             ((System.ComponentModel.ISupportInitialize)nudMinSimilarityPercentage).EndInit();
             ((System.ComponentModel.ISupportInitialize)nudDeviationPercent).EndInit();
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -193,5 +219,7 @@
         private NumericUpDown nudMinSimilarityPercentage;
         private NumericUpDown nudDeviationPercent;
         private Button btnSetDefaults;
+        private Panel panel1;
+        private CheckBox chkbxUseClustering;
     }
 }

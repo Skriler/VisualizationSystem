@@ -9,7 +9,7 @@ public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>
     protected readonly Dictionary<string, Color> nodeColors = new();
 
     public Dictionary<string, NodeSimilarityResult> NodeDataMap { get; } = new();
-    public UserSettings Settings { get; set; }
+    public UserSettings Settings { get; set; } = new();
 
     public abstract TGraph Build(string name, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters);
 
@@ -22,7 +22,14 @@ public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>
             var currentNodeName = similarityResult.Node.Name;
             var nodeColor = GetNodeColor(currentNodeName);
 
-            AddNode(graph, currentNodeName, nodeColor, similarityResult.SimilarNodesAboveThreshold, similarityResult.SimilarNodes.Count);
+            AddNode(
+                graph, 
+                currentNodeName, 
+                nodeColor, 
+                similarityResult.SimilarNodesAboveThreshold, 
+                similarityResult.SimilarNodes.Count
+                );
+            
             NodeDataMap[currentNodeName] = similarityResult;
         }
     }

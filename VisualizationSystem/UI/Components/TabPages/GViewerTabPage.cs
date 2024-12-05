@@ -6,13 +6,15 @@ namespace VisualizationSystem.UI.Components.TabPages;
 public sealed class ClosableGViewerTabPage : ClosableTabPageBase
 {
     private readonly Action<string> onNodeClick;
-    private GViewer gViewer;
+    private readonly GViewer gViewer;
 
     public Graph DisplayedGraph { get; set; }
 
     public ClosableGViewerTabPage(string text, Graph graph, Action<string> onNodeClick) 
         : base(text)
     {
+        gViewer = new GViewer();
+
         DisplayedGraph = graph;
         this.onNodeClick = onNodeClick;
 
@@ -21,13 +23,11 @@ public sealed class ClosableGViewerTabPage : ClosableTabPageBase
 
     protected override void InitializeContent()
     {
-        gViewer = new GViewer
-        {
-            Dock = DockStyle.Fill,
-            Graph = DisplayedGraph,
-        };
+        gViewer.Dock = DockStyle.Fill;
+        gViewer.Graph = DisplayedGraph;
 
         gViewer.DoubleClick += HandleGViewerNodeDoubleClick;
+
         Controls.Add(gViewer);
     }
 

@@ -87,7 +87,7 @@ public class NodeComparisonManager
             if (firstParameter == null || secondParameter == null)
                 continue;
 
-            if (firstParameter.ParameterType.Id != secondParameter.ParameterType.Id)
+            if (firstParameter.ParameterType.Name != secondParameter.ParameterType.Name)
                 continue;
 
             if (!comparer.Compare(firstParameter.Value, secondParameter.Value, Settings.DeviationPercent))

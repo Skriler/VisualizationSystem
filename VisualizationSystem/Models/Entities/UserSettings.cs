@@ -17,6 +17,9 @@ public class UserSettings
     public float DeviationPercent { get; set; }
 
     [Required]
+    public bool UseClustering { get; set; }
+
+    [Required]
     public int NodeTableId { get; set; }
     public NodeTable NodeTable { get; set; } = default!;
 

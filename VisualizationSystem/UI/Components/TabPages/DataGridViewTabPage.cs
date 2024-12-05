@@ -3,24 +3,19 @@
 namespace VisualizationSystem.UI.Components.TabPages;
 public sealed class ClosableDataGridViewTabPage : ClosableTabPageBase
 {
-    private NodeTableDataGridView nodeTableDataGridView;
-
-    public NodeTable DisplayedNodeTable { get; set; }
+    private readonly NodeTableDataGridView nodeTableDataGridView;
 
     public ClosableDataGridViewTabPage(string text, NodeTable table)
         : base(text)
     {
-        DisplayedNodeTable = table;
-
+        nodeTableDataGridView = new NodeTableDataGridView(table);
+        
         InitializeContent();
     }
 
     protected override void InitializeContent()
     {
-        nodeTableDataGridView = new NodeTableDataGridView(DisplayedNodeTable)
-        {
-            Dock = DockStyle.Fill,
-        };
+        nodeTableDataGridView.Dock = DockStyle.Fill;
 
         Controls.Add(nodeTableDataGridView);
     }
@@ -30,7 +25,6 @@ public sealed class ClosableDataGridViewTabPage : ClosableTabPageBase
         if (newData is not NodeTable newNodeTable)
             throw new ArgumentException("Invalid input data");
 
-        DisplayedNodeTable = newNodeTable;
-        nodeTableDataGridView.UpdateTable(DisplayedNodeTable);
+        nodeTableDataGridView.UpdateTable(newNodeTable);
     }
 }

@@ -1,6 +1,8 @@
 ﻿using Microsoft.Msagl.Drawing;
+using Microsoft.Msagl.Layout.Layered;
 using Microsoft.Msagl.Layout.MDS;
 using VisualizationSystem.Models.Storages;
+using Cluster = VisualizationSystem.Models.Storages.Cluster;
 using MsaglColor = Microsoft.Msagl.Drawing.Color;
 using SystemColor = System.Drawing.Color;
 
@@ -10,58 +12,56 @@ public class MsaglGraphBuilder : GraphBuilder<Graph>
 {
     public override Graph Build(string name, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters)
     {
-        var graph = new Graph(name)
-        {
-            LayoutAlgorithmSettings = new MdsLayoutSettings(),
-        };
+        var graph = new Graph(name);
 
         AddNodes(graph, similarityResults);
         AddEdges(graph, similarityResults);
-        AddClusters(graph, clusters);
+
+        if (Settings.UseClustering)
+        {
+            AddClusters(graph, clusters);
+            graph.LayoutAlgorithmSettings = new SugiyamaLayoutSettings();
+        }
+        else
+        {
+            graph.LayoutAlgorithmSettings = new MdsLayoutSettings();
+        }
 
         return graph;
     }
 
     protected override void AddClusters(Graph graph, List<Cluster> clusters)
     {
-        var rootSubgraph = new Subgraph("Main");
-
         foreach (var cluster in clusters)
         {
-            var subgraph = new Subgraph(cluster.Id.ToString());
-            subgraph.Attr.FillColor = MsaglColor.GreenYellow;
-            subgraph.LabelText = $"Cluster: {cluster.Id.ToString()}";
-
-            foreach (var nodeObject in cluster.Nodes)
+            var subgraph = new Subgraph(cluster.Id.ToString())
             {
-                var node = graph.FindNode(nodeObject.Name);
+                LabelText = $"Cluster: {cluster.Id}",
+            };
 
-                if (node == null)
+            foreach (var node in cluster.Nodes)
+            {
+                var existingNode = graph.FindNode(node.Name);
+
+                if (existingNode == null)
                     continue;
 
-                subgraph.AddNode(node);
+                subgraph.AddNode(existingNode);
             }
 
-            rootSubgraph.AddSubgraph(subgraph);
+            graph.RootSubgraph.AddSubgraph(subgraph);
         }
-
-        graph.RootSubgraph.AddSubgraph(rootSubgraph);
     }
 
     protected override void AddNode(Graph graph, string nodeName, SystemColor nodeColor, int edgesCount, int maxEdges)
     {
-        var node = graph.FindNode(nodeName);
-
-        if (node != null)
-            return;
-
-        node = new Node(nodeName)
+        var node = new Node(nodeName)
         {
             LabelText = nodeName,
             Attr =
             {
                 FillColor = new MsaglColor(nodeColor.R, nodeColor.G, nodeColor.B),
-                //LabelMargin = (int)GetNodeSize(edgesCount, maxEdges)
+                //LabelMargin = (int)GetNodeSize(edgesCount, maxEdges) TODO
             }
         };
 
@@ -75,12 +75,11 @@ public class MsaglGraphBuilder : GraphBuilder<Graph>
         edge.Attr.ArrowheadAtSource = ArrowStyle.None;
         edge.Attr.ArrowheadAtTarget = ArrowStyle.None;
 
+        // TODO
+        //edge.LabelText = $"{similarityPercentage:F1}%";
         //edge.Attr.Length = 1.0 / similarityPercentage;
 
         var edgeColor = CalculateEdgeColor(similarityPercentage, Settings.MinSimilarityPercentage);
-
         edge.Attr.Color = new MsaglColor(edgeColor.A, edgeColor.R, edgeColor.G, edgeColor.B);
-
-        //edge.LabelText = $"{similarityPercentage:F1}%";
     }
 }

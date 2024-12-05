@@ -29,6 +29,7 @@ public partial class SettingsForm : Form
     {
         settings.MinSimilarityPercentage = (float)nudMinSimilarityPercentage.Value;
         settings.DeviationPercent = (float)nudDeviationPercent.Value;
+        settings.UseClustering = chkbxUseClustering.Checked;
         SaveParameterState(previousIndex);
 
         DialogResult = DialogResult.OK;
@@ -46,6 +47,7 @@ public partial class SettingsForm : Form
     {
         nudMinSimilarityPercentage.Value = (decimal)settings.MinSimilarityPercentage;
         nudDeviationPercent.Value = (decimal)settings.DeviationPercent;
+        chkbxUseClustering.Checked = settings.UseClustering;
     }
 
     private void InitializeParameterStatesPanel()

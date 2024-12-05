@@ -14,7 +14,7 @@ public sealed class DotNetGraphBuilder : GraphBuilder<DotGraph>
 
         AddNodes(graph, similarityResults);
         AddEdges(graph, similarityResults);
-        //AddClusters(graph, clusters);
+        AddClusters(graph, clusters);
 
         return graph;
     }

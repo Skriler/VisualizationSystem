@@ -24,15 +24,15 @@ public partial class MainForm : Form
     private readonly TabControlService tabControlService;
 
     private NodeTable? nodeTable;
-    private UserSettings userSettings;
-    private Graph graph;
+    private UserSettings? userSettings;
+    private Graph? graph;
 
     public MainForm(
         NodeTableRepository nodeRepository,
         UserSettingsRepository settingsRepository,
         ExcelDataImporter fileService,
-        NodeComparisonManager nodeComparer,
-        GraphSaveManager graphSaveService,
+        NodeComparisonManager nodeComparisonManager,
+        GraphSaveManager graphSaveManager,
         IGraphBuilder<Graph> graphBuilder
         )
     {
@@ -43,8 +43,8 @@ public partial class MainForm : Form
         this.nodeRepository = nodeRepository;
         this.settingsRepository = settingsRepository;
         this.fileService = fileService;
-        this.nodeComparisonManager = nodeComparer;
-        this.graphSaveManager = graphSaveService;
+        this.nodeComparisonManager = nodeComparisonManager;
+        this.graphSaveManager = graphSaveManager;
         this.graphBuilder = graphBuilder;
 
         tabControlService = new TabControlService(tabControl);
@@ -126,7 +126,7 @@ public partial class MainForm : Form
 
     private async void settingsToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (nodeTable == null)
+        if (userSettings == null)
         {
             ShowWarning("No data to configure");
             return;
@@ -323,7 +323,9 @@ public partial class MainForm : Form
         graphBuilder.UpdateSettings(userSettings);
         graphSaveManager.UpdateSettings(userSettings);
 
-        CreateGraph();
+        if (graph != null)
+            CreateGraph();
+        
         tabControlService.UpdateDataGridViewTabPageIfOpen(nodeTable);
         tabControlService.UpdateGViewerTabPageIfOpen(graph, nodeTable.Name);
     }
