@@ -263,7 +263,7 @@ public partial class MainForm : Form
     private void CreateGraph()
     {
         nodeComparisonManager.CalculateSimilarNodes(nodeTable);
-        nodeComparisonManager.CalculateClusters(0.5f);
+        nodeComparisonManager.CalculateClusters(0.75f);
         graph = graphBuilder.Build(
             nodeTable.Name, 
             nodeComparisonManager.SimilarityResults, 
