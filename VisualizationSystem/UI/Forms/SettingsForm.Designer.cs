@@ -42,6 +42,7 @@
             btnSetDefaults = new Button();
             panel1 = new Panel();
             chkbxUseClustering = new CheckBox();
+            cmbClusterAlgorithm = new ComboBox();
             panelParameterStates.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nudWeight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudMinSimilarityPercentage).BeginInit();
@@ -162,6 +163,7 @@
             // 
             panel1.AccessibleDescription = "";
             panel1.AccessibleName = "";
+            panel1.Controls.Add(cmbClusterAlgorithm);
             panel1.Controls.Add(chkbxUseClustering);
             panel1.Location = new Point(10, 195);
             panel1.Name = "panel1";
@@ -177,6 +179,15 @@
             chkbxUseClustering.TabIndex = 1;
             chkbxUseClustering.Text = "Use Clustering";
             chkbxUseClustering.UseVisualStyleBackColor = true;
+            // 
+            // cmbClusterAlgorithm
+            // 
+            cmbClusterAlgorithm.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbClusterAlgorithm.FormattingEnabled = true;
+            cmbClusterAlgorithm.Location = new Point(12, 12);
+            cmbClusterAlgorithm.Name = "cmbClusterAlgorithm";
+            cmbClusterAlgorithm.Size = new Size(232, 23);
+            cmbClusterAlgorithm.TabIndex = 4;
             // 
             // SettingsForm
             // 
@@ -221,5 +232,6 @@
         private Button btnSetDefaults;
         private Panel panel1;
         private CheckBox chkbxUseClustering;
+        private ComboBox cmbClusterAlgorithm;
     }
 }

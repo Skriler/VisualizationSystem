@@ -7,20 +7,26 @@ namespace VisualizationSystem.Services.Utilities;
 
 public class NodeComparisonManager
 {
+    private readonly ClustererFactory clustererFactory;
     private readonly ICompare comparer;
-    private readonly IClusterize clusterer;
+
+    private IClusterize clusterer;
 
     public List<NodeSimilarityResult> SimilarityResults { get; private set; }
     public List<Cluster> Clusters { get; private set; }
     public UserSettings Settings { get; private set; }
 
-    public NodeComparisonManager(ICompare comparer, IClusterize clusterer)
+    public NodeComparisonManager(ClustererFactory clustererFactory, ICompare comparer)
     {
+        this.clustererFactory = clustererFactory;
         this.comparer = comparer;
-        this.clusterer = clusterer;
     }
 
-    public void UpdateSettings(UserSettings settings) => Settings = settings;
+    public void UpdateSettings(UserSettings settings)
+    {
+        Settings = settings;
+        clusterer = clustererFactory.CreateClusterer(Settings.ClusterAlgorithm);
+    }
 
     public void CalculateSimilarNodes(NodeTable table)
     {

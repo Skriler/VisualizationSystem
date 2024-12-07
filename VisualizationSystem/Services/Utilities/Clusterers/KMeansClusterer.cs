@@ -8,7 +8,7 @@ public class KMeansClusterer : IClusterize
     private readonly int maxIterations;
     private readonly Random random;
 
-    public KMeansClusterer(int k, int maxIterations = 100)
+    public KMeansClusterer(int k = 20, int maxIterations = 100)
     {
         this.k = k;
         this.maxIterations = maxIterations;

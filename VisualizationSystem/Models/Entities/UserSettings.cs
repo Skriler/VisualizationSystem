@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using VisualizationSystem.Services.Utilities.Clusterers;
 
 namespace VisualizationSystem.Models.Entities;
 
@@ -18,6 +19,9 @@ public class UserSettings
 
     [Required]
     public bool UseClustering { get; set; }
+
+    [Required] 
+    public ClusterAlgorithm ClusterAlgorithm { get; set; } = ClusterAlgorithm.Agglomerative;
 
     [Required]
     public int NodeTableId { get; set; }

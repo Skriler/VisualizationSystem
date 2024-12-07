@@ -1,4 +1,5 @@
 ﻿using VisualizationSystem.Models.Entities;
+using VisualizationSystem.Services.Utilities.Clusterers;
 
 namespace VisualizationSystem.UI.Forms;
 
@@ -30,6 +31,13 @@ public partial class SettingsForm : Form
         settings.MinSimilarityPercentage = (float)nudMinSimilarityPercentage.Value;
         settings.DeviationPercent = (float)nudDeviationPercent.Value;
         settings.UseClustering = chkbxUseClustering.Checked;
+
+        var selectedAlgorithm = (ClusterAlgorithm)Enum.Parse(
+            typeof(ClusterAlgorithm), 
+            cmbClusterAlgorithm.SelectedItem.ToString()
+            );
+        settings.ClusterAlgorithm = selectedAlgorithm;
+
         SaveParameterState(previousIndex);
 
         DialogResult = DialogResult.OK;
@@ -48,6 +56,10 @@ public partial class SettingsForm : Form
         nudMinSimilarityPercentage.Value = (decimal)settings.MinSimilarityPercentage;
         nudDeviationPercent.Value = (decimal)settings.DeviationPercent;
         chkbxUseClustering.Checked = settings.UseClustering;
+
+        var clusterAlgorithms = Enum.GetNames(typeof(ClusterAlgorithm));
+        cmbClusterAlgorithm.Items.AddRange(clusterAlgorithms);
+        cmbClusterAlgorithm.SelectedItem = settings.ClusterAlgorithm.ToString();
     }
 
     private void InitializeParameterStatesPanel()
