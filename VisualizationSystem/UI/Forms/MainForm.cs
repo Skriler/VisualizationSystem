@@ -3,6 +3,7 @@ using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Services.Utilities;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.UI;
+using VisualizationSystem.Services.Utilities.Clusterers;
 using VisualizationSystem.UI.Components.TabPages;
 using VisualizationSystem.Services.Utilities.ExcelHandlers;
 using VisualizationSystem.Services.Utilities.GraphBuilders;
@@ -27,13 +28,16 @@ public partial class MainForm : Form
     private UserSettings? userSettings;
     private Graph? graph;
 
+    private readonly KMeansClusterer kMeansClusterer;
+
     public MainForm(
         NodeTableRepository nodeRepository,
         UserSettingsRepository settingsRepository,
         ExcelDataImporter fileService,
         NodeComparisonManager nodeComparisonManager,
         GraphSaveManager graphSaveManager,
-        IGraphBuilder<Graph> graphBuilder
+        IGraphBuilder<Graph> graphBuilder,
+        KMeansClusterer kMeansClusterer
         )
     {
         InitializeComponent();
@@ -49,6 +53,19 @@ public partial class MainForm : Form
 
         tabControlService = new TabControlService(tabControl);
 
+        this.kMeansClusterer = kMeansClusterer;
+    }
+
+
+    private void kMeansClusterToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        if (nodeTable == null)
+        {
+            ShowWarning("No data to show");
+            return;
+        }
+
+        kMeansClusterer.Cluster(nodeTable.NodeObjects, 0.5f);
     }
 
     private async void MainForm_Load(object sender, EventArgs e)
@@ -95,8 +112,8 @@ public partial class MainForm : Form
         try
         {
             await graphSaveManager.SaveGraphAsync(
-                nodeTable.Name, 
-                nodeComparisonManager.SimilarityResults, 
+                nodeTable.Name,
+                nodeComparisonManager.SimilarityResults,
                 nodeComparisonManager.Clusters
                 );
         }
@@ -265,8 +282,8 @@ public partial class MainForm : Form
         nodeComparisonManager.CalculateSimilarNodes(nodeTable);
         nodeComparisonManager.CalculateClusters(0.75f);
         graph = graphBuilder.Build(
-            nodeTable.Name, 
-            nodeComparisonManager.SimilarityResults, 
+            nodeTable.Name,
+            nodeComparisonManager.SimilarityResults,
             nodeComparisonManager.Clusters
             );
     }
@@ -325,7 +342,7 @@ public partial class MainForm : Form
 
         if (graph != null)
             CreateGraph();
-        
+
         tabControlService.UpdateDataGridViewTabPageIfOpen(nodeTable);
         tabControlService.UpdateGViewerTabPageIfOpen(graph, nodeTable.Name);
     }

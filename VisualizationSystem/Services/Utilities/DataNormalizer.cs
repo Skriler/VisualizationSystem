@@ -6,17 +6,26 @@ namespace VisualizationSystem.Services.Utilities;
 
 public class DataNormalizer
 {
-    public DataMatrixManager NormalizeNodeParameters(List<NodeObject> nodes)
+    public readonly DataMatrixManager matrixManager;
+
+    private List<NodeObject> nodes;
+
+    public DataNormalizer()
     {
-        DataMatrixManager matrixManager = new DataMatrixManager();
-
-        InitializeParameterRangesAndStringParameters(nodes, matrixManager);
-        ProcessNodesForNormalization(nodes, matrixManager);
-
-        return matrixManager;
+        matrixManager = new DataMatrixManager();
     }
 
-    private void InitializeParameterRangesAndStringParameters(List<NodeObject> nodes, DataMatrixManager matrixManager)
+    public void NormalizeNodeParameters(List<NodeObject> nodes)
+    {
+        matrixManager.Clear();
+
+        this.nodes = nodes;
+
+        InitializeParameterRangesAndStringParameters();
+       ProcessNodesForNormalization();
+    }
+
+    private void InitializeParameterRangesAndStringParameters()
     {
         foreach (var node in nodes)
         {
@@ -24,17 +33,17 @@ public class DataNormalizer
             {
                 if (IsNumeric(parameter.Value))
                 {
-                    AddToNumericRange(parameter, matrixManager);
+                    AddToNumericRange(parameter);
                 }
                 else
                 {
-                    AddToStringParameterList(parameter, matrixManager);
+                    AddToStringParameterList(parameter);
                 }
             }
         }
     }
 
-    private void AddToNumericRange(NodeParameter parameter, DataMatrixManager matrixManager)
+    private void AddToNumericRange(NodeParameter parameter)
     {
         double value = Convert.ToDouble(parameter.Value);
 
@@ -52,8 +61,11 @@ public class DataNormalizer
         }
     }
 
-    private void AddToStringParameterList(NodeParameter parameter, DataMatrixManager matrixManager)
+    private void AddToStringParameterList(NodeParameter parameter)
     {
+        if (string.IsNullOrWhiteSpace(parameter.Value))
+            return;
+
         if (!matrixManager.StringParameters.ContainsKey(parameter.ParameterTypeId))
         {
             matrixManager.StringParameters[parameter.ParameterTypeId] = new List<string>();
@@ -65,18 +77,15 @@ public class DataNormalizer
         }
     }
 
-    private void ProcessNodesForNormalization(List<NodeObject> nodes, DataMatrixManager matrixManager)
+    private void ProcessNodesForNormalization()
     {
-        int rowIndex = 0;
-
-        foreach (var node in nodes)
+        for (int row = 0; row < nodes.Count; ++row)
         {
-            ProcessNodeForNormalization(node, rowIndex, matrixManager);
-            rowIndex++;
+            ProcessNodeForNormalization(nodes[row], row);
         }
     }
 
-    private void ProcessNodeForNormalization(NodeObject node, int rowIndex, DataMatrixManager matrixManager)
+    private void ProcessNodeForNormalization(NodeObject node, int rowIndex)
     {
         int numericColumnIndex = 0;
         int categoricalColumnIndex = 0;
@@ -85,18 +94,18 @@ public class DataNormalizer
         {
             if (IsNumeric(parameter.Value))
             {
-                ProcessNumericParameter(parameter, rowIndex, numericColumnIndex, matrixManager);
+                ProcessNumericParameter(parameter, rowIndex, numericColumnIndex, node.Parameters.Count);
                 numericColumnIndex++;
             }
             else
             {
-                ProcessCategoricalParameter(parameter, rowIndex, categoricalColumnIndex, matrixManager);
+                ProcessCategoricalParameter(parameter, rowIndex, categoricalColumnIndex);
                 categoricalColumnIndex++;
             }
         }
     }
 
-    private void ProcessNumericParameter(NodeParameter node, int rowIndex, int numericColumnIndex, DataMatrixManager matrixManager)
+    private void ProcessNumericParameter(NodeParameter node, int rowIndex, int columnIndex, int parametersCount)
     {
         double value = Convert.ToDouble(node.Value);
 
@@ -105,17 +114,17 @@ public class DataNormalizer
             var range = matrixManager.ParameterRanges[node.ParameterTypeId];
             double normalizedValue = NormalizeMinMax(value, range.Min, range.Max);
 
-            //TODO EnsureMatrixExists(node.ParameterTypeId,, node.Count, matrixManager);
-            matrixManager.Matrices[node.ParameterTypeId].SetValue(rowIndex, numericColumnIndex, normalizedValue);
+            EnsureMatrixExists(node.ParameterTypeId, nodes.Count, parametersCount);
+            matrixManager.Matrices[node.ParameterTypeId].SetValue(rowIndex, columnIndex, normalizedValue);
         }
     }
 
-    private void ProcessCategoricalParameter(NodeParameter parameter, int rowIndex, int categoricalColumnIndex, DataMatrixManager matrixManager)
+    private void ProcessCategoricalParameter(NodeParameter parameter, int rowIndex, int categoricalColumnIndex)
     {
         var possibleValues = matrixManager.StringParameters[parameter.ParameterTypeId];
         double[] encodedValue = ConvertStringToOneHot(parameter.Value, possibleValues);
 
-        //TODO EnsureMatrixExists(parameter.ParameterTypeId, matrixManager.NodesCount, possibleValues.Count, matrixManager);
+        EnsureMatrixExists(parameter.ParameterTypeId, nodes.Count, possibleValues.Count);
 
         for (int i = 0; i < encodedValue.Length; i++)
         {
@@ -123,7 +132,7 @@ public class DataNormalizer
         }
     }
 
-    private void EnsureMatrixExists(int parameterTypeId, int rows, int columns, DataMatrixManager matrixManager)
+    private void EnsureMatrixExists(int parameterTypeId, int rows, int columns)
     {
         if (matrixManager.Matrices.ContainsKey(parameterTypeId))
             return;

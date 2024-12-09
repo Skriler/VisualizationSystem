@@ -1,19 +1,34 @@
-﻿using VisualizationSystem.Models.Storages;
+﻿using VisualizationSystem.Models.Entities;
+using VisualizationSystem.Models.Storages;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
 
 public class KMeansClusterer : IClusterize
 {
+    private readonly DataNormalizer dataNormalizer;
+
+    private readonly Random random = new();
     private readonly int k;
     private readonly int maxIterations;
-    private readonly Random random;
 
-    public KMeansClusterer(int k = 20, int maxIterations = 100)
+    public KMeansClusterer(DataNormalizer dataNormalizer, int k = 20, int maxIterations = 100)
     {
+        this.dataNormalizer = dataNormalizer;
+
         this.k = k;
         this.maxIterations = maxIterations;
+    }
 
-        random = new Random();
+    public List<Cluster> Cluster(List<NodeObject> nodes, float minSimilarityThreshold)
+    {
+        var clusters = new List<Cluster>();
+
+        dataNormalizer.NormalizeNodeParameters(nodes);
+        var matrixManager = dataNormalizer.matrixManager;
+
+        Console.WriteLine(matrixManager);
+
+        return clusters;
     }
 
     public List<Cluster> Cluster(List<NodeSimilarityResult> similarityResults, float minSimilarityThreshold)

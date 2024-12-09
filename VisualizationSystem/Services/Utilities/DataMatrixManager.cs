@@ -15,4 +15,11 @@ public class DataMatrixManager
     {
         Matrices[parameterTypeId] = matrix;
     }
+
+    public void Clear()
+    {
+        ParameterRanges.Clear();
+        StringParameters.Clear();
+        Matrices.Clear();
+    }
 }

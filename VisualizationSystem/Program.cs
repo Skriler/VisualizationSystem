@@ -57,8 +57,9 @@ internal static class Program
         services.AddSingleton<NodeComparisonManager>();
         services.AddSingleton<GraphSaveManager>();
 
-        services.AddSingleton<AgglomerativeClusterer>();
+        services.AddSingleton<DataNormalizer>();
         services.AddSingleton<KMeansClusterer>();
+        services.AddSingleton<AgglomerativeClusterer>();
         services.AddSingleton<ClustererFactory>();
 
         services.AddSingleton<ICompare, DefaultComparer>();

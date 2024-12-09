@@ -34,11 +34,12 @@
             uploadExcelFileToolStripMenuItem = new ToolStripMenuItem();
             showToolStripMenuItem = new ToolStripMenuItem();
             loadTableToolStripMenuItem = new ToolStripMenuItem();
+            saveGraphImageToolStripMenuItem = new ToolStripMenuItem();
             visualizationToolStripMenuItem = new ToolStripMenuItem();
             buildGraphToolStripMenuItem = new ToolStripMenuItem();
             settingsToolStripMenuItem = new ToolStripMenuItem();
             tabControl = new TabControl();
-            saveGraphImageToolStripMenuItem = new ToolStripMenuItem();
+            kMeansClusterToolStripMenuItem = new ToolStripMenuItem();
             menuStrip.SuspendLayout();
             SuspendLayout();
             // 
@@ -61,26 +62,33 @@
             // uploadExcelFileToolStripMenuItem
             // 
             uploadExcelFileToolStripMenuItem.Name = "uploadExcelFileToolStripMenuItem";
-            uploadExcelFileToolStripMenuItem.Size = new Size(180, 22);
+            uploadExcelFileToolStripMenuItem.Size = new Size(168, 22);
             uploadExcelFileToolStripMenuItem.Text = "Upload Excel File";
             uploadExcelFileToolStripMenuItem.Click += uploadExcelFileToolStripMenuItem_Click;
             // 
             // showToolStripMenuItem
             // 
             showToolStripMenuItem.Name = "showToolStripMenuItem";
-            showToolStripMenuItem.Size = new Size(180, 22);
+            showToolStripMenuItem.Size = new Size(168, 22);
             showToolStripMenuItem.Text = "Show";
             showToolStripMenuItem.Click += showToolStripMenuItem_Click;
             // 
             // loadTableToolStripMenuItem
             // 
             loadTableToolStripMenuItem.Name = "loadTableToolStripMenuItem";
-            loadTableToolStripMenuItem.Size = new Size(180, 22);
+            loadTableToolStripMenuItem.Size = new Size(168, 22);
             loadTableToolStripMenuItem.Text = "Load Table";
+            // 
+            // saveGraphImageToolStripMenuItem
+            // 
+            saveGraphImageToolStripMenuItem.Name = "saveGraphImageToolStripMenuItem";
+            saveGraphImageToolStripMenuItem.Size = new Size(168, 22);
+            saveGraphImageToolStripMenuItem.Text = "Save graph image";
+            saveGraphImageToolStripMenuItem.Click += saveGraphImageToolStripMenuItem_Click;
             // 
             // visualizationToolStripMenuItem
             // 
-            visualizationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { buildGraphToolStripMenuItem, settingsToolStripMenuItem });
+            visualizationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { buildGraphToolStripMenuItem, settingsToolStripMenuItem, kMeansClusterToolStripMenuItem });
             visualizationToolStripMenuItem.Name = "visualizationToolStripMenuItem";
             visualizationToolStripMenuItem.Size = new Size(85, 20);
             visualizationToolStripMenuItem.Text = "Visualization";
@@ -88,14 +96,14 @@
             // buildGraphToolStripMenuItem
             // 
             buildGraphToolStripMenuItem.Name = "buildGraphToolStripMenuItem";
-            buildGraphToolStripMenuItem.Size = new Size(136, 22);
+            buildGraphToolStripMenuItem.Size = new Size(180, 22);
             buildGraphToolStripMenuItem.Text = "Build Graph";
             buildGraphToolStripMenuItem.Click += buildGraphToolStripMenuItem_Click;
             // 
             // settingsToolStripMenuItem
             // 
             settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            settingsToolStripMenuItem.Size = new Size(136, 22);
+            settingsToolStripMenuItem.Size = new Size(180, 22);
             settingsToolStripMenuItem.Text = "Settings";
             settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
             // 
@@ -111,12 +119,12 @@
             tabControl.DrawItem += tabControl_DrawItem;
             tabControl.MouseDown += tabControl_MouseDown;
             // 
-            // saveGraphImageToolStripMenuItem
+            // kMeansClusterToolStripMenuItem
             // 
-            saveGraphImageToolStripMenuItem.Name = "saveGraphImageToolStripMenuItem";
-            saveGraphImageToolStripMenuItem.Size = new Size(180, 22);
-            saveGraphImageToolStripMenuItem.Text = "Save graph image";
-            saveGraphImageToolStripMenuItem.Click += saveGraphImageToolStripMenuItem_Click;
+            kMeansClusterToolStripMenuItem.Name = "kMeansClusterToolStripMenuItem";
+            kMeansClusterToolStripMenuItem.Size = new Size(180, 22);
+            kMeansClusterToolStripMenuItem.Text = "K means cluster";
+            kMeansClusterToolStripMenuItem.Click += kMeansClusterToolStripMenuItem_Click;
             // 
             // MainForm
             // 
@@ -148,5 +156,6 @@
         private ToolStripMenuItem loadTableToolStripMenuItem;
         private TabControl tabControl;
         private ToolStripMenuItem saveGraphImageToolStripMenuItem;
+        private ToolStripMenuItem kMeansClusterToolStripMenuItem;
     }
 }
