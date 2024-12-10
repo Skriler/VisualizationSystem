@@ -1,4 +1,5 @@
-﻿using VisualizationSystem.Models.Entities;
+﻿using Microsoft.Identity.Client;
+using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Storages;
 using VisualizationSystem.Models.Storages.Matrixes;
 
@@ -6,23 +7,28 @@ namespace VisualizationSystem.Services.Utilities;
 
 public class DataNormalizer
 {
-    public readonly DataMatrixManager matrixManager;
+    private readonly DataMatrixManager matrixManager;
 
     private List<NodeObject> nodes;
+
+    public double[,] combinedMatrix;
 
     public DataNormalizer()
     {
         matrixManager = new DataMatrixManager();
     }
 
-    public void NormalizeNodeParameters(List<NodeObject> nodes)
+    public double[,] GetNormalizedMatrix(List<NodeObject> nodes)
     {
         matrixManager.Clear();
-
         this.nodes = nodes;
 
         InitializeParameterRangesAndStringParameters();
-       ProcessNodesForNormalization();
+        ProcessNodesForNormalization();
+
+        var normalizedMatrix = CombineMatrices();
+
+        return normalizedMatrix;
     }
 
     private void InitializeParameterRangesAndStringParameters()
@@ -45,6 +51,9 @@ public class DataNormalizer
 
     private void AddToNumericRange(NodeParameter parameter)
     {
+        if (matrixManager.StringParameters.ContainsKey(parameter.ParameterTypeId))
+            throw new InvalidOperationException($"Conflict detected: string data already exists for {parameter.ParameterTypeId}");
+
         double value = Convert.ToDouble(parameter.Value);
 
         if (!matrixManager.ParameterRanges.ContainsKey(parameter.ParameterTypeId))
@@ -65,6 +74,9 @@ public class DataNormalizer
     {
         if (string.IsNullOrWhiteSpace(parameter.Value))
             return;
+
+        if (matrixManager.ParameterRanges.ContainsKey(parameter.ParameterTypeId))
+            throw new InvalidOperationException($"Conflict detected: numeric range already exists for {parameter.ParameterTypeId}");
 
         if (!matrixManager.StringParameters.ContainsKey(parameter.ParameterTypeId))
         {
@@ -87,49 +99,43 @@ public class DataNormalizer
 
     private void ProcessNodeForNormalization(NodeObject node, int rowIndex)
     {
-        int numericColumnIndex = 0;
-        int categoricalColumnIndex = 0;
-
         foreach (var parameter in node.Parameters)
         {
             if (IsNumeric(parameter.Value))
             {
-                ProcessNumericParameter(parameter, rowIndex, numericColumnIndex, node.Parameters.Count);
-                numericColumnIndex++;
+                ProcessNumericParameter(parameter, rowIndex);
             }
             else
             {
-                ProcessCategoricalParameter(parameter, rowIndex, categoricalColumnIndex);
-                categoricalColumnIndex++;
+                ProcessCategoricalParameter(parameter, rowIndex);
             }
         }
     }
 
-    private void ProcessNumericParameter(NodeParameter node, int rowIndex, int columnIndex, int parametersCount)
+    private void ProcessNumericParameter(NodeParameter parameter, int rowIndex)
     {
-        double value = Convert.ToDouble(node.Value);
+        if (!matrixManager.ParameterRanges.TryGetValue(parameter.ParameterTypeId, out var range))
+            return;
 
-        if (matrixManager.ParameterRanges.ContainsKey(node.ParameterTypeId))
-        {
-            var range = matrixManager.ParameterRanges[node.ParameterTypeId];
-            double normalizedValue = NormalizeMinMax(value, range.Min, range.Max);
+        var value = Convert.ToDouble(parameter.Value);
+        var normalizedValue = NormalizeMinMax(value, range.Min, range.Max);
 
-            EnsureMatrixExists(node.ParameterTypeId, nodes.Count, parametersCount);
-            matrixManager.Matrices[node.ParameterTypeId].SetValue(rowIndex, columnIndex, normalizedValue);
-        }
+        EnsureMatrixExists(parameter.ParameterTypeId, nodes.Count, 1);
+        matrixManager.Matrices[parameter.ParameterTypeId].SetValue(rowIndex, 0, normalizedValue);
     }
 
-    private void ProcessCategoricalParameter(NodeParameter parameter, int rowIndex, int categoricalColumnIndex)
+    private void ProcessCategoricalParameter(NodeParameter parameter, int rowIndex)
     {
-        var possibleValues = matrixManager.StringParameters[parameter.ParameterTypeId];
-        double[] encodedValue = ConvertStringToOneHot(parameter.Value, possibleValues);
+        if (string.IsNullOrWhiteSpace(parameter.Value))
+            return;
+
+        if (!matrixManager.StringParameters.TryGetValue(parameter.ParameterTypeId, out var possibleValues))
+            return;
+
+        var columnIndex = GetOneHotIndex(parameter.Value, possibleValues);
 
         EnsureMatrixExists(parameter.ParameterTypeId, nodes.Count, possibleValues.Count);
-
-        for (int i = 0; i < encodedValue.Length; i++)
-        {
-            matrixManager.Matrices[parameter.ParameterTypeId].SetValue(rowIndex, categoricalColumnIndex++, encodedValue[i]);
-        }
+        matrixManager.Matrices[parameter.ParameterTypeId].SetValue(rowIndex, columnIndex, 1);
     }
 
     private void EnsureMatrixExists(int parameterTypeId, int rows, int columns)
@@ -140,8 +146,35 @@ public class DataNormalizer
         matrixManager.AddMatrix(parameterTypeId, new DataMatrix(rows, columns));
     }
 
+    public double[,] CombineMatrices()
+    {
+        var rowAmount = nodes.Count;
+        var colAmount = matrixManager.GetTotalColumns();
+
+        combinedMatrix = new double[rowAmount, colAmount];
+
+        var currentColumnOffset = 0;
+        foreach (var matrix in matrixManager.Matrices.Values)
+        {
+            for (int i = 0; i < rowAmount; ++i)
+            {
+                for (int j = 0; j < matrix.Columns; ++j)
+                {
+                    combinedMatrix[i, currentColumnOffset + j] = matrix.Matrix[i, j];
+                }
+            }
+
+            currentColumnOffset += matrix.Columns;
+        }
+
+        return combinedMatrix;
+    }
+
     private double NormalizeMinMax(double value, double min, double max)
     {
+        if (max == min)
+            return 1;
+
         return (value - min) / (max - min);
     }
 
@@ -150,17 +183,8 @@ public class DataNormalizer
         return double.TryParse(value, out _);
     }
 
-    private static double[] ConvertStringToOneHot(string value, List<string> possibleValues)
+    private int GetOneHotIndex(string value, List<string> possibleValues)
     {
-        double[] encoded = new double[possibleValues.Count];
-
-        int index = possibleValues.IndexOf(value);
-
-        if (index != -1)
-        {
-            encoded[index] = 1;
-        }
-
-        return encoded;
+        return possibleValues.IndexOf(value);
     }
 }

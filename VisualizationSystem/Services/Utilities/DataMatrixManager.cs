@@ -22,4 +22,6 @@ public class DataMatrixManager
         StringParameters.Clear();
         Matrices.Clear();
     }
+
+    public int GetTotalColumns() => Matrices.Values.Sum(matrix => matrix.Columns);
 }
