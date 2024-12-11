@@ -11,14 +11,12 @@ public class DataNormalizer
 
     private List<NodeObject> nodes;
 
-    public double[,] combinedMatrix;
-
     public DataNormalizer()
     {
         matrixManager = new DataMatrixManager();
     }
 
-    public double[,] GetNormalizedMatrix(List<NodeObject> nodes)
+    public List<NormalizedNodeData> GetNormalizedData(List<NodeObject> nodes)
     {
         matrixManager.Clear();
         this.nodes = nodes;
@@ -146,28 +144,45 @@ public class DataNormalizer
         matrixManager.AddMatrix(parameterTypeId, new DataMatrix(rows, columns));
     }
 
-    public double[,] CombineMatrices()
+    private List<NormalizedNodeData> CombineMatrices()
     {
-        var rowAmount = nodes.Count;
-        var colAmount = matrixManager.GetTotalColumns();
+        var normalizedDataList = new List<NormalizedNodeData>();
 
-        combinedMatrix = new double[rowAmount, colAmount];
+        int currentColumnOffset = 0;
+        foreach (var node in nodes)
+        {
+            var normalizedNodeData = CreateNormalizedNodeData(node, currentColumnOffset);
 
-        var currentColumnOffset = 0;
+            currentColumnOffset += matrixManager.GetTotalColumns();
+            normalizedDataList.Add(normalizedNodeData);
+        }
+
+        return normalizedDataList;
+    }
+
+    private NormalizedNodeData CreateNormalizedNodeData(NodeObject node, int currentColumnOffset)
+    {
+        var normalizedNodeData = new NormalizedNodeData(node, new double[matrixManager.GetTotalColumns()]);
+
         foreach (var matrix in matrixManager.Matrices.Values)
         {
-            for (int i = 0; i < rowAmount; ++i)
-            {
-                for (int j = 0; j < matrix.Columns; ++j)
-                {
-                    combinedMatrix[i, currentColumnOffset + j] = matrix.Matrix[i, j];
-                }
-            }
+            CopyMatrixToNormalizedData(matrix, normalizedNodeData.NormalizedParameters, currentColumnOffset);
 
             currentColumnOffset += matrix.Columns;
         }
 
-        return combinedMatrix;
+        return normalizedNodeData;
+    }
+
+    private void CopyMatrixToNormalizedData(DataMatrix matrix, double[] normalizedParameters, int columnOffset)
+    {
+        for (int i = 0; i < nodes.Count; i++)
+        {
+            for (int j = 0; j < matrix.Columns; j++)
+            {
+                normalizedParameters[columnOffset + j] = matrix.Matrix[i, j];
+            }
+        }
     }
 
     private double NormalizeMinMax(double value, double min, double max)
