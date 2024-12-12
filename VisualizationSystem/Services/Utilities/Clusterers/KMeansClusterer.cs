@@ -1,5 +1,6 @@
 ﻿using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Storages;
+using VisualizationSystem.Models.Storages.Clusters;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
 
@@ -23,14 +24,14 @@ public class KMeansClusterer : IClusterize
 
     public List<Cluster> Cluster(List<NodeObject> nodes, float minSimilarityThreshold)
     {
-        var normalizedNodes = dataNormalizer.GetNormalizedData(nodes);
-        var parametersCount = normalizedNodes.FirstOrDefault()?.NormalizedParameters.Length ?? 0;
+        var normalizedNodes = dataNormalizer.GetNormalizedNodes(nodes);
+        var parametersCount = normalizedNodes.FirstOrDefault()?.NormalizedParameters.Count ?? 0;
 
         if (normalizedNodes.Count < k)
             throw new InvalidOperationException("Nodes amount is less than the number of clusters");
 
         kMeansClusters = new List<KMeansCluster>(k);
-        InitializeClusters(normalizedNodes);
+        InitializeClusters(normalizedNodes, parametersCount);
 
         for (int iteration = 0; iteration < maxIterations; ++iteration)
         {
@@ -53,7 +54,7 @@ public class KMeansClusterer : IClusterize
             if (!assignmentsChanged)
                 break;
 
-            RecalculateCentroids(normalizedNodes, parametersCount);
+            RecalculateClusters(normalizedNodes, parametersCount);
         }
 
         return kMeansClusters.Select(c => c.Cluster).ToList();
@@ -82,24 +83,26 @@ public class KMeansClusterer : IClusterize
         return clusters;
     }
 
-    private void InitializeClusters(List<NormalizedNodeData> nodes)
+    private void InitializeClusters(List<NormalizedNode> nodes, int parametersCount)
     {
         var selectedIndices = new HashSet<int>();
 
         for (int i = 0; i < k; ++i)
         {
-            int randomIndex;
+            var cluster = new KMeansCluster(parametersCount);
 
+            int randomIndex;
             do
             {
                 randomIndex = random.Next(nodes.Count);
             } while (!selectedIndices.Add(randomIndex));
 
-            kMeansClusters[i].InitializeCentroid(nodes[randomIndex].NormalizedParameters);
+            cluster.InitializeCentroid(nodes[randomIndex].NormalizedParameters);
+            kMeansClusters.Add(cluster);
         }
     }
 
-    private int GetNearestClusterIndex(NormalizedNodeData node)
+    private int GetNearestClusterIndex(NormalizedNode node)
     {
         var clusterIndex = 0;
         var minDistance = double.MaxValue;
@@ -118,7 +121,7 @@ public class KMeansClusterer : IClusterize
         return clusterIndex;
     }
 
-    private void RecalculateCentroids(List<NormalizedNodeData> data, int cols)
+    private void RecalculateClusters(List<NormalizedNode> data, int cols)
     {
         foreach (var kMeansCluster in kMeansClusters)
         {
@@ -127,9 +130,9 @@ public class KMeansClusterer : IClusterize
         }
     }
 
-    private List<double[]> GetClusterData(List<NormalizedNodeData> data, Cluster cluster, int cols)
+    private List<List<double>> GetClusterData(List<NormalizedNode> data, Cluster cluster, int cols)
     {
-        var clusterData = new List<double[]>();
+        var clusterData = new List<List<double>>();
 
         foreach (var node in cluster.Nodes)
         {
@@ -144,7 +147,7 @@ public class KMeansClusterer : IClusterize
         return clusterData;
     }
 
-    private double GetEuclideanDistance(NormalizedNodeData node, double[] centroid)
+    private double GetEuclideanDistance(NormalizedNode node, double[] centroid)
     {
         double distance = 0;
         var data = node.NormalizedParameters;

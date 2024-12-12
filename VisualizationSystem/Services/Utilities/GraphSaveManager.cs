@@ -2,6 +2,7 @@
 using DotNetGraph.Core;
 using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Storages;
+using VisualizationSystem.Models.Storages.Clusters;
 using VisualizationSystem.Services.Utilities.GraphBuilders;
 
 namespace VisualizationSystem.Services.Utilities;

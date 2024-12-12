@@ -2,7 +2,7 @@
 using Microsoft.Msagl.Layout.Layered;
 using Microsoft.Msagl.Layout.MDS;
 using VisualizationSystem.Models.Storages;
-using Cluster = VisualizationSystem.Models.Storages.Cluster;
+using Cluster = VisualizationSystem.Models.Storages.Clusters.Cluster;
 using MsaglColor = Microsoft.Msagl.Drawing.Color;
 using SystemColor = System.Drawing.Color;
 

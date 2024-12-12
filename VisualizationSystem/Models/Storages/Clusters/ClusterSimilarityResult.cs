@@ -1,4 +1,4 @@
-﻿namespace VisualizationSystem.Models.Storages;
+﻿namespace VisualizationSystem.Models.Storages.Clusters;
 
 public class ClusterSimilarityResult
 {

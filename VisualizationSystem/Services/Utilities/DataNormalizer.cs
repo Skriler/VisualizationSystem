@@ -1,35 +1,32 @@
-﻿using Microsoft.Identity.Client;
-using VisualizationSystem.Models.Entities;
+﻿using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Storages;
-using VisualizationSystem.Models.Storages.Matrixes;
+using VisualizationSystem.Models.Storages.Ranges;
 
 namespace VisualizationSystem.Services.Utilities;
 
 public class DataNormalizer
 {
-    private readonly DataMatrixManager matrixManager;
-
-    private List<NodeObject> nodes;
+    private readonly List<ParameterNumericRange> numericRanges;
+    private readonly List<ParameterStringRange> stringRanges;
 
     public DataNormalizer()
     {
-        matrixManager = new DataMatrixManager();
+        numericRanges = new();
+        stringRanges = new();
     }
 
-    public List<NormalizedNodeData> GetNormalizedData(List<NodeObject> nodes)
+    public List<NormalizedNode> GetNormalizedNodes(List<NodeObject> nodes)
     {
-        matrixManager.Clear();
-        this.nodes = nodes;
+        numericRanges.Clear();
+        stringRanges.Clear();
 
-        InitializeParameterRangesAndStringParameters();
-        ProcessNodesForNormalization();
+        InitializeParameterRanges(nodes);
+        var normalizedNodes = NormalizeNodes(nodes);
 
-        var normalizedMatrix = CombineMatrices();
-
-        return normalizedMatrix;
+        return normalizedNodes;
     }
 
-    private void InitializeParameterRangesAndStringParameters()
+    private void InitializeParameterRanges(List<NodeObject> nodes)
     {
         foreach (var node in nodes)
         {
@@ -49,23 +46,25 @@ public class DataNormalizer
 
     private void AddToNumericRange(NodeParameter parameter)
     {
-        if (matrixManager.StringParameters.ContainsKey(parameter.ParameterTypeId))
+        if (stringRanges.Any(range => range.Id == parameter.ParameterTypeId))
             throw new InvalidOperationException($"Conflict detected: string data already exists for {parameter.ParameterTypeId}");
 
-        double value = Convert.ToDouble(parameter.Value);
+        var value = Convert.ToDouble(parameter.Value);
 
-        if (!matrixManager.ParameterRanges.ContainsKey(parameter.ParameterTypeId))
+        var range = numericRanges
+            .FirstOrDefault(range => range.Id == parameter.ParameterTypeId);
+
+        if (range == null)
         {
-            matrixManager.ParameterRanges[parameter.ParameterTypeId] = new ParameterRange(value, value);
+            range = new ParameterNumericRange(parameter.ParameterTypeId, value, value);
+            numericRanges.Add(range);
+            return;
         }
-        else
-        {
-            var currentRange = matrixManager.ParameterRanges[parameter.ParameterTypeId];
-            matrixManager.ParameterRanges[parameter.ParameterTypeId] = new ParameterRange(
-                Math.Min(currentRange.Min, value),
-                Math.Max(currentRange.Max, value)
+
+        range.Update(
+            Math.Min(range.Min, value),
+            Math.Max(range.Max, value)
             );
-        }
     }
 
     private void AddToStringParameterList(NodeParameter parameter)
@@ -73,116 +72,80 @@ public class DataNormalizer
         if (string.IsNullOrWhiteSpace(parameter.Value))
             return;
 
-        if (matrixManager.ParameterRanges.ContainsKey(parameter.ParameterTypeId))
+        if (numericRanges.Any(range => range.Id == parameter.ParameterTypeId))
             throw new InvalidOperationException($"Conflict detected: numeric range already exists for {parameter.ParameterTypeId}");
 
-        if (!matrixManager.StringParameters.ContainsKey(parameter.ParameterTypeId))
+        var range = stringRanges
+            .FirstOrDefault(range => range.Id == parameter.ParameterTypeId);
+
+        if (range == null)
         {
-            matrixManager.StringParameters[parameter.ParameterTypeId] = new List<string>();
+            range = new ParameterStringRange(parameter.ParameterTypeId);
+            stringRanges.Add(range);
         }
 
-        if (!matrixManager.StringParameters[parameter.ParameterTypeId].Contains(parameter.Value))
-        {
-            matrixManager.StringParameters[parameter.ParameterTypeId].Add(parameter.Value);
-        }
+        range.AddValue(parameter.Value);
     }
 
-    private void ProcessNodesForNormalization()
+    private List<NormalizedNode> NormalizeNodes(List<NodeObject> nodes)
     {
-        for (int row = 0; row < nodes.Count; ++row)
+        var normalizedNodes = new List<NormalizedNode>();
+
+        foreach (var node in nodes)
         {
-            ProcessNodeForNormalization(nodes[row], row);
+            var normalizedNode = new NormalizedNode(node);
+            ProcessNodeForNormalization(normalizedNode, node);
+
+            normalizedNodes.Add(normalizedNode);
         }
+
+        return normalizedNodes;
     }
 
-    private void ProcessNodeForNormalization(NodeObject node, int rowIndex)
+    private void ProcessNodeForNormalization(NormalizedNode normalizedNode, NodeObject node)
     {
         foreach (var parameter in node.Parameters)
         {
-            if (IsNumeric(parameter.Value))
+            if (IsNumeric(parameter.Value) && numericRanges.Any(range => range.Id == parameter.ParameterTypeId))
             {
-                ProcessNumericParameter(parameter, rowIndex);
+                ProcessNumericParameter(normalizedNode, parameter);
+            }
+            else if (stringRanges.Any(range => range.Id == parameter.ParameterTypeId))
+            {
+                ProcessCategoricalParameter(normalizedNode, parameter);
             }
             else
             {
-                ProcessCategoricalParameter(parameter, rowIndex);
+                normalizedNode.NormalizedParameters.Add(0);
             }
         }
     }
 
-    private void ProcessNumericParameter(NodeParameter parameter, int rowIndex)
+    private void ProcessNumericParameter(NormalizedNode normalizedNode, NodeParameter parameter)
     {
-        if (!matrixManager.ParameterRanges.TryGetValue(parameter.ParameterTypeId, out var range))
+        var range = numericRanges
+            .FirstOrDefault(range => range.Id == parameter.ParameterTypeId);
+
+        if (range == null)
             return;
 
         var value = Convert.ToDouble(parameter.Value);
         var normalizedValue = NormalizeMinMax(value, range.Min, range.Max);
 
-        EnsureMatrixExists(parameter.ParameterTypeId, nodes.Count, 1);
-        matrixManager.Matrices[parameter.ParameterTypeId].SetValue(rowIndex, 0, normalizedValue);
+        normalizedNode.NormalizedParameters.Add(normalizedValue);
     }
 
-    private void ProcessCategoricalParameter(NodeParameter parameter, int rowIndex)
+    private void ProcessCategoricalParameter(NormalizedNode normalizedNode, NodeParameter parameter)
     {
-        if (string.IsNullOrWhiteSpace(parameter.Value))
+        var range = stringRanges
+            .FirstOrDefault(range => range.Id == parameter.ParameterTypeId);
+
+        if (range == null)
             return;
 
-        if (!matrixManager.StringParameters.TryGetValue(parameter.ParameterTypeId, out var possibleValues))
-            return;
+        var oneHotArray = ConvertStringToOneHot(parameter.Value, range.Values);
 
-        var columnIndex = GetOneHotIndex(parameter.Value, possibleValues);
-
-        EnsureMatrixExists(parameter.ParameterTypeId, nodes.Count, possibleValues.Count);
-        matrixManager.Matrices[parameter.ParameterTypeId].SetValue(rowIndex, columnIndex, 1);
-    }
-
-    private void EnsureMatrixExists(int parameterTypeId, int rows, int columns)
-    {
-        if (matrixManager.Matrices.ContainsKey(parameterTypeId))
-            return;
-
-        matrixManager.AddMatrix(parameterTypeId, new DataMatrix(rows, columns));
-    }
-
-    private List<NormalizedNodeData> CombineMatrices()
-    {
-        var normalizedDataList = new List<NormalizedNodeData>();
-
-        int currentColumnOffset = 0;
-        foreach (var node in nodes)
-        {
-            var normalizedNodeData = CreateNormalizedNodeData(node, currentColumnOffset);
-
-            currentColumnOffset += matrixManager.GetTotalColumns();
-            normalizedDataList.Add(normalizedNodeData);
-        }
-
-        return normalizedDataList;
-    }
-
-    private NormalizedNodeData CreateNormalizedNodeData(NodeObject node, int currentColumnOffset)
-    {
-        var normalizedNodeData = new NormalizedNodeData(node, new double[matrixManager.GetTotalColumns()]);
-
-        foreach (var matrix in matrixManager.Matrices.Values)
-        {
-            CopyMatrixToNormalizedData(matrix, normalizedNodeData.NormalizedParameters, currentColumnOffset);
-
-            currentColumnOffset += matrix.Columns;
-        }
-
-        return normalizedNodeData;
-    }
-
-    private void CopyMatrixToNormalizedData(DataMatrix matrix, double[] normalizedParameters, int columnOffset)
-    {
-        for (int i = 0; i < nodes.Count; i++)
-        {
-            for (int j = 0; j < matrix.Columns; j++)
-            {
-                normalizedParameters[columnOffset + j] = matrix.Matrix[i, j];
-            }
-        }
+        normalizedNode.NormalizedParameters.AddRange(oneHotArray);
     }
 
     private double NormalizeMinMax(double value, double min, double max)
@@ -198,8 +161,16 @@ public class DataNormalizer
         return double.TryParse(value, out _);
     }
 
-    private int GetOneHotIndex(string value, List<string> possibleValues)
+    private static double[] ConvertStringToOneHot(string value, List<string> possibleValues)
     {
-        return possibleValues.IndexOf(value);
+        var encoded = new double[possibleValues.Count];
+        var index = possibleValues.IndexOf(value);
+
+        if (index != -1)
+        {
+            encoded[index] = 1;
+        }
+
+        return encoded;
     }
 }

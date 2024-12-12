@@ -1,5 +1,6 @@
 ﻿using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Storages;
+using VisualizationSystem.Models.Storages.Clusters;
 
 namespace VisualizationSystem.Services.Utilities.GraphBuilders;
 

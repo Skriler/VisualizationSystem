@@ -1,6 +1,6 @@
 ﻿using VisualizationSystem.Models.Entities;
 
-namespace VisualizationSystem.Models.Storages;
+namespace VisualizationSystem.Models.Storages.Clusters;
 
 public class Cluster
 {
@@ -18,7 +18,7 @@ public class Cluster
     {
         if (Nodes.Contains(node))
             return;
-        
+
         Nodes.Add(node);
     }
 
