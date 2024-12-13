@@ -56,18 +56,6 @@ public partial class MainForm : Form
         this.kMeansClusterer = kMeansClusterer;
     }
 
-
-    private void kMeansClusterToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (nodeTable == null)
-        {
-            ShowWarning("No data to show");
-            return;
-        }
-
-        kMeansClusterer.Cluster(nodeTable.NodeObjects, 0.5f);
-    }
-
     private async void MainForm_Load(object sender, EventArgs e)
     {
         await LoadTableNamesToMenuAsync();
@@ -111,11 +99,14 @@ public partial class MainForm : Form
 
         try
         {
-            await graphSaveManager.SaveGraphAsync(
-                nodeTable.Name,
-                nodeComparisonManager.SimilarityResults,
-                nodeComparisonManager.Clusters
-                );
+            if (userSettings.UseClustering)
+            {
+                await graphSaveManager.SaveGraphAsync(nodeTable.Name, nodeComparisonManager.Clusters);
+            }
+            else
+            {
+                await graphSaveManager.SaveGraphAsync(nodeTable.Name, nodeComparisonManager.SimilarityResults);
+            }
         }
         catch (Exception ex)
         {
@@ -279,13 +270,16 @@ public partial class MainForm : Form
 
     private void CreateGraph()
     {
-        nodeComparisonManager.CalculateSimilarNodes(nodeTable);
-        nodeComparisonManager.CalculateClusters(0.75f);
-        graph = graphBuilder.Build(
-            nodeTable.Name,
-            nodeComparisonManager.SimilarityResults,
-            nodeComparisonManager.Clusters
-            );
+        if (userSettings.UseClustering)
+        {
+            nodeComparisonManager.CalculateClusters(nodeTable.NodeObjects, 0.75f);
+            graph = graphBuilder.Build(nodeTable.Name, nodeComparisonManager.Clusters);
+        }
+        else
+        {
+            nodeComparisonManager.CalculateSimilarNodes(nodeTable.NodeObjects);
+            graph = graphBuilder.Build(nodeTable.Name, nodeComparisonManager.SimilarityResults);
+        }
     }
 
     private async Task LoadTableAsync(string tableName)

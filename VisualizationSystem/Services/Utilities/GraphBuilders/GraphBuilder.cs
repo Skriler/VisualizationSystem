@@ -12,7 +12,8 @@ public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>
     public Dictionary<string, NodeSimilarityResult> NodeDataMap { get; } = new();
     public UserSettings Settings { get; set; } = new();
 
-    public abstract TGraph Build(string name, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters);
+    public abstract TGraph Build(string name, List<NodeSimilarityResult> similarityResults);
+    public abstract TGraph Build(string name, List<Cluster> clusters);
 
     protected virtual void AddNodes(TGraph graph, List<NodeSimilarityResult> similarityResults)
     {

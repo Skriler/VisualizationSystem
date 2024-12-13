@@ -8,13 +8,22 @@ namespace VisualizationSystem.Services.Utilities.GraphBuilders;
 
 public sealed class DotNetGraphBuilder : GraphBuilder<DotGraph>
 {
-    public override DotGraph Build(string name, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters)
+    public override DotGraph Build(string name, List<NodeSimilarityResult> similarityResults)
     {
         var graph = new DotGraph()
             .WithIdentifier(name);
 
         AddNodes(graph, similarityResults);
         AddEdges(graph, similarityResults);
+
+        return graph;
+    }
+
+    public override DotGraph Build(string name, List<Cluster> clusters)
+    {
+        var graph = new DotGraph()
+            .WithIdentifier(name);
+
         AddClusters(graph, clusters);
 
         return graph;

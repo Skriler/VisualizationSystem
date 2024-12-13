@@ -9,6 +9,8 @@ namespace VisualizationSystem.Services.Utilities;
 
 public class GraphSaveManager
 {
+    private const string GraphName = "graph.dot";
+
     private readonly IGraphBuilder<DotGraph> graphBuilder;
 
     public GraphSaveManager(IGraphBuilder<DotGraph> graphBuilder)
@@ -18,16 +20,29 @@ public class GraphSaveManager
 
     public void UpdateSettings(UserSettings settings) => graphBuilder.UpdateSettings(settings);
 
-    public async Task SaveGraphAsync(string name, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters)
+    public async Task SaveGraphAsync(string name, List<NodeSimilarityResult> similarityResults)
     {
-        var graph = graphBuilder.Build(name, similarityResults, clusters);
+        var graph = graphBuilder.Build(name, similarityResults);
 
+        await WriteGraphAsync(graph);
+    }
+
+
+    public async Task SaveGraphAsync(string name, List<Cluster> clusters)
+    {
+        var graph = graphBuilder.Build(name, clusters);
+
+        await WriteGraphAsync(graph);
+    }
+
+    private async Task WriteGraphAsync(DotGraph graph)
+    {
         await using var writer = new StringWriter();
         var context = new CompilationContext(writer, new CompilationOptions());
 
         await graph.CompileAsync(context);
         var result = writer.GetStringBuilder().ToString();
 
-        File.WriteAllText("graph.dot", result);
+        await File.WriteAllTextAsync(GraphName, result);
     }
 }

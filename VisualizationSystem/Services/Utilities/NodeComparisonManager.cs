@@ -29,12 +29,10 @@ public class NodeComparisonManager
         clusterer = clustererFactory.CreateClusterer(Settings.ClusterAlgorithm);
     }
 
-    public void CalculateSimilarNodes(NodeTable table)
+    public void CalculateSimilarNodes(List<NodeObject> nodes)
     {
-        var similarityResultsDict = table.NodeObjects
+        var similarityResultsDict = nodes
             .ToDictionary(node => node, node => new NodeSimilarityResult(node));
-
-        var nodes = table.NodeObjects;
 
         for (int i = 0; i < nodes.Count; ++i)
         {
@@ -64,12 +62,12 @@ public class NodeComparisonManager
         });
     }
 
-    public void CalculateClusters(float minSimilarityThreshold)
+    public void CalculateClusters(List<NodeObject> nodes, float minSimilarityThreshold)
     {
-        if (SimilarityResults.Count <= 0)
+        if (nodes.Count <= 0)
             throw new InvalidOperationException("Node analysis must be performed first before calculating clusters.");
 
-        Clusters = clusterer.Cluster(SimilarityResults, minSimilarityThreshold);
+        Clusters = clusterer.Cluster(nodes, minSimilarityThreshold);
     }
 
     private float GetSimilarityPercentage(NodeObject firstNode, NodeObject secondNode)

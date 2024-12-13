@@ -1,90 +1,57 @@
-﻿using VisualizationSystem.Models.Storages;
+﻿using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Storages.Clusters;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
 
 public class AgglomerativeClusterer : IClusterize
 {
-    private Dictionary<string, int> nodeToIndex = new();
-    private float[,] similarityMatrix = {};
+    private readonly DataNormalizer dataNormalizer;
 
-    public List<Cluster> Cluster(List<NodeSimilarityResult> similarityResults, float minSimilarityThreshold)
+    public AgglomerativeClusterer(DataNormalizer dataNormalizer)
     {
-        var clusters = similarityResults
-            .Select(sr => new Cluster() { Nodes = { sr.Node } })
+        this.dataNormalizer = dataNormalizer;
+    }
+
+    public List<Cluster> Cluster(List<NodeObject> nodes, float minSimilarityThreshold)
+    {
+        var normalizedNodes = dataNormalizer.GetNormalizedNodes(nodes);
+
+        var clusters = normalizedNodes
+            .Select(n => new AgglomerativeCluster(n))
             .ToList();
 
-        var isMerged = new bool[clusters.Count];
-        BuildNodeToIndexMapping(similarityResults);
-        BuildSimilarityMatrix(similarityResults);
-
-        while (clusters.Count > 1)
+        while (clusters.Count(c => !c.IsMerged) > 1)
         {
-            var similarCluster = FindMostSimilarClusters(clusters, isMerged);
+            var similarCluster = FindMostSimilarClusters(clusters);
 
             if (similarCluster.Similarity < minSimilarityThreshold)
                 break;
 
-            clusters[similarCluster.FirstClusterId].Merge(clusters[similarCluster.SecondClusterId]);
-            isMerged[similarCluster.SecondClusterId] = true;
-
-            UpdateSimilarityMatrix(
-                clusters,
-                similarCluster.FirstClusterId,
-                similarCluster.SecondClusterId
-                );
+            clusters[similarCluster.FirstClusterId]
+                .Merge(clusters[similarCluster.SecondClusterId]);
         }
 
-        clusters = clusters.Where((cluster, index) => !isMerged[index]).ToList();
-
-        return clusters;
+        return clusters.Where(c => !c.IsMerged).Cast<Cluster>().ToList();
     }
 
-    private void BuildNodeToIndexMapping(List<NodeSimilarityResult> similarityResults)
-    {
-        nodeToIndex = similarityResults
-            .Select((result, index) => new { result.Node.Name, index })
-            .ToDictionary(n => n.Name, n => n.index);
-    }
-
-    private void BuildSimilarityMatrix(List<NodeSimilarityResult> similarityResults)
-    {
-        var n = similarityResults.Count;
-        similarityMatrix = new float[n, n];
-
-        for (int i = 0; i < n; ++i)
-        {
-            for (int j = 0; j < n; ++j)
-            {
-                if (i == j)
-                {
-                    similarityMatrix[i, j] = 1;
-                    continue;
-                }
-
-                var similarNode = similarityResults[i].SimilarNodes
-                    .FirstOrDefault(sn => sn.Node.Name == similarityResults[j].Node.Name);
-
-                similarityMatrix[i, j] = similarNode?.SimilarityPercentage ?? 0;
-            }
-        }
-    }
-
-    private ClusterSimilarityResult FindMostSimilarClusters(List<Cluster> clusters, bool[] isMerged)
+    private ClusterSimilarityResult FindMostSimilarClusters(List<AgglomerativeCluster> clusters)
     {
         var clusterSimilarity = new ClusterSimilarityResult();
 
         for (int i = 0; i < clusters.Count; ++i)
         {
-            if (isMerged[i])
+            if (clusters[i].IsMerged)
                 continue;
 
             for (int j = i + 1; j < clusters.Count; ++j)
             {
-                if (isMerged[j])
+                if (clusters[j].IsMerged)
                     continue;
 
-                var similarity = ComputeClusterSimilarity(clusters[i], clusters[j]);
+                var similarity = GetCosineSimilarity(
+                    clusters[i].AverageParameters, 
+                    clusters[j].AverageParameters
+                    );
 
                 if (similarity <= clusterSimilarity.Similarity)
                     continue;
@@ -96,40 +63,12 @@ public class AgglomerativeClusterer : IClusterize
         return clusterSimilarity;
     }
 
-    private float ComputeClusterSimilarity(Cluster firstCluster, Cluster secondCluster)
+    private float GetCosineSimilarity(double[] firstParameters, double[] secondParameters)
     {
-        var firstNames = firstCluster.Nodes.Select(node => node.Name).ToList();
-        var secondNames = secondCluster.Nodes.Select(node => node.Name).ToList();
-        var count = firstNames.Count * secondNames.Count;
+        var dotProduct = firstParameters.Zip(secondParameters, (x, y) => x * y).Sum();
+        var firstMagnitude = Math.Sqrt(firstParameters.Sum(x => x * x));
+        var secondMagnitude = Math.Sqrt(secondParameters.Sum(x => x * x));
 
-        var totalSimilarity = (
-            from firstName in firstNames
-            from secondName in secondNames
-            let firstIndex = nodeToIndex[firstName]
-            let secondIndex = nodeToIndex[secondName]
-            select similarityMatrix[firstIndex, secondIndex]
-            ).Sum();
-
-        return totalSimilarity / count;
-    }
-
-    private void UpdateSimilarityMatrix(List<Cluster> clusters, int mergedCluster, int removedCluster)
-    {
-        for (int i = 0; i < clusters.Count; i++)
-        {
-            if (i == mergedCluster || i == removedCluster)
-                continue;
-
-            var newSimilarity = ComputeClusterSimilarity(clusters[i], clusters[mergedCluster]);
-
-            similarityMatrix[i, mergedCluster] = newSimilarity;
-            similarityMatrix[mergedCluster, i] = newSimilarity;
-        }
-
-        for (int i = 0; i < clusters.Count; i++)
-        {
-            similarityMatrix[i, removedCluster] = -1;
-            similarityMatrix[removedCluster, i] = -1;
-        }
+        return (float)(dotProduct / (firstMagnitude * secondMagnitude));
     }
 }

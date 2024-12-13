@@ -10,22 +10,30 @@ namespace VisualizationSystem.Services.Utilities.GraphBuilders;
 
 public class MsaglGraphBuilder : GraphBuilder<Graph>
 {
-    public override Graph Build(string name, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters)
+    public override Graph Build(string name, List<NodeSimilarityResult> similarityResults)
     {
-        var graph = new Graph(name);
+        var graph = new Graph(name)
+        {
+            LayoutAlgorithmSettings = new MdsLayoutSettings(),
+        };
 
         AddNodes(graph, similarityResults);
         AddEdges(graph, similarityResults);
 
-        if (Settings.UseClustering)
+
+        return graph;
+    }
+
+    public override Graph Build(string name, List<Cluster> clusters)
+    {
+        var graph = new Graph(name)
         {
-            AddClusters(graph, clusters);
-            graph.LayoutAlgorithmSettings = new SugiyamaLayoutSettings();
-        }
-        else
-        {
-            graph.LayoutAlgorithmSettings = new MdsLayoutSettings();
-        }
+            LayoutAlgorithmSettings = new SugiyamaLayoutSettings(),
+        };
+
+        //AddNodes(graph, similarityResults);
+        //AddEdges(graph, similarityResults);
+        AddClusters(graph, clusters);
 
         return graph;
     }

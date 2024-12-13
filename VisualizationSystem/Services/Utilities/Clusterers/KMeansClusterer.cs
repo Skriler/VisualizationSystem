@@ -60,29 +60,6 @@ public class KMeansClusterer : IClusterize
         return kMeansClusters.Select(c => c.Cluster).ToList();
     }
 
-    public List<Cluster> Cluster(List<NodeSimilarityResult> similarityResults, float minSimilarityThreshold)
-    {
-        var nodes = similarityResults.Select(sr => sr.Node).ToList();
-        //var features = TODO get
-
-        //var centroids = InitializeCentroids(features);
-
-        var clusters = new List<Cluster>();
-
-        //for (int iteration = 0; iteration < maxIterations; iteration++)
-        //{
-        //    var assignments = AssignNodesToClusters(features, centroids);
-        //    var newCentroids = RecalculateCentroids(assignments, features);
-
-        //    if (AreCentroidsEqual(centroids, newCentroids))
-        //        break;
-
-        //    centroids = newCentroids;
-        //}
-
-        return clusters;
-    }
-
     private void InitializeClusters(List<NormalizedNode> nodes, int parametersCount)
     {
         var selectedIndices = new HashSet<int>();
@@ -109,7 +86,7 @@ public class KMeansClusterer : IClusterize
         
         for (int i = 0; i < kMeansClusters.Count; ++i)
         {
-            var distance = GetEuclideanDistance(node, kMeansClusters[i].Centroid);
+            var distance = GetEuclideanDistance(node.NormalizedParameters, kMeansClusters[i].Centroid);
 
             if (distance >= minDistance)
                 continue;
@@ -147,10 +124,12 @@ public class KMeansClusterer : IClusterize
         return clusterData;
     }
 
-    private double GetEuclideanDistance(NormalizedNode node, double[] centroid)
+    private double GetEuclideanDistance(List<double> data, double[] centroid)
     {
+        if (data.Count != centroid.Length)
+            throw new InvalidOperationException("Node data and centroid must be the same length");
+
         double distance = 0;
-        var data = node.NormalizedParameters;
 
         for (int i = 0; i < centroid.Length; ++i)
         {

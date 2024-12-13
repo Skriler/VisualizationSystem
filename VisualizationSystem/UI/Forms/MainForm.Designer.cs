@@ -39,7 +39,6 @@
             buildGraphToolStripMenuItem = new ToolStripMenuItem();
             settingsToolStripMenuItem = new ToolStripMenuItem();
             tabControl = new TabControl();
-            kMeansClusterToolStripMenuItem = new ToolStripMenuItem();
             menuStrip.SuspendLayout();
             SuspendLayout();
             // 
@@ -88,7 +87,7 @@
             // 
             // visualizationToolStripMenuItem
             // 
-            visualizationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { buildGraphToolStripMenuItem, settingsToolStripMenuItem, kMeansClusterToolStripMenuItem });
+            visualizationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { buildGraphToolStripMenuItem, settingsToolStripMenuItem });
             visualizationToolStripMenuItem.Name = "visualizationToolStripMenuItem";
             visualizationToolStripMenuItem.Size = new Size(85, 20);
             visualizationToolStripMenuItem.Text = "Visualization";
@@ -118,13 +117,6 @@
             tabControl.TabIndex = 3;
             tabControl.DrawItem += tabControl_DrawItem;
             tabControl.MouseDown += tabControl_MouseDown;
-            // 
-            // kMeansClusterToolStripMenuItem
-            // 
-            kMeansClusterToolStripMenuItem.Name = "kMeansClusterToolStripMenuItem";
-            kMeansClusterToolStripMenuItem.Size = new Size(180, 22);
-            kMeansClusterToolStripMenuItem.Text = "K means cluster";
-            kMeansClusterToolStripMenuItem.Click += kMeansClusterToolStripMenuItem_Click;
             // 
             // MainForm
             // 
@@ -156,6 +148,5 @@
         private ToolStripMenuItem loadTableToolStripMenuItem;
         private TabControl tabControl;
         private ToolStripMenuItem saveGraphImageToolStripMenuItem;
-        private ToolStripMenuItem kMeansClusterToolStripMenuItem;
     }
 }
