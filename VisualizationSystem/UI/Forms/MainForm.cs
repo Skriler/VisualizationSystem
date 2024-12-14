@@ -101,7 +101,7 @@ public partial class MainForm : Form
         {
             if (userSettings.UseClustering)
             {
-                await graphSaveManager.SaveGraphAsync(nodeTable.Name, nodeComparisonManager.Clusters);
+                await graphSaveManager.SaveGraphAsync(nodeTable.Name, nodeTable.NodeObjects, nodeComparisonManager.Clusters);
             }
             else
             {
@@ -273,7 +273,7 @@ public partial class MainForm : Form
         if (userSettings.UseClustering)
         {
             nodeComparisonManager.CalculateClusters(nodeTable.NodeObjects, 0.75f);
-            graph = graphBuilder.Build(nodeTable.Name, nodeComparisonManager.Clusters);
+            graph = graphBuilder.Build(nodeTable.Name, nodeTable.NodeObjects, nodeComparisonManager.Clusters);
         }
         else
         {

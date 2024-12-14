@@ -8,9 +8,9 @@ public class KMeansClusterer : IClusterize
 {
     private readonly DataNormalizer dataNormalizer;
 
-    private readonly Random random = new();
     private readonly int k;
     private readonly int maxIterations;
+    private readonly Random random;
 
     private List<KMeansCluster> kMeansClusters;
 
@@ -20,6 +20,8 @@ public class KMeansClusterer : IClusterize
 
         this.k = k;
         this.maxIterations = maxIterations;
+
+        random = new Random();
     }
 
     public List<Cluster> Cluster(List<NodeObject> nodes, float minSimilarityThreshold)

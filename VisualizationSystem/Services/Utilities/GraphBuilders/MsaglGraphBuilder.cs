@@ -1,6 +1,7 @@
 ﻿using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.Layout.Layered;
 using Microsoft.Msagl.Layout.MDS;
+using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Storages;
 using Cluster = VisualizationSystem.Models.Storages.Clusters.Cluster;
 using MsaglColor = Microsoft.Msagl.Drawing.Color;
@@ -24,14 +25,14 @@ public class MsaglGraphBuilder : GraphBuilder<Graph>
         return graph;
     }
 
-    public override Graph Build(string name, List<Cluster> clusters)
+    public override Graph Build(string name, List<NodeObject> nodes, List<Cluster> clusters)
     {
         var graph = new Graph(name)
         {
             LayoutAlgorithmSettings = new SugiyamaLayoutSettings(),
         };
 
-        //AddNodes(graph, similarityResults);
+        AddNodes(graph, nodes);
         //AddEdges(graph, similarityResults);
         AddClusters(graph, clusters);
 
@@ -49,6 +50,10 @@ public class MsaglGraphBuilder : GraphBuilder<Graph>
 
             foreach (var node in cluster.Nodes)
             {
+                var nodeColor = GetNodeColor(node.Name);
+
+                AddNode(graph, node.Name, nodeColor);
+
                 var existingNode = graph.FindNode(node.Name);
 
                 if (existingNode == null)
@@ -61,7 +66,7 @@ public class MsaglGraphBuilder : GraphBuilder<Graph>
         }
     }
 
-    protected override void AddNode(Graph graph, string nodeName, SystemColor nodeColor, int edgesCount, int maxEdges)
+    protected override void AddNode(Graph graph, string nodeName, SystemColor nodeColor)
     {
         var node = new Node(nodeName)
         {

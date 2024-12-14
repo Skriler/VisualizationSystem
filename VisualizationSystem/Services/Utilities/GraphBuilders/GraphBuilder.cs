@@ -13,7 +13,7 @@ public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>
     public UserSettings Settings { get; set; } = new();
 
     public abstract TGraph Build(string name, List<NodeSimilarityResult> similarityResults);
-    public abstract TGraph Build(string name, List<Cluster> clusters);
+    public abstract TGraph Build(string name, List<NodeObject> nodes, List<Cluster> clusters);
 
     protected virtual void AddNodes(TGraph graph, List<NodeSimilarityResult> similarityResults)
     {
@@ -27,12 +27,27 @@ public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>
             AddNode(
                 graph, 
                 currentNodeName, 
-                nodeColor, 
-                similarityResult.SimilarNodesAboveThreshold, 
-                similarityResult.SimilarNodes.Count
+                nodeColor
                 );
             
             NodeDataMap[currentNodeName] = similarityResult;
+        }
+    }
+
+    protected virtual void AddNodes(TGraph graph, List<NodeObject> nodes)
+    {
+        NodeDataMap.Clear();
+
+        foreach (var node in nodes)
+        {
+            var currentNodeName = node.Name;
+            var nodeColor = GetNodeColor(currentNodeName);
+
+            AddNode(
+                graph,
+                currentNodeName,
+                nodeColor
+            );
         }
     }
 
@@ -104,6 +119,6 @@ public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>
     }
 
     protected abstract void AddClusters(TGraph graph, List<Cluster> clusters);
-    protected abstract void AddNode(TGraph graph, string nodeName, Color nodeColor, int edgesCount, int maxEdges);
+    protected abstract void AddNode(TGraph graph, string nodeName, Color nodeColor);
     protected abstract void AddEdge(TGraph graph, string firstNodeName, string secondNodeName, float similarityPercentage);
 }

@@ -17,6 +17,7 @@ public class ClustererFactory
         {
             ClusterAlgorithm.Agglomerative => serviceProvider.GetRequiredService<AgglomerativeClusterer>(),
             ClusterAlgorithm.KMeans => serviceProvider.GetRequiredService<KMeansClusterer>(),
+            ClusterAlgorithm.DBSCAN => serviceProvider.GetRequiredService<DBSCANClusterer>(),
             _ => throw new ArgumentOutOfRangeException(nameof(algorithm))
         };
     }

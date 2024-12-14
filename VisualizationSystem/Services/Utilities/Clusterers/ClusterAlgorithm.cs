@@ -3,5 +3,6 @@
 public enum ClusterAlgorithm
 {
     Agglomerative,
-    KMeans
+    KMeans,
+    DBSCAN,
 }

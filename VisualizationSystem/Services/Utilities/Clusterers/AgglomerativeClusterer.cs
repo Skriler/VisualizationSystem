@@ -7,6 +7,8 @@ public class AgglomerativeClusterer : IClusterize
 {
     private readonly DataNormalizer dataNormalizer;
 
+    private List<AgglomerativeCluster> agglomerativeClusters;
+
     public AgglomerativeClusterer(DataNormalizer dataNormalizer)
     {
         this.dataNormalizer = dataNormalizer;
@@ -16,41 +18,41 @@ public class AgglomerativeClusterer : IClusterize
     {
         var normalizedNodes = dataNormalizer.GetNormalizedNodes(nodes);
 
-        var clusters = normalizedNodes
+        agglomerativeClusters = normalizedNodes
             .Select(n => new AgglomerativeCluster(n))
             .ToList();
 
-        while (clusters.Count(c => !c.IsMerged) > 1)
+        while (agglomerativeClusters.Count(c => !c.IsMerged) > 1)
         {
-            var similarCluster = FindMostSimilarClusters(clusters);
+            var similarCluster = FindMostSimilarClusters();
 
             if (similarCluster.Similarity < minSimilarityThreshold)
                 break;
 
-            clusters[similarCluster.FirstClusterId]
-                .Merge(clusters[similarCluster.SecondClusterId]);
+            agglomerativeClusters[similarCluster.FirstClusterId]
+                .Merge(agglomerativeClusters[similarCluster.SecondClusterId]);
         }
 
-        return clusters.Where(c => !c.IsMerged).Cast<Cluster>().ToList();
+        return agglomerativeClusters.Where(c => !c.IsMerged).Cast<Cluster>().ToList();
     }
 
-    private ClusterSimilarityResult FindMostSimilarClusters(List<AgglomerativeCluster> clusters)
+    private ClusterSimilarityResult FindMostSimilarClusters()
     {
         var clusterSimilarity = new ClusterSimilarityResult();
 
-        for (int i = 0; i < clusters.Count; ++i)
+        for (int i = 0; i < agglomerativeClusters.Count; ++i)
         {
-            if (clusters[i].IsMerged)
+            if (agglomerativeClusters[i].IsMerged)
                 continue;
 
-            for (int j = i + 1; j < clusters.Count; ++j)
+            for (int j = i + 1; j < agglomerativeClusters.Count; ++j)
             {
-                if (clusters[j].IsMerged)
+                if (agglomerativeClusters[j].IsMerged)
                     continue;
 
                 var similarity = GetCosineSimilarity(
-                    clusters[i].AverageParameters, 
-                    clusters[j].AverageParameters
+                    agglomerativeClusters[i].AverageParameters,
+                    agglomerativeClusters[j].AverageParameters
                     );
 
                 if (similarity <= clusterSimilarity.Similarity)
@@ -65,6 +67,9 @@ public class AgglomerativeClusterer : IClusterize
 
     private float GetCosineSimilarity(double[] firstParameters, double[] secondParameters)
     {
+        if (firstParameters.Length != secondParameters.Length)
+            throw new InvalidOperationException("Parameters must be the same length");
+
         var dotProduct = firstParameters.Zip(secondParameters, (x, y) => x * y).Sum();
         var firstMagnitude = Math.Sqrt(firstParameters.Sum(x => x * x));
         var secondMagnitude = Math.Sqrt(secondParameters.Sum(x => x * x));

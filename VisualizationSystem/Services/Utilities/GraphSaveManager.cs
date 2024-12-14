@@ -28,9 +28,9 @@ public class GraphSaveManager
     }
 
 
-    public async Task SaveGraphAsync(string name, List<Cluster> clusters)
+    public async Task SaveGraphAsync(string name, List<NodeObject> nodes, List<Cluster> clusters)
     {
-        var graph = graphBuilder.Build(name, clusters);
+        var graph = graphBuilder.Build(name, nodes, clusters);
 
         await WriteGraphAsync(graph);
     }
