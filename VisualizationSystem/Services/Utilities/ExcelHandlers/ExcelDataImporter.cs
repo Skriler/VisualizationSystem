@@ -1,5 +1,5 @@
 ﻿using System.Data;
-using VisualizationSystem.Models.Entities;
+using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Services.UI;
 using VisualizationSystem.Services.Utilities.Mappers;
 
@@ -7,11 +7,11 @@ namespace VisualizationSystem.Services.Utilities.ExcelHandlers;
 
 public class ExcelDataImporter
 {
-    private readonly DialogService dialogService;
+    private readonly DialogManager dialogService;
     private readonly ExcelReader excelReader;
     private readonly NodeTableMapper nodeTableMapper;
 
-    public ExcelDataImporter(DialogService dialogService, ExcelReader excelReader, NodeTableMapper nodeTableMapper)
+    public ExcelDataImporter(DialogManager dialogService, ExcelReader excelReader, NodeTableMapper nodeTableMapper)
     {
         this.dialogService = dialogService;
         this.excelReader = excelReader;

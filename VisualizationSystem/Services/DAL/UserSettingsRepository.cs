@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using VisualizationSystem.Models.Entities;
+using VisualizationSystem.Models.Entities.Settings;
 
 namespace VisualizationSystem.Services.DAL;
 
@@ -38,6 +38,7 @@ public class UserSettingsRepository
         return await db.UserSettings
             .Include(us => us.NodeTable)
             .Include(us => us.ParameterStates)
+            .Include(us => us.AlgorithmSettings)
             .FirstAsync(us => us.NodeTable.Name == tableName);
     }
 

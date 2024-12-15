@@ -1,6 +1,8 @@
-﻿using VisualizationSystem.Models.Entities;
-using VisualizationSystem.Models.Storages;
+﻿using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Models.Storages.Clusters;
+using VisualizationSystem.Models.Storages.Nodes;
+using VisualizationSystem.Services.Utilities.Normalizers;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
 
@@ -9,6 +11,8 @@ public class DBSCANClusterer : IClusterize
     private readonly DataNormalizer dataNormalizer;
     private readonly double eps;
     private readonly int minPts;
+
+    public UserSettings Settings { get; set; } = new();
 
     private HashSet<NormalizedNode> visitedNodes;
 
@@ -20,13 +24,12 @@ public class DBSCANClusterer : IClusterize
         this.minPts = minPts;
     }
 
-    public List<Cluster> Cluster(List<NodeObject> nodes, float minSimilarityThreshold)
+    public List<Cluster> Cluster(List<NodeObject> nodes)
     {
         var normalizedNodes = dataNormalizer.GetNormalizedNodes(nodes);
 
-        visitedNodes = new HashSet<NormalizedNode>();
-
         var clusters = new List<Cluster>();
+        visitedNodes = new HashSet<NormalizedNode>();
 
         foreach (var node in normalizedNodes)
         {
@@ -73,21 +76,22 @@ public class DBSCANClusterer : IClusterize
 
         foreach (var neighbor in neighbors)
         {
-            if (!cluster.Nodes.Contains(neighbor.Node))
-            {
-                cluster.AddNode(neighbor.Node);
-            }
+            if (cluster.Nodes.Contains(neighbor.Node))
+                continue;
+
+            cluster.AddNode(neighbor.Node);
 
             if (visitedNodes.Contains(neighbor))
                 continue;
 
             visitedNodes.Add(neighbor);
+
             var neighborNeighbors = GetNeighbors(neighbor, nodes);
 
             if (neighborNeighbors.Count < minPts)
                 continue;
 
-            neighbors.AddRange(neighborNeighbors.Where(n => !neighbors.Contains(n)));
+            ExpandCluster(cluster, neighbor, neighborNeighbors, nodes);
         }
     }
 

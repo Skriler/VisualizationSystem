@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using VisualizationSystem.Models.Entities;
+using VisualizationSystem.Models.Entities.Nodes;
 
 namespace VisualizationSystem.Services.DAL;
 

@@ -1,6 +1,8 @@
-﻿using VisualizationSystem.Models.Entities;
-using VisualizationSystem.Models.Storages;
+﻿using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Models.Storages.Clusters;
+using VisualizationSystem.Models.Storages.Nodes;
+using VisualizationSystem.Services.Utilities.Normalizers;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
 
@@ -11,6 +13,8 @@ public class KMeansClusterer : IClusterize
     private readonly int k;
     private readonly int maxIterations;
     private readonly Random random;
+
+    public UserSettings Settings { get; set; } = new();
 
     private List<KMeansCluster> kMeansClusters;
 
@@ -24,7 +28,7 @@ public class KMeansClusterer : IClusterize
         random = new Random();
     }
 
-    public List<Cluster> Cluster(List<NodeObject> nodes, float minSimilarityThreshold)
+    public List<Cluster> Cluster(List<NodeObject> nodes)
     {
         var normalizedNodes = dataNormalizer.GetNormalizedNodes(nodes);
         var parametersCount = normalizedNodes.FirstOrDefault()?.NormalizedParameters.Count ?? 0;
@@ -40,26 +44,26 @@ public class KMeansClusterer : IClusterize
             var assignmentsChanged = false;
 
             foreach (var kMeansCluster in kMeansClusters)
-                kMeansCluster.Cluster.Nodes.Clear();
+                kMeansCluster.Nodes.Clear();
 
             for (int i = 0; i < normalizedNodes.Count; ++i)
             {
                 var clusterIndex = GetNearestClusterIndex(normalizedNodes[i]);
 
-                if (kMeansClusters[clusterIndex].Cluster.Nodes.Contains(nodes[i])) 
+                if (kMeansClusters[clusterIndex].Nodes.Contains(nodes[i])) 
                     continue;
 
                 assignmentsChanged = true;
-                kMeansClusters[clusterIndex].Cluster.AddNode(nodes[i]);
+                kMeansClusters[clusterIndex].AddNode(nodes[i]);
             }
 
             if (!assignmentsChanged)
                 break;
 
-            RecalculateClusters(normalizedNodes, parametersCount);
+            RecalculateClusters(normalizedNodes);
         }
 
-        return kMeansClusters.Select(c => c.Cluster).ToList();
+        return kMeansClusters.Cast<Cluster>().ToList();
     }
 
     private void InitializeClusters(List<NormalizedNode> nodes, int parametersCount)
@@ -100,16 +104,16 @@ public class KMeansClusterer : IClusterize
         return clusterIndex;
     }
 
-    private void RecalculateClusters(List<NormalizedNode> data, int cols)
+    private void RecalculateClusters(List<NormalizedNode> data)
     {
         foreach (var kMeansCluster in kMeansClusters)
         {
-            var clusterData = GetClusterData(data, kMeansCluster.Cluster, cols);
+            var clusterData = GetClusterData(data, kMeansCluster);
             kMeansCluster.RecalculateCentroid(clusterData);
         }
     }
 
-    private List<List<double>> GetClusterData(List<NormalizedNode> data, Cluster cluster, int cols)
+    private List<List<double>> GetClusterData(List<NormalizedNode> data, KMeansCluster cluster)
     {
         var clusterData = new List<List<double>>();
 

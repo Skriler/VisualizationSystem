@@ -1,8 +1,8 @@
 ﻿using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.Layout.Layered;
 using Microsoft.Msagl.Layout.MDS;
-using VisualizationSystem.Models.Entities;
-using VisualizationSystem.Models.Storages;
+using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Storages.Results;
 using Cluster = VisualizationSystem.Models.Storages.Clusters.Cluster;
 using MsaglColor = Microsoft.Msagl.Drawing.Color;
 using SystemColor = System.Drawing.Color;

@@ -1,5 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using VisualizationSystem.Models.Entities;
+using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Entities.Settings;
+using VisualizationSystem.Models.Entities.Settings.AlgorithmSettings;
+using VisualizationSystem.Services.Utilities.Clusterers;
 
 namespace VisualizationSystem.Services.DAL;
 
@@ -17,9 +21,22 @@ public sealed class VisualizationSystemDbContext : DbContext
 
     public DbSet<ParameterState> ParameterStates { get; set; }
 
+    public DbSet<ClusterAlgorithmSettings> ClusterAlgorithmSettings { get; set; }
+
     public VisualizationSystemDbContext(DbContextOptions<VisualizationSystemDbContext> options)
         : base(options)
     {
         Database.EnsureCreated();
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<ClusterAlgorithmSettings>()
+            .HasDiscriminator<ClusterAlgorithm>("Algorithm")
+            .HasValue<AgglomerativeSettings>(ClusterAlgorithm.Agglomerative)
+            .HasValue<KMeansSettings>(ClusterAlgorithm.KMeans)
+            .HasValue<DBSCANSettings>(ClusterAlgorithm.DBSCAN);
     }
 }

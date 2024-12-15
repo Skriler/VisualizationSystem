@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace VisualizationSystem.Models.Entities;
+namespace VisualizationSystem.Models.Entities.Settings;
 
 public class ParameterState
 {

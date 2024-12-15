@@ -1,10 +1,12 @@
-﻿using VisualizationSystem.Models.Entities;
-using VisualizationSystem.Models.Storages;
+﻿using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Models.Storages.Clusters;
+using VisualizationSystem.Models.Storages.Nodes;
+using VisualizationSystem.Models.Storages.Results;
 using VisualizationSystem.Services.Utilities.Clusterers;
-using VisualizationSystem.Services.Utilities.Comparers;
+using VisualizationSystem.Services.Utilities.Factories;
 
-namespace VisualizationSystem.Services.Utilities;
+namespace VisualizationSystem.Services.Utilities.Comparers;
 
 public class NodeComparisonManager
 {
@@ -26,7 +28,8 @@ public class NodeComparisonManager
     public void UpdateSettings(UserSettings settings)
     {
         Settings = settings;
-        clusterer = clustererFactory.CreateClusterer(Settings.ClusterAlgorithm);
+        clusterer = clustererFactory.CreateClusterer(Settings.AlgorithmSettings.SelectedAlgorithm);
+        clusterer.UpdateSettings(settings);
     }
 
     public void CalculateSimilarNodes(List<NodeObject> nodes)
@@ -62,12 +65,12 @@ public class NodeComparisonManager
         });
     }
 
-    public void CalculateClusters(List<NodeObject> nodes, float minSimilarityThreshold)
+    public void CalculateClusters(List<NodeObject> nodes)
     {
         if (nodes.Count <= 0)
             throw new InvalidOperationException("Node analysis must be performed first before calculating clusters.");
 
-        Clusters = clusterer.Cluster(nodes, minSimilarityThreshold);
+        Clusters = clusterer.Cluster(nodes);
     }
 
     private float GetSimilarityPercentage(NodeObject firstNode, NodeObject secondNode)
@@ -101,7 +104,7 @@ public class NodeComparisonManager
             totalMatchedWeight += parameterState.Weight;
         }
 
-        return totalActiveWeight > 0 ? (totalMatchedWeight / totalActiveWeight) * 100 : 0;
+        return totalActiveWeight > 0 ? totalMatchedWeight / totalActiveWeight * 100 : 0;
 
     }
 }

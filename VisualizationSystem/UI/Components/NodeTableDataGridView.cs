@@ -1,5 +1,5 @@
 ﻿using System.Data;
-using VisualizationSystem.Models.Entities;
+using VisualizationSystem.Models.Entities.Nodes;
 
 namespace VisualizationSystem.UI.Components;
 

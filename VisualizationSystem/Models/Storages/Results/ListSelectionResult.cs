@@ -1,4 +1,4 @@
-﻿namespace VisualizationSystem.Models.Storages;
+﻿namespace VisualizationSystem.Models.Storages.Results;
 
 public class ListSelectionResult
 {

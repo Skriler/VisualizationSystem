@@ -1,6 +1,7 @@
-﻿using VisualizationSystem.Models.Entities;
+﻿using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Storages.Nodes;
 
-namespace VisualizationSystem.Models.Storages;
+namespace VisualizationSystem.Models.Storages.Results;
 
 public class NodeSimilarityResult
 {
@@ -14,7 +15,7 @@ public class NodeSimilarityResult
     }
 
     public void UpdateSimilarNodesAboveThreshold(float minSimilarityPercentage)
-    { 
+    {
         SimilarNodesAboveThreshold = SimilarNodes
             .Count(sn => sn.SimilarityPercentage > minSimilarityPercentage);
     }

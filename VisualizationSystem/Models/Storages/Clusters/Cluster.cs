@@ -1,4 +1,4 @@
-﻿using VisualizationSystem.Models.Entities;
+﻿using VisualizationSystem.Models.Entities.Nodes;
 
 namespace VisualizationSystem.Models.Storages.Clusters;
 
@@ -20,10 +20,5 @@ public class Cluster
             return;
 
         Nodes.Add(node);
-    }
-
-    public void Merge(Cluster targetCluster)
-    {
-        Nodes.AddRange(targetCluster.Nodes);
     }
 }

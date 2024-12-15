@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using VisualizationSystem.Services.Utilities.Clusterers;
 
-namespace VisualizationSystem.Services.Utilities.Clusterers;
+namespace VisualizationSystem.Services.Utilities.Factories;
 
 public class ClustererFactory
 {

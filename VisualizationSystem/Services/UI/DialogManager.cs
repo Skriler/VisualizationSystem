@@ -1,9 +1,9 @@
-﻿using VisualizationSystem.Models.Storages;
+﻿using VisualizationSystem.Models.Storages.Results;
 using VisualizationSystem.UI.Forms;
 
 namespace VisualizationSystem.Services.UI;
 
-public class DialogService
+public class DialogManager
 {
     private const string FileDialogTitle = "Select an Excel File";
     private const string InitialDirectory = "D:\\";

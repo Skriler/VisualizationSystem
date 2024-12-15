@@ -1,29 +1,59 @@
-﻿using VisualizationSystem.Models.Entities;
-using VisualizationSystem.Services.Utilities.Clusterers;
+﻿using VisualizationSystem.Models.Entities.Settings;
+using VisualizationSystem.Services.UI.Panels;
+using VisualizationSystem.Services.Utilities.Factories;
 
 namespace VisualizationSystem.UI.Forms;
 
 public partial class SettingsForm : Form
 {
     private readonly UserSettings settings;
-    private int previousIndex = -1;
+    private readonly UserSettingsFactory userSettingsFactory;
 
-    public SettingsForm(UserSettings comparisonSettings)
+    private readonly ParameterStatesPanelManager parameterStatesPanel;
+    private readonly ClusteringAlgorithmsPanelManager clusteringOptionsPanel;
+
+    public SettingsForm(UserSettings comparisonSettings, UserSettingsFactory userSettingsFactory)
     {
         InitializeComponent();
 
         settings = comparisonSettings;
+        this.userSettingsFactory = userSettingsFactory;
+
+        parameterStatesPanel = new ParameterStatesPanelManager(settings, panelParameterStates, cmbNames, nudWeight, chkbxIsActive);
+        clusteringOptionsPanel = new ClusteringAlgorithmsPanelManager(
+            settings, panelClusteringOptions, cmbClusterAlgorithm, 
+            nudFirstParameter, nudSecondParameter, lblFirstParameter, 
+            lblSecondParameter, panelParameterStates.Location
+            );
 
         InitializeMainControls();
-        InitializeParameterStatesPanel();
+
+        parameterStatesPanel.Initialize();
+        clusteringOptionsPanel.Initialize();
     }
 
-    private void cmbNames_SelectedIndexChanged(object sender, EventArgs e)
+    private void chkbxUseClustering_CheckedChanged(object sender, EventArgs e)
     {
-        if (previousIndex >= 0)
-            SaveParameterState(previousIndex);
+        panelClusteringOptions.Visible = chkbxUseClustering.Checked;
+        panelParameterStates.Visible = !chkbxUseClustering.Checked;
+    }
 
-        UpdateParameterStatesPanel();
+    private void cmbNames_SelectedValueChanged(object sender, EventArgs e)
+    {
+        if (cmbNames.SelectedItem == null)
+            return;
+
+        parameterStatesPanel.SavePrevious();
+        parameterStatesPanel.UpdateContent();
+    }
+
+    private void cmbClusterAlgorithm_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (cmbClusterAlgorithm.SelectedItem == null)
+            return;
+
+        clusteringOptionsPanel.SavePrevious();
+        clusteringOptionsPanel.UpdateContent();
     }
 
     private void btnSubmit_Click(object sender, EventArgs e)
@@ -32,13 +62,8 @@ public partial class SettingsForm : Form
         settings.DeviationPercent = (float)nudDeviationPercent.Value;
         settings.UseClustering = chkbxUseClustering.Checked;
 
-        var selectedAlgorithm = (ClusterAlgorithm)Enum.Parse(
-            typeof(ClusterAlgorithm), 
-            cmbClusterAlgorithm.SelectedItem.ToString()
-            );
-        settings.ClusterAlgorithm = selectedAlgorithm;
-
-        SaveParameterState(previousIndex);
+        parameterStatesPanel.SavePrevious();
+        clusteringOptionsPanel.SavePrevious();
 
         DialogResult = DialogResult.OK;
         Close();
@@ -48,7 +73,8 @@ public partial class SettingsForm : Form
     {
         settings.ResetToDefaults();
         InitializeMainControls();
-        UpdateParameterStatesPanel();
+        parameterStatesPanel.UpdateContent();
+        clusteringOptionsPanel.UpdateContent();
     }
 
     private void InitializeMainControls()
@@ -56,54 +82,5 @@ public partial class SettingsForm : Form
         nudMinSimilarityPercentage.Value = (decimal)settings.MinSimilarityPercentage;
         nudDeviationPercent.Value = (decimal)settings.DeviationPercent;
         chkbxUseClustering.Checked = settings.UseClustering;
-
-        var clusterAlgorithms = Enum.GetNames(typeof(ClusterAlgorithm));
-        cmbClusterAlgorithm.Items.AddRange(clusterAlgorithms);
-        cmbClusterAlgorithm.SelectedItem = settings.ClusterAlgorithm.ToString();
-    }
-
-    private void InitializeParameterStatesPanel()
-    {
-        cmbNames.Items.AddRange(
-            settings.ParameterStates
-            .Select(paramState => paramState.ParameterType.Name)
-            .ToArray()
-        );
-
-        if (cmbNames.Items.Count <= 0)
-            return;
-
-        cmbNames.SelectedIndex = 0;
-        UpdateParameterStatesPanel();
-    }
-
-    private void UpdateParameterStatesPanel()
-    {
-        var selectedName = cmbNames.SelectedItem?.ToString();
-        var newSelectedParameterState = settings.ParameterStates
-            .FirstOrDefault(p => p.ParameterType.Name == selectedName);
-
-        if (newSelectedParameterState == null)
-            return;
-
-        nudWeight.Value = (decimal)newSelectedParameterState.Weight;
-        chkbxIsActive.Checked = newSelectedParameterState.IsActive;
-        previousIndex = cmbNames.SelectedIndex;
-    }
-
-    private void SaveParameterState(int index)
-    {
-        if (index < 0 || index >= settings.ParameterStates.Count)
-            return;
-
-        var parameterName = cmbNames.Items[index]?.ToString();
-        var parameterState = settings.ParameterStates
-            .FirstOrDefault(p => p.ParameterType.Name == parameterName);
-
-        if (parameterState == null)
-            return;
-
-        parameterState.Weight = (float)nudWeight.Value;
-        parameterState.IsActive = chkbxIsActive.Checked;
     }
 }

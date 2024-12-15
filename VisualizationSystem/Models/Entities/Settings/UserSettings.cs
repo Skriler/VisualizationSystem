@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using VisualizationSystem.Services.Utilities.Clusterers;
+using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Entities.Settings.AlgorithmSettings;
 
-namespace VisualizationSystem.Models.Entities;
+namespace VisualizationSystem.Models.Entities.Settings;
 
 public class UserSettings
 {
@@ -20,12 +21,12 @@ public class UserSettings
     [Required]
     public bool UseClustering { get; set; }
 
-    [Required] 
-    public ClusterAlgorithm ClusterAlgorithm { get; set; } = ClusterAlgorithm.Agglomerative;
-
     [Required]
     public int NodeTableId { get; set; }
     public NodeTable NodeTable { get; set; } = default!;
+
+    public int AlgorithmSettingsId { get; set; }
+    public ClusterAlgorithmSettings AlgorithmSettings { get; set; } = default!;
 
     public List<ParameterState> ParameterStates { get; set; } = new();
 
@@ -34,20 +35,11 @@ public class UserSettings
         ResetCoreValues();
     }
 
-    public void InitializeNodeTableData(NodeTable nodeTable)
-    {
-        NodeTable = nodeTable;
-        ParameterStates = nodeTable.ParameterTypes
-            .Select(p => new ParameterState(p, this))
-            .ToList();
-
-        ResetCoreValues();
-    }
-
     public void ResetToDefaults()
     {
         ResetCoreValues();
         ResetParameterStates();
+        //TODO reset clusters
     }
 
     public void ResetCoreValues()

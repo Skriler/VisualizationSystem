@@ -1,6 +1,6 @@
-﻿using VisualizationSystem.Models.Entities;
+﻿using VisualizationSystem.Models.Entities.Nodes;
 
-namespace VisualizationSystem.Models.Storages;
+namespace VisualizationSystem.Models.Storages.Nodes;
 
 public class SimilarNode
 {

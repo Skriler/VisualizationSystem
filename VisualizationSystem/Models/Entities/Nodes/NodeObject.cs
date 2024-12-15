@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace VisualizationSystem.Models.Entities;
+namespace VisualizationSystem.Models.Entities.Nodes;
 
 public class NodeObject
 {
@@ -10,5 +10,5 @@ public class NodeObject
     [Required]
     public string Name { get; set; } = string.Empty;
 
-    public List<NodeParameter> Parameters  { get; set; } = new();
+    public List<NodeParameter> Parameters { get; set; } = new();
 }

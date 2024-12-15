@@ -1,8 +1,8 @@
-﻿using VisualizationSystem.Models.Entities;
-using VisualizationSystem.Models.Storages;
+﻿using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Storages.Nodes;
 using VisualizationSystem.Models.Storages.Ranges;
 
-namespace VisualizationSystem.Services.Utilities;
+namespace VisualizationSystem.Services.Utilities.Normalizers;
 
 public class DataNormalizer
 {

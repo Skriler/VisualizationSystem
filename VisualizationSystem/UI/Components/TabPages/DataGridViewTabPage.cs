@@ -1,4 +1,4 @@
-﻿using VisualizationSystem.Models.Entities;
+﻿using VisualizationSystem.Models.Entities.Nodes;
 
 namespace VisualizationSystem.UI.Components.TabPages;
 public sealed class ClosableDataGridViewTabPage : ClosableTabPageBase

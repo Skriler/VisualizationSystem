@@ -1,11 +1,12 @@
 ﻿using DotNetGraph.Compilation;
 using DotNetGraph.Core;
-using VisualizationSystem.Models.Entities;
-using VisualizationSystem.Models.Storages;
+using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Models.Storages.Clusters;
+using VisualizationSystem.Models.Storages.Results;
 using VisualizationSystem.Services.Utilities.GraphBuilders;
 
-namespace VisualizationSystem.Services.Utilities;
+namespace VisualizationSystem.Services.UI;
 
 public class GraphSaveManager
 {

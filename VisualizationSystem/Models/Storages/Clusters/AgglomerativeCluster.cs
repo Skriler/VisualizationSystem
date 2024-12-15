@@ -1,9 +1,10 @@
-﻿namespace VisualizationSystem.Models.Storages.Clusters;
+﻿using VisualizationSystem.Models.Storages.Nodes;
+
+namespace VisualizationSystem.Models.Storages.Clusters;
 
 public class AgglomerativeCluster : Cluster
 {
     public bool IsMerged { get; set; }
-
     public double[] AverageParameters { get; private set; }
 
     public AgglomerativeCluster(NormalizedNode normalizedNode)

@@ -40,14 +40,20 @@
             nudMinSimilarityPercentage = new NumericUpDown();
             nudDeviationPercent = new NumericUpDown();
             btnSetDefaults = new Button();
-            panel1 = new Panel();
-            chkbxUseClustering = new CheckBox();
+            panelClusteringOptions = new Panel();
+            nudSecondParameter = new NumericUpDown();
+            lblSecondParameter = new Label();
+            lblFirstParameter = new Label();
             cmbClusterAlgorithm = new ComboBox();
+            nudFirstParameter = new NumericUpDown();
+            chkbxUseClustering = new CheckBox();
             panelParameterStates.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nudWeight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudMinSimilarityPercentage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudDeviationPercent).BeginInit();
-            panel1.SuspendLayout();
+            panelClusteringOptions.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)nudSecondParameter).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)nudFirstParameter).BeginInit();
             SuspendLayout();
             // 
             // lblMinSimilarityPercentage
@@ -86,7 +92,7 @@
             panelParameterStates.Controls.Add(nudWeight);
             panelParameterStates.Controls.Add(chkbxIsActive);
             panelParameterStates.Controls.Add(cmbNames);
-            panelParameterStates.Location = new Point(10, 92);
+            panelParameterStates.Location = new Point(10, 132);
             panelParameterStates.Name = "panelParameterStates";
             panelParameterStates.Size = new Size(250, 90);
             panelParameterStates.TabIndex = 9;
@@ -127,7 +133,7 @@
             cmbNames.Name = "cmbNames";
             cmbNames.Size = new Size(232, 23);
             cmbNames.TabIndex = 0;
-            cmbNames.SelectedIndexChanged += cmbNames_SelectedIndexChanged;
+            cmbNames.SelectedValueChanged += cmbNames_SelectedValueChanged;
             // 
             // nudMinSimilarityPercentage
             // 
@@ -159,26 +165,46 @@
             btnSetDefaults.UseVisualStyleBackColor = true;
             btnSetDefaults.Click += btnSetDefaults_Click;
             // 
-            // panel1
+            // panelClusteringOptions
             // 
-            panel1.AccessibleDescription = "";
-            panel1.AccessibleName = "";
-            panel1.Controls.Add(cmbClusterAlgorithm);
-            panel1.Controls.Add(chkbxUseClustering);
-            panel1.Location = new Point(10, 195);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(250, 90);
-            panel1.TabIndex = 10;
+            panelClusteringOptions.AccessibleDescription = "";
+            panelClusteringOptions.AccessibleName = "";
+            panelClusteringOptions.Controls.Add(nudSecondParameter);
+            panelClusteringOptions.Controls.Add(lblSecondParameter);
+            panelClusteringOptions.Controls.Add(lblFirstParameter);
+            panelClusteringOptions.Controls.Add(cmbClusterAlgorithm);
+            panelClusteringOptions.Controls.Add(nudFirstParameter);
+            panelClusteringOptions.Location = new Point(280, 132);
+            panelClusteringOptions.Name = "panelClusteringOptions";
+            panelClusteringOptions.Size = new Size(250, 141);
+            panelClusteringOptions.TabIndex = 10;
             // 
-            // chkbxUseClustering
+            // nudSecondParameter
             // 
-            chkbxUseClustering.AutoSize = true;
-            chkbxUseClustering.Location = new Point(135, 55);
-            chkbxUseClustering.Name = "chkbxUseClustering";
-            chkbxUseClustering.Size = new Size(102, 19);
-            chkbxUseClustering.TabIndex = 1;
-            chkbxUseClustering.Text = "Use Clustering";
-            chkbxUseClustering.UseVisualStyleBackColor = true;
+            nudSecondParameter.DecimalPlaces = 1;
+            nudSecondParameter.Increment = new decimal(new int[] { 1, 0, 0, 65536 });
+            nudSecondParameter.Location = new Point(164, 96);
+            nudSecondParameter.Name = "nudSecondParameter";
+            nudSecondParameter.Size = new Size(80, 23);
+            nudSecondParameter.TabIndex = 13;
+            // 
+            // lblSecondParameter
+            // 
+            lblSecondParameter.AutoSize = true;
+            lblSecondParameter.Location = new Point(12, 98);
+            lblSecondParameter.Name = "lblSecondParameter";
+            lblSecondParameter.Size = new Size(44, 15);
+            lblSecondParameter.TabIndex = 14;
+            lblSecondParameter.Text = "Param:";
+            // 
+            // lblFirstParameter
+            // 
+            lblFirstParameter.AutoSize = true;
+            lblFirstParameter.Location = new Point(12, 55);
+            lblFirstParameter.Name = "lblFirstParameter";
+            lblFirstParameter.Size = new Size(44, 15);
+            lblFirstParameter.TabIndex = 5;
+            lblFirstParameter.Text = "Param:";
             // 
             // cmbClusterAlgorithm
             // 
@@ -188,13 +214,35 @@
             cmbClusterAlgorithm.Name = "cmbClusterAlgorithm";
             cmbClusterAlgorithm.Size = new Size(232, 23);
             cmbClusterAlgorithm.TabIndex = 4;
+            cmbClusterAlgorithm.SelectedIndexChanged += cmbClusterAlgorithm_SelectedIndexChanged;
+            // 
+            // nudFirstParameter
+            // 
+            nudFirstParameter.DecimalPlaces = 1;
+            nudFirstParameter.Increment = new decimal(new int[] { 1, 0, 0, 65536 });
+            nudFirstParameter.Location = new Point(164, 52);
+            nudFirstParameter.Name = "nudFirstParameter";
+            nudFirstParameter.Size = new Size(80, 23);
+            nudFirstParameter.TabIndex = 4;
+            // 
+            // chkbxUseClustering
+            // 
+            chkbxUseClustering.AutoSize = true;
+            chkbxUseClustering.Location = new Point(12, 92);
+            chkbxUseClustering.Name = "chkbxUseClustering";
+            chkbxUseClustering.Size = new Size(102, 19);
+            chkbxUseClustering.TabIndex = 1;
+            chkbxUseClustering.Text = "Use Clustering";
+            chkbxUseClustering.UseVisualStyleBackColor = true;
+            chkbxUseClustering.CheckedChanged += chkbxUseClustering_CheckedChanged;
             // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(268, 341);
-            Controls.Add(panel1);
+            ClientSize = new Size(543, 341);
+            Controls.Add(panelClusteringOptions);
+            Controls.Add(chkbxUseClustering);
             Controls.Add(btnSetDefaults);
             Controls.Add(nudDeviationPercent);
             Controls.Add(nudMinSimilarityPercentage);
@@ -211,8 +259,10 @@
             ((System.ComponentModel.ISupportInitialize)nudWeight).EndInit();
             ((System.ComponentModel.ISupportInitialize)nudMinSimilarityPercentage).EndInit();
             ((System.ComponentModel.ISupportInitialize)nudDeviationPercent).EndInit();
-            panel1.ResumeLayout(false);
-            panel1.PerformLayout();
+            panelClusteringOptions.ResumeLayout(false);
+            panelClusteringOptions.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)nudSecondParameter).EndInit();
+            ((System.ComponentModel.ISupportInitialize)nudFirstParameter).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -230,8 +280,12 @@
         private NumericUpDown nudMinSimilarityPercentage;
         private NumericUpDown nudDeviationPercent;
         private Button btnSetDefaults;
-        private Panel panel1;
+        private Panel panelClusteringOptions;
         private CheckBox chkbxUseClustering;
         private ComboBox cmbClusterAlgorithm;
+        private NumericUpDown nudSecondParameter;
+        private Label lblSecondParameter;
+        private Label lblFirstParameter;
+        private NumericUpDown nudFirstParameter;
     }
 }

@@ -1,17 +1,15 @@
-﻿using DotNetGraph.Core;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Msagl.Drawing;
-using VisualizationSystem.Models.Entities;
+﻿using Microsoft.Msagl.Drawing;
+using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.UI.Components.TabPages;
 
 namespace VisualizationSystem.Services.UI;
 
-public class TabControlService
+public class TabControlManager
 {
     private readonly TabControl tabControl;
     private readonly Dictionary<string, ClosableTabPageBase> tabPages;
 
-    public TabControlService(TabControl tabControl)
+    public TabControlManager(TabControl tabControl)
     {
         this.tabControl = tabControl;
         tabPages = new Dictionary<string, ClosableTabPageBase>();

@@ -1,5 +1,7 @@
-﻿using VisualizationSystem.Models.Entities;
+﻿using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Models.Storages.Clusters;
+using VisualizationSystem.Services.Utilities.Normalizers;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
 
@@ -7,14 +9,21 @@ public class AgglomerativeClusterer : IClusterize
 {
     private readonly DataNormalizer dataNormalizer;
 
+    private readonly float minSimilarityThreshold;
+
+    public UserSettings Settings { get; set; } = new();
+
     private List<AgglomerativeCluster> agglomerativeClusters;
 
-    public AgglomerativeClusterer(DataNormalizer dataNormalizer)
+
+    public AgglomerativeClusterer(DataNormalizer dataNormalizer, float minSimilarityThreshold = 0.75f)
     {
         this.dataNormalizer = dataNormalizer;
+
+        this.minSimilarityThreshold = minSimilarityThreshold;
     }
 
-    public List<Cluster> Cluster(List<NodeObject> nodes, float minSimilarityThreshold)
+    public List<Cluster> Cluster(List<NodeObject> nodes)
     {
         var normalizedNodes = dataNormalizer.GetNormalizedNodes(nodes);
 

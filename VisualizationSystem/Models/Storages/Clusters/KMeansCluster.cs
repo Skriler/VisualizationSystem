@@ -1,13 +1,11 @@
 ﻿namespace VisualizationSystem.Models.Storages.Clusters;
 
-public class KMeansCluster
+public class KMeansCluster : Cluster
 {
-    public Cluster Cluster { get; set; }
     public double[] Centroid { get; set; }
 
     public KMeansCluster(int parameterCount)
     {
-        Cluster = new Cluster();
         Centroid = new double[parameterCount];
     }
 

@@ -1,8 +1,8 @@
 ﻿using DotNetGraph.Core;
 using DotNetGraph.Extensions;
-using VisualizationSystem.Models.Entities;
-using VisualizationSystem.Models.Storages;
+using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Storages.Clusters;
+using VisualizationSystem.Models.Storages.Results;
 using Color = System.Drawing.Color;
 
 namespace VisualizationSystem.Services.Utilities.GraphBuilders;

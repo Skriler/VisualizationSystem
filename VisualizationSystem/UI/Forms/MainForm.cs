@@ -1,12 +1,14 @@
 ﻿using Microsoft.Msagl.Drawing;
-using VisualizationSystem.Models.Entities;
-using VisualizationSystem.Services.Utilities;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.UI;
 using VisualizationSystem.Services.Utilities.Clusterers;
 using VisualizationSystem.UI.Components.TabPages;
 using VisualizationSystem.Services.Utilities.ExcelHandlers;
 using VisualizationSystem.Services.Utilities.GraphBuilders;
+using VisualizationSystem.Models.Entities.Settings;
+using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Services.Utilities.Comparers;
+using VisualizationSystem.Services.Utilities.Factories;
 
 namespace VisualizationSystem.UI.Forms;
 
@@ -22,13 +24,13 @@ public partial class MainForm : Form
     private readonly GraphSaveManager graphSaveManager;
     private readonly IGraphBuilder<Graph> graphBuilder;
 
-    private readonly TabControlService tabControlService;
+    private readonly UserSettingsFactory userSettingsFactory;
+
+    private readonly TabControlManager tabControlService;
 
     private NodeTable? nodeTable;
     private UserSettings? userSettings;
     private Graph? graph;
-
-    private readonly KMeansClusterer kMeansClusterer;
 
     public MainForm(
         NodeTableRepository nodeRepository,
@@ -37,7 +39,7 @@ public partial class MainForm : Form
         NodeComparisonManager nodeComparisonManager,
         GraphSaveManager graphSaveManager,
         IGraphBuilder<Graph> graphBuilder,
-        KMeansClusterer kMeansClusterer
+        UserSettingsFactory userSettingsFactory
         )
     {
         InitializeComponent();
@@ -50,10 +52,9 @@ public partial class MainForm : Form
         this.nodeComparisonManager = nodeComparisonManager;
         this.graphSaveManager = graphSaveManager;
         this.graphBuilder = graphBuilder;
+        this.userSettingsFactory = userSettingsFactory;
 
-        tabControlService = new TabControlService(tabControl);
-
-        this.kMeansClusterer = kMeansClusterer;
+        tabControlService = new TabControlManager(tabControl);
     }
 
     private async void MainForm_Load(object sender, EventArgs e)
@@ -272,7 +273,7 @@ public partial class MainForm : Form
     {
         if (userSettings.UseClustering)
         {
-            nodeComparisonManager.CalculateClusters(nodeTable.NodeObjects, 0.75f);
+            nodeComparisonManager.CalculateClusters(nodeTable.NodeObjects);
             graph = graphBuilder.Build(nodeTable.Name, nodeTable.NodeObjects, nodeComparisonManager.Clusters);
         }
         else
@@ -319,9 +320,7 @@ public partial class MainForm : Form
         }
         else
         {
-            userSettings = new UserSettings();
-            userSettings.InitializeNodeTableData(nodeTable);
-
+            userSettings = userSettingsFactory.InitializeNodeTableData(nodeTable, ClusterAlgorithm.Agglomerative);
             await settingsRepository.AddAsync(userSettings);
         }
 
