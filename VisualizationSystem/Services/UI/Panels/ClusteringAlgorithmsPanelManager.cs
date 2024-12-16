@@ -1,6 +1,4 @@
-﻿using System.Windows.Forms;
-using VisualizationSystem.Models.Entities.Settings;
-using VisualizationSystem.Models.Entities.Settings.AlgorithmSettings;
+﻿using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Models.Storages.Configs;
 using VisualizationSystem.Services.Utilities.Clusterers;
 
@@ -60,6 +58,8 @@ public class ClusteringAlgorithmsPanelManager : PanelManager
 
         var algorithm = (ClusterAlgorithm)algorithms.GetValue(cmbClusterAlgorithm.SelectedIndex);
 
+        settings.AlgorithmSettings.SelectedAlgorithm = algorithm;
+
         Action algorithmSetupAction = algorithm switch
         {
             ClusterAlgorithm.Agglomerative => UpdateClusteringOptionsForAgglomerative,
@@ -92,34 +92,25 @@ public class ClusteringAlgorithmsPanelManager : PanelManager
 
     private void UpdateClusteringOptionsForAgglomerative()
     {
-        if (settings.AlgorithmSettings is not AgglomerativeSettings algorithmSettings)
-            return;
-
         UpdateClusteringOptions(AlgorithmParameterConfigs.AgglomerativeConfig);
 
-        nudFirstParameter.Value = (decimal)algorithmSettings.Threshold;
+        nudFirstParameter.Value = (decimal)settings.AlgorithmSettings.Threshold;
     }
 
     private void UpdateClusteringOptionsForKMeans()
     {
-        if (settings.AlgorithmSettings is not KMeansSettings algorithmSettings)
-            return;
-
         UpdateClusteringOptions(AlgorithmParameterConfigs.KMeansConfig);
 
-        nudFirstParameter.Value = algorithmSettings.NumberOfClusters;
-        nudSecondParameter.Value = algorithmSettings.MaxIterations;
+        nudFirstParameter.Value = settings.AlgorithmSettings.NumberOfClusters;
+        nudSecondParameter.Value = settings.AlgorithmSettings.MaxIterations;
     }
 
     private void UpdateClusteringOptionsForDBSCAN()
     {
-        if (settings.AlgorithmSettings is not DBSCANSettings algorithmSettings)
-            return;
-
         UpdateClusteringOptions(AlgorithmParameterConfigs.DBSCANConfig);
 
-        nudFirstParameter.Value = (decimal)algorithmSettings.Epsilon;
-        nudSecondParameter.Value = algorithmSettings.MinPoints;
+        nudFirstParameter.Value = (decimal)settings.AlgorithmSettings.Epsilon;
+        nudSecondParameter.Value = settings.AlgorithmSettings.MinPoints;
     }
 
     private void UpdateClusteringOptions(AlgorithmParameterConfig config)
@@ -135,31 +126,31 @@ public class ClusteringAlgorithmsPanelManager : PanelManager
 
         lblSecondParameter.Visible = config.HasSecondParameter;
         nudSecondParameter.Visible = config.HasSecondParameter;
+
+        ConfigureNumericUpDown(nudFirstParameter, config.IsFirstParameterInt);
+        ConfigureNumericUpDown(nudSecondParameter, config.IsSecondParameterInt);
+    }
+
+    private void ConfigureNumericUpDown(NumericUpDown nud, bool isInt)
+    {
+        nud.DecimalPlaces = isInt ? 0 : 1;
+        nud.Increment = isInt ? 1 : (decimal)0.1;
     }
 
     private void SaveAgglomerativeSettings()
     {
-        if (settings.AlgorithmSettings is not AgglomerativeSettings algorithmSettings)
-            return;
-
-        algorithmSettings.Threshold = (float)nudFirstParameter.Value;
+        settings.AlgorithmSettings.Threshold = (float)nudFirstParameter.Value;
     }
 
     private void SaveKMeansSettings()
     {
-        if (settings.AlgorithmSettings is not KMeansSettings algorithmSettings)
-            return;
-
-        algorithmSettings.NumberOfClusters = (int)nudFirstParameter.Value;
-        algorithmSettings.MaxIterations = (int)nudSecondParameter.Value;
+        settings.AlgorithmSettings.NumberOfClusters = (int)nudFirstParameter.Value;
+        settings.AlgorithmSettings.MaxIterations = (int)nudSecondParameter.Value;
     }
 
     private void SaveDBSCANSettings()
     {
-        if (settings.AlgorithmSettings is not DBSCANSettings algorithmSettings)
-            return;
-
-        algorithmSettings.Epsilon = (float)nudFirstParameter.Value;
-        algorithmSettings.MinPoints = (int)nudSecondParameter.Value;
+        settings.AlgorithmSettings.Epsilon = (float)nudFirstParameter.Value;
+        settings.AlgorithmSettings.MinPoints = (int)nudSecondParameter.Value;
     }
 }

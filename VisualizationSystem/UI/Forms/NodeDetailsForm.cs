@@ -1,4 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
 using VisualizationSystem.Models.Storages.Results;
 
 namespace VisualizationSystem.UI.Forms;
@@ -32,7 +33,9 @@ public partial class NodeDetailsForm : Form
 
         foreach (var parameter in similarityResult.Node.Parameters)
         {
-            dgvNodeParameters.Rows.Add(parameter.ParameterType.Name, parameter.Value);
+            var value = FormatDecimalValue(parameter.Value);
+
+            dgvNodeParameters.Rows.Add(parameter.ParameterType.Name, value);
         }
     }
 
@@ -66,5 +69,16 @@ public partial class NodeDetailsForm : Form
             return;
 
         onNodeCellClick?.Invoke(nodeName);
+    }
+
+    private static string FormatDecimalValue(string value)
+    {
+        if (!decimal.TryParse(value, out decimal number))
+            return value;
+
+        if (number == Math.Floor(number))
+            return value;
+
+        return Math.Round(number, 2).ToString(); 
     }
 }

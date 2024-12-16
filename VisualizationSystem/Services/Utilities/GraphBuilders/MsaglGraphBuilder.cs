@@ -11,6 +11,10 @@ namespace VisualizationSystem.Services.Utilities.GraphBuilders;
 
 public class MsaglGraphBuilder : GraphBuilder<Graph>
 {
+    public MsaglGraphBuilder(GraphColorAssigner colorAssigner) 
+        : base(colorAssigner)
+    { }
+
     public override Graph Build(string name, List<NodeSimilarityResult> similarityResults)
     {
         var graph = new Graph(name)
@@ -20,7 +24,6 @@ public class MsaglGraphBuilder : GraphBuilder<Graph>
 
         AddNodes(graph, similarityResults);
         AddEdges(graph, similarityResults);
-
 
         return graph;
     }
@@ -32,7 +35,7 @@ public class MsaglGraphBuilder : GraphBuilder<Graph>
             LayoutAlgorithmSettings = new SugiyamaLayoutSettings(),
         };
 
-        AddNodes(graph, nodes);
+        AddNodes(graph, nodes, clusters);
         //AddEdges(graph, similarityResults);
         AddClusters(graph, clusters);
 
@@ -41,6 +44,8 @@ public class MsaglGraphBuilder : GraphBuilder<Graph>
 
     protected override void AddClusters(Graph graph, List<Cluster> clusters)
     {
+        NodeDataMap.Clear();
+
         foreach (var cluster in clusters)
         {
             var subgraph = new Subgraph(cluster.Id.ToString())
@@ -50,10 +55,6 @@ public class MsaglGraphBuilder : GraphBuilder<Graph>
 
             foreach (var node in cluster.Nodes)
             {
-                var nodeColor = GetNodeColor(node.Name);
-
-                AddNode(graph, node.Name, nodeColor);
-
                 var existingNode = graph.FindNode(node.Name);
 
                 if (existingNode == null)
@@ -92,7 +93,7 @@ public class MsaglGraphBuilder : GraphBuilder<Graph>
         //edge.LabelText = $"{similarityPercentage:F1}%";
         //edge.Attr.Length = 1.0 / similarityPercentage;
 
-        var edgeColor = CalculateEdgeColor(similarityPercentage, Settings.MinSimilarityPercentage);
+        var edgeColor = colorAssigner.CalculateEdgeColor(similarityPercentage, Settings.MinSimilarityPercentage);
         edge.Attr.Color = new MsaglColor(edgeColor.A, edgeColor.R, edgeColor.G, edgeColor.B);
     }
 }

@@ -1,23 +1,20 @@
 ﻿using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Services.UI.Panels;
-using VisualizationSystem.Services.Utilities.Factories;
 
 namespace VisualizationSystem.UI.Forms;
 
 public partial class SettingsForm : Form
 {
     private readonly UserSettings settings;
-    private readonly UserSettingsFactory userSettingsFactory;
 
     private readonly ParameterStatesPanelManager parameterStatesPanel;
     private readonly ClusteringAlgorithmsPanelManager clusteringOptionsPanel;
 
-    public SettingsForm(UserSettings comparisonSettings, UserSettingsFactory userSettingsFactory)
+    public SettingsForm(UserSettings comparisonSettings)
     {
         InitializeComponent();
 
         settings = comparisonSettings;
-        this.userSettingsFactory = userSettingsFactory;
 
         parameterStatesPanel = new ParameterStatesPanelManager(settings, panelParameterStates, cmbNames, nudWeight, chkbxIsActive);
         clusteringOptionsPanel = new ClusteringAlgorithmsPanelManager(

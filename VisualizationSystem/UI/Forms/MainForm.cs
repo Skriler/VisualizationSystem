@@ -62,6 +62,8 @@ public partial class MainForm : Form
         await LoadTableNamesToMenuAsync();
 
         tabControl.Padding = new Point(20, 3);
+
+        saveGraphImageToolStripMenuItem.Visible = false;
     }
 
     private async void uploadExcelFileToolStripMenuItem_Click(object sender, EventArgs e)

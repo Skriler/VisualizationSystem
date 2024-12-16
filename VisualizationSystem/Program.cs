@@ -57,13 +57,13 @@ internal static class Program
         services.AddSingleton<ExcelDataImporter>();
         services.AddSingleton<NodeComparisonManager>();
         services.AddSingleton<GraphSaveManager>();
+        services.AddSingleton<GraphColorAssigner>();
 
         services.AddSingleton<DataNormalizer>();
         services.AddSingleton<KMeansClusterer>();
         services.AddSingleton<AgglomerativeClusterer>();
         services.AddSingleton<DBSCANClusterer>();
 
-        services.AddSingleton<ClusterAlgorithmSettingsFactory>();
         services.AddSingleton<UserSettingsFactory>();
         services.AddSingleton<ClustererFactory>();
         

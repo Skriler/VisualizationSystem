@@ -29,7 +29,7 @@ public class NodeComparisonManager
     {
         Settings = settings;
         clusterer = clustererFactory.CreateClusterer(Settings.AlgorithmSettings.SelectedAlgorithm);
-        clusterer.UpdateSettings(settings);
+        clusterer.UpdateSettings(settings.AlgorithmSettings);
     }
 
     public void CalculateSimilarNodes(List<NodeObject> nodes)

@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Models.Entities.Settings.AlgorithmSettings;
 
 namespace VisualizationSystem.Models.Entities.Settings;
 
@@ -39,7 +38,7 @@ public class UserSettings
     {
         ResetCoreValues();
         ResetParameterStates();
-        //TODO reset clusters
+        AlgorithmSettings.ResetToDefaults();
     }
 
     public void ResetCoreValues()

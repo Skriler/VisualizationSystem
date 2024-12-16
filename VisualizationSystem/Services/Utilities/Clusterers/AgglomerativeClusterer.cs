@@ -8,19 +8,13 @@ namespace VisualizationSystem.Services.Utilities.Clusterers;
 public class AgglomerativeClusterer : IClusterize
 {
     private readonly DataNormalizer dataNormalizer;
-
-    private readonly float minSimilarityThreshold;
-
-    public UserSettings Settings { get; set; } = new();
-
     private List<AgglomerativeCluster> agglomerativeClusters;
 
+    public ClusterAlgorithmSettings AlgorithmSettings { get; set; } = new();
 
-    public AgglomerativeClusterer(DataNormalizer dataNormalizer, float minSimilarityThreshold = 0.75f)
+    public AgglomerativeClusterer(DataNormalizer dataNormalizer)
     {
         this.dataNormalizer = dataNormalizer;
-
-        this.minSimilarityThreshold = minSimilarityThreshold;
     }
 
     public List<Cluster> Cluster(List<NodeObject> nodes)
@@ -35,7 +29,7 @@ public class AgglomerativeClusterer : IClusterize
         {
             var similarCluster = FindMostSimilarClusters();
 
-            if (similarCluster.Similarity < minSimilarityThreshold)
+            if (similarCluster.Similarity < AlgorithmSettings.Threshold)
                 break;
 
             agglomerativeClusters[similarCluster.FirstClusterId]

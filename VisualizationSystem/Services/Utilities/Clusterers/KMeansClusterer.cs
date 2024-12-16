@@ -9,21 +9,14 @@ namespace VisualizationSystem.Services.Utilities.Clusterers;
 public class KMeansClusterer : IClusterize
 {
     private readonly DataNormalizer dataNormalizer;
-
-    private readonly int k;
-    private readonly int maxIterations;
     private readonly Random random;
-
-    public UserSettings Settings { get; set; } = new();
-
     private List<KMeansCluster> kMeansClusters;
 
-    public KMeansClusterer(DataNormalizer dataNormalizer, int k = 5, int maxIterations = 100)
+    public ClusterAlgorithmSettings AlgorithmSettings { get; set; } = new();
+
+    public KMeansClusterer(DataNormalizer dataNormalizer)
     {
         this.dataNormalizer = dataNormalizer;
-
-        this.k = k;
-        this.maxIterations = maxIterations;
 
         random = new Random();
     }
@@ -33,13 +26,13 @@ public class KMeansClusterer : IClusterize
         var normalizedNodes = dataNormalizer.GetNormalizedNodes(nodes);
         var parametersCount = normalizedNodes.FirstOrDefault()?.NormalizedParameters.Count ?? 0;
 
-        if (normalizedNodes.Count < k)
+        if (normalizedNodes.Count < AlgorithmSettings.NumberOfClusters)
             throw new InvalidOperationException("Nodes amount is less than the number of clusters");
 
-        kMeansClusters = new List<KMeansCluster>(k);
+        kMeansClusters = new List<KMeansCluster>(AlgorithmSettings.NumberOfClusters);
         InitializeClusters(normalizedNodes, parametersCount);
 
-        for (int iteration = 0; iteration < maxIterations; ++iteration)
+        for (int iteration = 0; iteration < AlgorithmSettings.MaxIterations; ++iteration)
         {
             var assignmentsChanged = false;
 
@@ -70,7 +63,7 @@ public class KMeansClusterer : IClusterize
     {
         var selectedIndices = new HashSet<int>();
 
-        for (int i = 0; i < k; ++i)
+        for (int i = 0; i < AlgorithmSettings.NumberOfClusters; ++i)
         {
             var cluster = new KMeansCluster(parametersCount);
 

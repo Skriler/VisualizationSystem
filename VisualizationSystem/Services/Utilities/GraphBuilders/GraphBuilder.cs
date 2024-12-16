@@ -7,11 +7,18 @@ namespace VisualizationSystem.Services.Utilities.GraphBuilders;
 
 public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>
 {
+    protected readonly GraphColorAssigner colorAssigner;
+
     protected readonly Random random = new();
     protected readonly Dictionary<string, Color> nodeColors = new();
 
     public Dictionary<string, NodeSimilarityResult> NodeDataMap { get; } = new();
     public UserSettings Settings { get; set; } = new();
+
+    protected GraphBuilder(GraphColorAssigner colorAssigner)
+    {
+        this.colorAssigner = colorAssigner;
+    }
 
     public abstract TGraph Build(string name, List<NodeSimilarityResult> similarityResults);
     public abstract TGraph Build(string name, List<NodeObject> nodes, List<Cluster> clusters);
@@ -20,10 +27,15 @@ public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>
     {
         NodeDataMap.Clear();
 
+        var minSimilarity = similarityResults.Min(result => result.SimilarNodes.Min(s => s.SimilarityPercentage));
+        var maxSimilarity = similarityResults.Max(result => result.SimilarNodes.Max(s => s.SimilarityPercentage));
+
         foreach (var similarityResult in similarityResults)
         {
             var currentNodeName = similarityResult.Node.Name;
-            var nodeColor = GetNodeColor(currentNodeName);
+
+            var nodeColor = colorAssigner
+                .GetNodeColorFromDensityWithSigmoid(similarityResult, similarityResults.Count, Settings.MinSimilarityPercentage);
 
             AddNode(
                 graph, 
@@ -35,14 +47,18 @@ public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>
         }
     }
 
-    protected virtual void AddNodes(TGraph graph, List<NodeObject> nodes)
+    protected virtual void AddNodes(TGraph graph, List<NodeObject> nodes, List<Cluster> clusters)
     {
         NodeDataMap.Clear();
 
         foreach (var node in nodes)
         {
             var currentNodeName = node.Name;
-            var nodeColor = GetNodeColor(currentNodeName);
+
+            var cluster = clusters.FirstOrDefault(c => c.Nodes.Contains(node));
+            var nodeColor = cluster != null
+                ? GetColorByName(cluster.Id.ToString())
+                : GetColorByName(node.Name);
 
             AddNode(
                 graph,
@@ -79,13 +95,13 @@ public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>
         }
     }
 
-    protected Color GetNodeColor(string nodeName)
+    protected Color GetColorByName(string name)
     {
-        if (nodeColors.TryGetValue(nodeName, out Color nodeColor))
+        if (nodeColors.TryGetValue(name, out Color nodeColor))
             return nodeColor;
 
         var newColor = GetNewRandomColor();
-        nodeColors[nodeName] = newColor;
+        nodeColors[name] = newColor;
 
         return newColor;
     }
@@ -96,22 +112,14 @@ public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>
 
         do
         {
-            randColor = Color.FromArgb(random.Next(256), random.Next(256), random.Next(256));
+            randColor = Color.FromArgb(
+                random.Next(128, 256),
+                random.Next(128, 256),
+                random.Next(128, 256)
+            );
         } while (nodeColors.Values.Contains(randColor));
 
         return randColor;
-    }
-
-    protected Color CalculateEdgeColor(float similarityPercentage, float minSimilarityThreshold)
-    {
-        var normalizedSimilarity = (similarityPercentage - minSimilarityThreshold) / (100 - minSimilarityThreshold);
-
-        // Interpolation between red (when the closest is 0) and green (when the closest is 100)
-        var red = (byte)(255 * (1 - normalizedSimilarity)); // Red decreases from 255 to 0
-        var green = (byte)(255 * normalizedSimilarity);     // Green increases from 0 to 255
-        const byte blue = 0;                                // Blue stays at 0
-
-        return Color.FromArgb(red, green, blue);
     }
 
     protected double GetNodeSize(int connectionCount, int maxConnections)

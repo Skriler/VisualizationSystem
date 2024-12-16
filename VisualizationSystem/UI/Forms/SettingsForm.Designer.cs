@@ -240,7 +240,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(543, 341);
+            ClientSize = new Size(268, 341);
             Controls.Add(panelClusteringOptions);
             Controls.Add(chkbxUseClustering);
             Controls.Add(btnSetDefaults);

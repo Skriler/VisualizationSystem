@@ -6,9 +6,9 @@ namespace VisualizationSystem.Services.Utilities.Clusterers;
 
 public interface IClusterize
 {
-    public UserSettings Settings { get; protected set; }
+    public ClusterAlgorithmSettings AlgorithmSettings { get; protected set; }
 
     List<Cluster> Cluster(List<NodeObject> nodes);
 
-    void UpdateSettings(UserSettings settings) => Settings = settings;
+    void UpdateSettings(ClusterAlgorithmSettings algorithmSettings) => AlgorithmSettings = algorithmSettings;
 }

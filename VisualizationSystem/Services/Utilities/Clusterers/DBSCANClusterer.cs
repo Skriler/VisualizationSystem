@@ -9,19 +9,13 @@ namespace VisualizationSystem.Services.Utilities.Clusterers;
 public class DBSCANClusterer : IClusterize
 {
     private readonly DataNormalizer dataNormalizer;
-    private readonly double eps;
-    private readonly int minPts;
-
-    public UserSettings Settings { get; set; } = new();
-
     private HashSet<NormalizedNode> visitedNodes;
 
-    public DBSCANClusterer(DataNormalizer dataNormalizer, double eps = 4, int minPts = 4)
+    public ClusterAlgorithmSettings AlgorithmSettings { get; set; } = new();
+
+    public DBSCANClusterer(DataNormalizer dataNormalizer)
     {
         this.dataNormalizer = dataNormalizer;
-
-        this.eps = eps;
-        this.minPts = minPts;
     }
 
     public List<Cluster> Cluster(List<NodeObject> nodes)
@@ -40,7 +34,7 @@ public class DBSCANClusterer : IClusterize
 
             var neighbors = GetNeighbors(node, normalizedNodes);
 
-            if (neighbors.Count < minPts)
+            if (neighbors.Count < AlgorithmSettings.MinPoints)
                 continue;
 
             var cluster = new Cluster();
@@ -63,7 +57,7 @@ public class DBSCANClusterer : IClusterize
     {
         var distance = GetMixedDistance(node.NormalizedParameters, other.NormalizedParameters);
 
-        return distance <= eps;
+        return distance <= AlgorithmSettings.Epsilon;
     }
 
     private void ExpandCluster(
@@ -88,7 +82,7 @@ public class DBSCANClusterer : IClusterize
 
             var neighborNeighbors = GetNeighbors(neighbor, nodes);
 
-            if (neighborNeighbors.Count < minPts)
+            if (neighborNeighbors.Count < AlgorithmSettings.MinPoints)
                 continue;
 
             ExpandCluster(cluster, neighbor, neighborNeighbors, nodes);
