@@ -1,60 +1,77 @@
 ﻿using Microsoft.IdentityModel.Tokens;
-using System.Globalization;
+using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Storages.Nodes;
 using VisualizationSystem.Models.Storages.Results;
 
 namespace VisualizationSystem.UI.Forms;
 
 public partial class NodeDetailsForm : Form
 {
-    private readonly NodeSimilarityResult similarityResult;
     private readonly Action<string> onNodeCellClick;
 
-    public NodeDetailsForm(NodeSimilarityResult nodeSimilarityResult, Action<string> onNodeCellClick)
+    public NodeDetailsForm(NodeSimilarityResult similarityResult, Action<string> onNodeCellClick)
     {
         InitializeComponent();
 
-        similarityResult = nodeSimilarityResult;
         this.onNodeCellClick = onNodeCellClick;
 
-        FillWithData();
+        FillWithData(similarityResult);
     }
 
-    public void FillWithData()
+    public void FillWithData(NodeSimilarityResult similarityResult)
     {
         Text = $"Details for {similarityResult.Node.Name}";
 
-        InitializeNodeParametersGrid();
-        InitializeSimilarNodesGrid();
+        InitializeNodeParametersGrid(similarityResult.Node.Parameters);
+        InitializeSimilarNodesGrid(similarityResult.SimilarNodes);
     }
 
-    private void InitializeNodeParametersGrid()
+    private void InitializeNodeParametersGrid(List<NodeParameter> parameters)
     {
         dgvNodeParameters.Rows.Clear();
 
-        foreach (var parameter in similarityResult.Node.Parameters)
-        {
-            var value = FormatDecimalValue(parameter.Value);
+        var rows = new List<DataGridViewRow>();
 
-            dgvNodeParameters.Rows.Add(parameter.ParameterType.Name, value);
+        foreach (var parameter in parameters)
+        {
+            var row = new DataGridViewRow();
+            var value = FormatDecimalValue(parameter.Value);
+            
+            row.CreateCells(
+                dgvNodeParameters, 
+                parameter.ParameterType.Name, 
+                value
+                );
+            rows.Add(row);
         }
+
+        dgvNodeParameters.Rows.AddRange(rows.ToArray());
     }
 
-    private void InitializeSimilarNodesGrid()
+    private void InitializeSimilarNodesGrid(List<SimilarNode> similarNodes)
     {
         dgvSimilarNodes.Rows.Clear();
 
-        foreach (var similarNode in similarityResult.SimilarNodes)
-        {
-            var similarityPercentage = $"{similarNode.SimilarityPercentage:F2}";
+        var sortedNodes = similarNodes
+        .OrderByDescending(sn => sn.SimilarityPercentage)
+        .ToList();
 
-            dgvSimilarNodes.Rows.Add(similarNode.Node.Name, similarityPercentage);
+        var rows = new List<DataGridViewRow>();
+
+        foreach (var node in sortedNodes)
+        {
+            var row = new DataGridViewRow();
+            var similarityPercentage = Math.Round(node.SimilarityPercentage, 2);
+            
+            row.CreateCells(
+                dgvSimilarNodes, 
+                node.Node.Name, 
+                similarityPercentage
+                );
+            rows.Add(row);
         }
 
-        dgvSimilarNodes.Sort(
-            dgvSimilarNodes.Columns[1],
-            System.ComponentModel.ListSortDirection.Descending
-            );
-
+        dgvSimilarNodes.Rows.AddRange(rows.ToArray());
         dgvSimilarNodes.CellDoubleClick += dgvSimilarNodes_CellDoubleClick;
     }
 
@@ -79,6 +96,6 @@ public partial class NodeDetailsForm : Form
         if (number == Math.Floor(number))
             return value;
 
-        return Math.Round(number, 2).ToString(); 
+        return Math.Round(number, 2).ToString();
     }
 }
