@@ -153,18 +153,32 @@ public partial class MainForm : Form
         }
     }
 
-    private async void loadTableToolStripMenuItem_Click(object sender, EventArgs e)
+    private async void LoadTable(string tableName)
     {
-        if (sender is not ToolStripMenuItem selectedItem || string.IsNullOrEmpty(selectedItem.Text))
+        if (string.IsNullOrEmpty(tableName))
             return;
 
-        if (selectedItem.Text == nodeTable?.Name)
+        if (tableName == nodeTable?.Name)
         {
             ShowWarning($"Table {nodeTable.Name} is already loaded");
             return;
         }
 
-        await LoadTableAsync(selectedItem.Text);
+        await LoadTableAsync(tableName);
+    }
+
+    private async void DeleteTable(string tableName)
+    {
+        if (string.IsNullOrEmpty(tableName))
+            return;
+
+        if (tableName == nodeTable?.Name)
+        {
+            ShowWarning($"Table {nodeTable.Name} is already loaded");
+            return;
+        }
+
+        await DeleteTableAsync(tableName);
     }
 
     private void tabControl_DrawItem(object sender, DrawItemEventArgs e)
@@ -222,21 +236,21 @@ public partial class MainForm : Form
         foreach (var loadedTable in loadedTables)
         {
             await nodeRepository.AddTableAsync(loadedTable);
-            AddTableToolStripMenuItem(loadedTable.Name);
         }
 
-        loadTableToolStripMenuItem.Enabled = true;
+        await LoadTableNamesToMenuAsync();
+        tablesToolStripMenuItem.Enabled = true;
     }
 
     private async Task LoadTableNamesToMenuAsync()
     {
-        loadTableToolStripMenuItem.DropDownItems.Clear();
+        tablesToolStripMenuItem.DropDownItems.Clear();
 
         var tables = await nodeRepository.GetAllAsync();
 
         if (tables.Count <= 0)
         {
-            loadTableToolStripMenuItem.Enabled = false;
+            tablesToolStripMenuItem.Enabled = false;
             return;
         }
 
@@ -249,15 +263,29 @@ public partial class MainForm : Form
             AddTableToolStripMenuItem(tableName);
         }
 
-        loadTableToolStripMenuItem.Enabled = true;
+        tablesToolStripMenuItem.Enabled = true;
     }
 
     private void AddTableToolStripMenuItem(string tableName)
     {
         var tableMenuItem = new ToolStripMenuItem(tableName);
-        tableMenuItem.Click += loadTableToolStripMenuItem_Click;
 
-        loadTableToolStripMenuItem.DropDownItems.Add(tableMenuItem);
+        tableMenuItem.DropDownItems.Add(
+            CreateMenuItem("Load", () => LoadTable(tableName))
+            );
+        tableMenuItem.DropDownItems.Add(
+            CreateMenuItem("Delete", () => DeleteTable(tableName))
+            );
+
+        tablesToolStripMenuItem.DropDownItems.Add(tableMenuItem);
+    }
+
+    private ToolStripMenuItem CreateMenuItem(string text, Action onClickAction)
+    {
+        var menuItem = new ToolStripMenuItem(text);
+        menuItem.Click += (sender, e) => onClickAction();
+
+        return menuItem;
     }
 
     private void AddDataGridViewTab()
@@ -287,7 +315,7 @@ public partial class MainForm : Form
 
     private async Task LoadTableAsync(string tableName)
     {
-        using var loadingForm = new LoadingForm();
+        using var loadingForm = new LoadingForm("Loading table...");
         loadingForm.Show();
         loadingForm.BringToFront();
 
@@ -298,11 +326,44 @@ public partial class MainForm : Form
             nodeTable = await nodeRepository.GetByNameAsync(tableName);
             await LoadUserSettingsAsync();
 
-            ShowSuccess("File uploaded successfully!");
+            ShowSuccess("Table loaded successfully!");
         }
         catch (Exception ex)
         {
-            ShowError("Error while uploading data", ex);
+            ShowError("Error while uploading table", ex);
+        }
+        finally
+        {
+            loadingForm.Close();
+
+            Enabled = true;
+            BringToFront();
+            UpdateFormTitle();
+        }
+    }
+
+    private async Task DeleteTableAsync(string tableName)
+    {
+        using var loadingForm = new LoadingForm("Deleting table...");
+        loadingForm.Show();
+        loadingForm.BringToFront();
+
+        Enabled = false;
+
+        try
+        {
+            await nodeRepository.DeleteTableAsync(tableName);
+
+            tablesToolStripMenuItem.DropDownItems.RemoveByKey(tableName);
+            tabControlService.RemoveRelatedTabPages(tableName);
+
+            await LoadTableNamesToMenuAsync();
+
+            ShowSuccess("File deleted successfully!");
+        }
+        catch (Exception ex)
+        {
+            ShowError("Error while deleting table", ex);
         }
         finally
         {

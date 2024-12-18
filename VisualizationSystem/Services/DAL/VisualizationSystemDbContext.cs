@@ -2,7 +2,6 @@
 using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Settings;
-using VisualizationSystem.Services.Utilities.Clusterers;
 
 namespace VisualizationSystem.Services.DAL;
 
@@ -26,5 +25,51 @@ public sealed class VisualizationSystemDbContext : DbContext
         : base(options)
     {
         Database.EnsureCreated();
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        ConfigureCascadeDeleteForNodeTable(modelBuilder);
+    }
+
+    private void ConfigureCascadeDeleteForNodeTable(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<NodeTable>()
+            .HasMany(nt => nt.NodeObjects)
+            .WithOne()
+            .HasForeignKey("NodeTableId")
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<NodeObject>()
+            .HasMany(no => no.Parameters)
+            .WithOne(np => np.NodeObject)
+            .HasForeignKey(np => np.NodeObjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<NodeParameter>()
+            .HasOne(np => np.ParameterType)
+            .WithMany()
+            .HasForeignKey(np => np.ParameterTypeId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserSettings>()
+            .HasOne(us => us.NodeTable)
+            .WithMany()
+            .HasForeignKey(us => us.NodeTableId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ParameterState>()
+            .HasOne(ps => ps.UserSettings)
+            .WithMany(us => us.ParameterStates)
+            .HasForeignKey(ps => ps.UserSettingsId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ClusterAlgorithmSettings>()
+            .HasOne(cas => cas.UserSettings)
+            .WithOne(us => us.AlgorithmSettings)
+            .HasForeignKey<ClusterAlgorithmSettings>(cas => cas.UserSettingsId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             progressBarLoading = new ProgressBar();
-            lblLoading = new Label();
+            lblMessage = new Label();
             SuspendLayout();
             // 
             // progressBarLoading
@@ -40,21 +40,21 @@
             progressBarLoading.Style = ProgressBarStyle.Marquee;
             progressBarLoading.TabIndex = 0;
             // 
-            // lblLoading
+            // lblMessage
             // 
-            lblLoading.AutoSize = true;
-            lblLoading.Location = new Point(50, 18);
-            lblLoading.Name = "lblLoading";
-            lblLoading.Size = new Size(85, 15);
-            lblLoading.TabIndex = 1;
-            lblLoading.Text = "Loading data...";
+            lblMessage.AutoSize = true;
+            lblMessage.Location = new Point(82, 19);
+            lblMessage.Name = "lblMessage";
+            lblMessage.Size = new Size(16, 15);
+            lblMessage.TabIndex = 1;
+            lblMessage.Text = "...";
             // 
             // LoadingForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(189, 78);
-            Controls.Add(lblLoading);
+            Controls.Add(lblMessage);
             Controls.Add(progressBarLoading);
             FormBorderStyle = FormBorderStyle.None;
             Name = "LoadingForm";
@@ -69,6 +69,6 @@
         #endregion
 
         private ProgressBar progressBarLoading;
-        private Label lblLoading;
+        private Label lblMessage;
     }
 }

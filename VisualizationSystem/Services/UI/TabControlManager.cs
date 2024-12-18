@@ -57,16 +57,43 @@ public class TabControlManager
 
     public void RemoveTabPage(TabPage tabPage)
     {
-        var tabPageId = tabPages
+        var tabId = tabPages
             .Where(kvp => kvp.Value == tabPage)
             .Select(kvp => kvp.Key)
             .FirstOrDefault();
 
-        if (tabPageId == null)
+        if (tabId == null)
             return;
 
+        RemoveTabPage(tabPage, tabId);
+    }
+
+    public void RemoveTabPage(string tabId)
+    {
+        var tabPage = tabPages
+            .Where(kvp => kvp.Key == tabId)
+            .Select(kvp => kvp.Value)
+            .FirstOrDefault();
+
+        if (tabPage == null)
+            return;
+
+        RemoveTabPage(tabPage, tabId);
+    }
+
+    private void RemoveTabPage(TabPage tabPage, string tabId)
+    {
         tabControl.TabPages.Remove(tabPage);
-        tabPages.Remove(tabPageId);
+        tabPages.Remove(tabId);
+    }
+
+    public void RemoveRelatedTabPages(string tableName)
+    {
+        var dataGridViewTabId = GetDataGridViewTabId(tableName);
+        var gViewerTabId = GetGViewerTabId(tableName);
+
+        RemoveTabPage(dataGridViewTabId);
+        RemoveTabPage(gViewerTabId);
     }
 
     private void AddTabPage(string tabId, ClosableTabPageBase tabPage)

@@ -33,6 +33,10 @@ public class ClusterAlgorithmSettings
     [Required]
     public int MinPoints { get; set; }
 
+    [Required]
+    public int UserSettingsId { get; set; }
+    public UserSettings UserSettings { get; set; } = default!;
+
     public ClusterAlgorithmSettings()
     {
         ResetToDefaults();

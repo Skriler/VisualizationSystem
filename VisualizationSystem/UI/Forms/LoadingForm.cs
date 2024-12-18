@@ -5,9 +5,11 @@ public partial class LoadingForm : Form
     private const short DefaultBorderThickness = 4;
     private static readonly Color DefaultBorderColor = Color.Black;
 
-    public LoadingForm()
+    public LoadingForm(string loadingMessage)
     {
         InitializeComponent();
+
+        lblMessage.Text = loadingMessage;
     }
 
     private void LoadingForm_Paint(object sender, PaintEventArgs e)
