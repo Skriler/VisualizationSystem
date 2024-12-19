@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Msagl.Drawing;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.UI;
+using VisualizationSystem.Services.Utilities;
 using VisualizationSystem.Services.Utilities.Clusterers;
 using VisualizationSystem.Services.Utilities.Comparers;
 using VisualizationSystem.Services.Utilities.ExcelHandlers;
@@ -64,9 +65,10 @@ internal static class Program
         services.AddSingleton<AgglomerativeClusterer>();
         services.AddSingleton<DBSCANClusterer>();
 
-        services.AddSingleton<UserSettingsFactory>();
         services.AddSingleton<ClustererFactory>();
-        
+        services.AddSingleton<UserSettingsManager>();
+        services.AddSingleton<GraphManager>();
+
         services.AddSingleton<ICompare, DefaultComparer>();
         services.AddSingleton<IGraphBuilder<Graph>, MsaglGraphBuilder>();
         services.AddSingleton<IGraphBuilder<DotGraph>, DotNetGraphBuilder>();

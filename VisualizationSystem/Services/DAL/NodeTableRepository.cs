@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Xml;
 using VisualizationSystem.Models.Entities.Nodes;
 
 namespace VisualizationSystem.Services.DAL;
@@ -13,7 +14,7 @@ public class NodeTableRepository
         db = context;
     }
 
-    public async Task AddTableAsync(NodeTable nodeTable)
+    public async Task AddAsync(NodeTable nodeTable)
     {
         if (nodeTable == null)
             throw new ArgumentNullException("Table must be initialized.");
@@ -22,6 +23,21 @@ public class NodeTableRepository
             throw new InvalidOperationException($"Table with name '{nodeTable.Name}' already exists.");
 
         db.NodeTables.Add(nodeTable);
+        await db.SaveChangesAsync();
+    }
+
+    public async Task AddListAsync(List<NodeTable> nodeTables)
+    {
+        if (nodeTables == null || nodeTables.Count == 0)
+            throw new ArgumentNullException("Table list must be initialized and cannot be empty.");
+
+        foreach (var nodeTable in nodeTables)
+        {
+            if (await ExistsAsync(nodeTable.Name))
+                throw new InvalidOperationException($"Table with name '{nodeTable.Name}' already exists.");
+        }
+
+        db.NodeTables.AddRange(nodeTables);
         await db.SaveChangesAsync();
     }
 

@@ -1,14 +1,9 @@
-﻿using Microsoft.Msagl.Drawing;
-using VisualizationSystem.Services.DAL;
-using VisualizationSystem.Services.UI;
-using VisualizationSystem.Services.Utilities.Clusterers;
+﻿using VisualizationSystem.Services.UI;
 using VisualizationSystem.UI.Components.TabPages;
 using VisualizationSystem.Services.Utilities.ExcelHandlers;
-using VisualizationSystem.Services.Utilities.GraphBuilders;
-using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Services.Utilities.Comparers;
-using VisualizationSystem.Services.Utilities.Factories;
+using VisualizationSystem.Services.Utilities;
+using VisualizationSystem.Services.DAL;
 
 namespace VisualizationSystem.UI.Forms;
 
@@ -16,43 +11,32 @@ public partial class MainForm : Form
 {
     private readonly string FormTitle;
 
-    private readonly NodeTableRepository nodeRepository;
-    private readonly UserSettingsRepository settingsRepository;
+    private readonly NodeTableRepository nodeTableRepository;
 
     private readonly ExcelDataImporter fileService;
-    private readonly NodeComparisonManager nodeComparisonManager;
-    private readonly GraphSaveManager graphSaveManager;
-    private readonly IGraphBuilder<Graph> graphBuilder;
-
-    private readonly UserSettingsFactory userSettingsFactory;
+    private readonly UserSettingsManager userSettingsManager;
+    private readonly GraphManager graphManager;
 
     private readonly TabControlManager tabControlService;
 
-    private NodeTable? nodeTable;
-    private UserSettings? userSettings;
-    private Graph? graph;
+    private NodeTable nodeTable;
 
     public MainForm(
-        NodeTableRepository nodeRepository,
-        UserSettingsRepository settingsRepository,
+        NodeTableRepository nodeTableRepository,
         ExcelDataImporter fileService,
-        NodeComparisonManager nodeComparisonManager,
-        GraphSaveManager graphSaveManager,
-        IGraphBuilder<Graph> graphBuilder,
-        UserSettingsFactory userSettingsFactory
+        UserSettingsManager userSettingsManager,
+        GraphManager graphManager
         )
     {
         InitializeComponent();
 
         FormTitle = Text;
 
-        this.nodeRepository = nodeRepository;
-        this.settingsRepository = settingsRepository;
+        this.nodeTableRepository = nodeTableRepository;
+
         this.fileService = fileService;
-        this.nodeComparisonManager = nodeComparisonManager;
-        this.graphSaveManager = graphSaveManager;
-        this.graphBuilder = graphBuilder;
-        this.userSettingsFactory = userSettingsFactory;
+        this.userSettingsManager = userSettingsManager;
+        this.graphManager = graphManager;
 
         tabControlService = new TabControlManager(tabControl);
     }
@@ -62,21 +46,24 @@ public partial class MainForm : Form
         await LoadTableNamesToMenuAsync();
 
         tabControl.Padding = new Point(20, 3);
-
         saveGraphImageToolStripMenuItem.Visible = false;
     }
 
     private async void uploadExcelFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (!await TryUploadFileAsync())
+        if (!await TryLoadTableFromFileAsync())
             return;
+
+        await LoadTableNamesToMenuAsync();
+        ApplySettingsToComponents();
+        UpdateFormTitle();
 
         ShowSuccess("File uploaded successfully!");
     }
 
     private void showToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (nodeTable == null)
+        if (nodeTable != null)
         {
             ShowWarning("No data to show");
             return;
@@ -84,7 +71,7 @@ public partial class MainForm : Form
 
         try
         {
-            AddDataGridViewTab();
+            tabControlService.AddDataGridViewTabPage(nodeTable);
         }
         catch (Exception ex)
         {
@@ -94,7 +81,7 @@ public partial class MainForm : Form
 
     private async void saveGraphImageToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (nodeTable == null)
+        if (nodeTable != null)
         {
             ShowWarning("No data to save");
             return;
@@ -102,13 +89,13 @@ public partial class MainForm : Form
 
         try
         {
-            if (userSettings.UseClustering)
+            if (userSettingsManager.UseClustering())
             {
-                await graphSaveManager.SaveGraphAsync(nodeTable.Name, nodeTable.NodeObjects, nodeComparisonManager.Clusters);
+                await graphManager.SaveClusteredGraphAsync(nodeTable);
             }
             else
             {
-                await graphSaveManager.SaveGraphAsync(nodeTable.Name, nodeComparisonManager.SimilarityResults);
+                await graphManager.SaveGraphAsync(nodeTable);
             }
         }
         catch (Exception ex)
@@ -119,7 +106,7 @@ public partial class MainForm : Form
 
     private void buildGraphToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (nodeTable == null)
+        if (nodeTable != null)
         {
             ShowWarning("No data to visualize graph");
             return;
@@ -127,7 +114,11 @@ public partial class MainForm : Form
 
         try
         {
-            AddGraphTab();
+            var graph = userSettingsManager.UseClustering() ?
+                graphManager.BuildClusteredGraph(nodeTable) :
+                graphManager.BuildGraph(nodeTable);
+
+            tabControlService.AddGViewerTabPage(graph, nodeTable.Name, OpenNodeDetailsForm);
         }
         catch (Exception ex)
         {
@@ -137,48 +128,22 @@ public partial class MainForm : Form
 
     private async void settingsToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (userSettings == null)
+        if (nodeTable != null)
         {
             ShowWarning("No data to configure");
             return;
         }
+
+        var userSettings = userSettingsManager.UserSettings;
 
         using (var settingsForm = new SettingsForm(userSettings))
         {
             if (settingsForm.ShowDialog() != DialogResult.OK)
                 return;
 
-            await settingsRepository.UpdateAsync(userSettings);
+            await userSettingsManager.UpdateAsync(userSettings);
             ApplySettingsToComponents();
         }
-    }
-
-    private async void LoadTable(string tableName)
-    {
-        if (string.IsNullOrEmpty(tableName))
-            return;
-
-        if (tableName == nodeTable?.Name)
-        {
-            ShowWarning($"Table {nodeTable.Name} is already loaded");
-            return;
-        }
-
-        await LoadTableAsync(tableName);
-    }
-
-    private async void DeleteTable(string tableName)
-    {
-        if (string.IsNullOrEmpty(tableName))
-            return;
-
-        if (tableName == nodeTable?.Name)
-        {
-            ShowWarning($"Table {nodeTable.Name} is already loaded");
-            return;
-        }
-
-        await DeleteTableAsync(tableName);
     }
 
     private void tabControl_DrawItem(object sender, DrawItemEventArgs e)
@@ -206,18 +171,20 @@ public partial class MainForm : Form
         }
     }
 
-    private async Task<bool> TryUploadFileAsync()
+    private async Task<bool> TryLoadTableFromFileAsync()
     {
         try
         {
-            if (!fileService.TryReadNodeTableFromExcelFile(out var tables))
+            if (!fileService.TryReadNodeTableFromExcelFile(out var nodeTables))
                 return false;
 
-            await AddLoadedNodeTablesAsync(tables);
+            if (!nodeTables.Any())
+                return false;
 
-            nodeTable = tables.Last();
-            await LoadUserSettingsAsync();
-            UpdateFormTitle();
+            await nodeTableRepository.AddListAsync(nodeTables);
+            nodeTable = nodeTables.Last();
+
+            await userSettingsManager.LoadAsync(nodeTable);
         }
         catch (Exception ex)
         {
@@ -228,41 +195,20 @@ public partial class MainForm : Form
         return true;
     }
 
-    private async Task AddLoadedNodeTablesAsync(List<NodeTable> loadedTables)
-    {
-        if (loadedTables.Count < 0)
-            return;
-
-        foreach (var loadedTable in loadedTables)
-        {
-            await nodeRepository.AddTableAsync(loadedTable);
-        }
-
-        await LoadTableNamesToMenuAsync();
-        tablesToolStripMenuItem.Enabled = true;
-    }
-
     private async Task LoadTableNamesToMenuAsync()
     {
         tablesToolStripMenuItem.DropDownItems.Clear();
 
-        var tables = await nodeRepository.GetAllAsync();
+        var nodeTables = await nodeTableRepository.GetAllAsync();
+        var tableNames = nodeTables.Select(x => x.Name).ToList();
 
-        if (tables.Count <= 0)
+        if (!tableNames.Any())
         {
             tablesToolStripMenuItem.Enabled = false;
             return;
         }
 
-        var tableNames = tables
-            .Select(x => x.Name)
-            .ToList();
-
-        foreach (var tableName in tableNames)
-        {
-            AddTableToolStripMenuItem(tableName);
-        }
-
+        tableNames.ForEach(AddTableToolStripMenuItem);
         tablesToolStripMenuItem.Enabled = true;
     }
 
@@ -271,16 +217,16 @@ public partial class MainForm : Form
         var tableMenuItem = new ToolStripMenuItem(tableName);
 
         tableMenuItem.DropDownItems.Add(
-            CreateMenuItem("Load", () => LoadTable(tableName))
+            CreateMenuItem("Load", async () => await HandleTableOperationAsync(tableName, "Loading table", OnLoadTable))
             );
         tableMenuItem.DropDownItems.Add(
-            CreateMenuItem("Delete", () => DeleteTable(tableName))
+            CreateMenuItem("Delete", async () => await HandleTableOperationAsync(tableName, "Deleting table", OnDeleteTable))
             );
 
         tablesToolStripMenuItem.DropDownItems.Add(tableMenuItem);
     }
 
-    private ToolStripMenuItem CreateMenuItem(string text, Action onClickAction)
+    private ToolStripMenuItem CreateMenuItem(string text, Func<Task> onClickAction)
     {
         var menuItem = new ToolStripMenuItem(text);
         menuItem.Click += (sender, e) => onClickAction();
@@ -288,34 +234,41 @@ public partial class MainForm : Form
         return menuItem;
     }
 
-    private void AddDataGridViewTab()
+    private async Task OnLoadTable(string tableName)
     {
-        tabControlService.AddDataGridViewTabPage(nodeTable);
+        nodeTable = await nodeTableRepository.GetByNameAsync(tableName);
+
+        await userSettingsManager.LoadAsync(nodeTable);
     }
 
-    private void AddGraphTab()
+    private async Task OnDeleteTable(string tableName)
     {
-        CreateGraph();
-        tabControlService.AddGViewerTabPage(graph, nodeTable.Name, OpenNodeDetailsForm);
+        await nodeTableRepository.DeleteTableAsync(tableName);
+
+        tablesToolStripMenuItem.DropDownItems.RemoveByKey(tableName);
+        tabControlService.RemoveRelatedTabPages(tableName);
+
+        await LoadTableNamesToMenuAsync();
     }
 
-    private void CreateGraph()
+    private async Task HandleTableOperationAsync(string tableName, string operationDescription, Func<string, Task> operation)
     {
-        if (userSettings.UseClustering)
+        if (string.IsNullOrEmpty(tableName)) 
+            return;
+
+        if (operationDescription == "Loading table" && nodeTable.Name == tableName)
         {
-            nodeComparisonManager.CalculateClusters(nodeTable.NodeObjects);
-            graph = graphBuilder.Build(nodeTable.Name, nodeTable.NodeObjects, nodeComparisonManager.Clusters);
+            ShowWarning($"Table {tableName} is already loaded");
+            return;
         }
-        else
-        {
-            nodeComparisonManager.CalculateSimilarNodes(nodeTable.NodeObjects);
-            graph = graphBuilder.Build(nodeTable.Name, nodeComparisonManager.SimilarityResults);
-        }
-    }
 
-    private async Task LoadTableAsync(string tableName)
-    {
-        using var loadingForm = new LoadingForm("Loading table...");
+        if (operationDescription == "Deleting table" && nodeTable.Name == tableName)
+        {
+            ShowWarning($"Can not delete table {tableName} while loaded");
+            return;
+        }
+
+        using var loadingForm = new LoadingForm(operationDescription);
         loadingForm.Show();
         loadingForm.BringToFront();
 
@@ -323,14 +276,12 @@ public partial class MainForm : Form
 
         try
         {
-            nodeTable = await nodeRepository.GetByNameAsync(tableName);
-            await LoadUserSettingsAsync();
-
-            ShowSuccess("Table loaded successfully!");
+            await operation(tableName);
+            ShowSuccess("The operation was successful!");
         }
         catch (Exception ex)
         {
-            ShowError("Error while uploading table", ex);
+            ShowError($"{operationDescription} failed", ex);
         }
         finally
         {
@@ -340,75 +291,22 @@ public partial class MainForm : Form
             BringToFront();
             UpdateFormTitle();
         }
-    }
-
-    private async Task DeleteTableAsync(string tableName)
-    {
-        using var loadingForm = new LoadingForm("Deleting table...");
-        loadingForm.Show();
-        loadingForm.BringToFront();
-
-        Enabled = false;
-
-        try
-        {
-            await nodeRepository.DeleteTableAsync(tableName);
-
-            tablesToolStripMenuItem.DropDownItems.RemoveByKey(tableName);
-            tabControlService.RemoveRelatedTabPages(tableName);
-
-            await LoadTableNamesToMenuAsync();
-
-            ShowSuccess("File deleted successfully!");
-        }
-        catch (Exception ex)
-        {
-            ShowError("Error while deleting table", ex);
-        }
-        finally
-        {
-            loadingForm.Close();
-
-            Enabled = true;
-            BringToFront();
-            UpdateFormTitle();
-        }
-    }
-
-    private async Task LoadUserSettingsAsync()
-    {
-        if (await settingsRepository.ExistsAsync(nodeTable.Name))
-        {
-            userSettings = await settingsRepository.GetByTableNameAsync(nodeTable.Name);
-        }
-        else
-        {
-            userSettings = userSettingsFactory.InitializeNodeTableData(nodeTable, ClusterAlgorithm.Agglomerative);
-            await settingsRepository.AddAsync(userSettings);
-        }
-
-        ApplySettingsToComponents();
     }
 
     private void ApplySettingsToComponents()
     {
-        nodeComparisonManager.UpdateSettings(userSettings);
-        graphBuilder.UpdateSettings(userSettings);
-        graphSaveManager.UpdateSettings(userSettings);
-
-        if (graph != null)
-            CreateGraph();
+        graphManager.UpdateSettings(userSettingsManager.UserSettings);
 
         tabControlService.UpdateDataGridViewTabPageIfOpen(nodeTable);
-        tabControlService.UpdateGViewerTabPageIfOpen(graph, nodeTable.Name);
+        tabControlService.UpdateGViewerTabPageIfOpen(graphManager.Graph, nodeTable.Name);
     }
 
     private void OpenNodeDetailsForm(string nodeName)
     {
-        if (!graphBuilder.NodeDataMap.TryGetValue(nodeName, out var nodeData))
+        if (graphManager.TryGetNodeSimilarityResult(nodeName, out var nodeSimilarityResult))
             return;
 
-        var detailsForm = new NodeDetailsForm(nodeData, OpenNodeDetailsForm);
+        var detailsForm = new NodeDetailsForm(nodeSimilarityResult, OpenNodeDetailsForm);
         detailsForm.Show();
         detailsForm.BringToFront();
     }
