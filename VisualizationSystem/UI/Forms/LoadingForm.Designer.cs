@@ -42,12 +42,13 @@
             // 
             // lblMessage
             // 
-            lblMessage.AutoSize = true;
-            lblMessage.Location = new Point(82, 19);
+            lblMessage.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            lblMessage.Location = new Point(21, 19);
             lblMessage.Name = "lblMessage";
-            lblMessage.Size = new Size(16, 15);
+            lblMessage.Size = new Size(144, 15);
             lblMessage.TabIndex = 1;
             lblMessage.Text = "...";
+            lblMessage.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // LoadingForm
             // 
@@ -63,7 +64,6 @@
             Text = "Loading...";
             Paint += LoadingForm_Paint;
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion

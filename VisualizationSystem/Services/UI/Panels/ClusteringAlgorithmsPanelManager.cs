@@ -127,14 +127,14 @@ public class ClusteringAlgorithmsPanelManager : PanelManager
         lblSecondParameter.Visible = config.HasSecondParameter;
         nudSecondParameter.Visible = config.HasSecondParameter;
 
-        ConfigureNumericUpDown(nudFirstParameter, config.IsFirstParameterInt);
-        ConfigureNumericUpDown(nudSecondParameter, config.IsSecondParameterInt);
+        ConfigureNumericUpDown(nudFirstParameter, config.FirstParameterDecimalPlaces);
+        ConfigureNumericUpDown(nudSecondParameter, config.SecondParameterDecimalPlaces);
     }
 
-    private void ConfigureNumericUpDown(NumericUpDown nud, bool isInt)
+    private void ConfigureNumericUpDown(NumericUpDown nud, int decimalPlaces)
     {
-        nud.DecimalPlaces = isInt ? 0 : 1;
-        nud.Increment = isInt ? 1 : (decimal)0.1;
+        nud.DecimalPlaces = decimalPlaces;
+        nud.Increment = (decimal)Math.Pow(10, -decimalPlaces);
     }
 
     private void SaveAgglomerativeSettings()

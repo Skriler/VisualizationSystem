@@ -63,7 +63,7 @@ public partial class MainForm : Form
 
     private void showToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (nodeTable != null)
+        if (nodeTable == null)
         {
             ShowWarning("No data to show");
             return;
@@ -81,7 +81,7 @@ public partial class MainForm : Form
 
     private async void saveGraphImageToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (nodeTable != null)
+        if (nodeTable == null)
         {
             ShowWarning("No data to save");
             return;
@@ -106,7 +106,7 @@ public partial class MainForm : Form
 
     private void buildGraphToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (nodeTable != null)
+        if (nodeTable == null)
         {
             ShowWarning("No data to visualize graph");
             return;
@@ -128,7 +128,7 @@ public partial class MainForm : Form
 
     private async void settingsToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (nodeTable != null)
+        if (nodeTable == null)
         {
             ShowWarning("No data to configure");
             return;
@@ -217,10 +217,10 @@ public partial class MainForm : Form
         var tableMenuItem = new ToolStripMenuItem(tableName);
 
         tableMenuItem.DropDownItems.Add(
-            CreateMenuItem("Load", async () => await HandleTableOperationAsync(tableName, "Loading table", OnLoadTable))
+            CreateMenuItem("Load", async () => await HandleLoadTableAsync(tableName))
             );
         tableMenuItem.DropDownItems.Add(
-            CreateMenuItem("Delete", async () => await HandleTableOperationAsync(tableName, "Deleting table", OnDeleteTable))
+            CreateMenuItem("Delete", async () => await HandleDeleteTableAsync(tableName))
             );
 
         tablesToolStripMenuItem.DropDownItems.Add(tableMenuItem);
@@ -229,45 +229,41 @@ public partial class MainForm : Form
     private ToolStripMenuItem CreateMenuItem(string text, Func<Task> onClickAction)
     {
         var menuItem = new ToolStripMenuItem(text);
-        menuItem.Click += (sender, e) => onClickAction();
+        menuItem.Click += async (sender, e) => await onClickAction();
 
         return menuItem;
     }
 
-    private async Task OnLoadTable(string tableName)
+    private async Task HandleLoadTableAsync(string tableName)
     {
-        nodeTable = await nodeTableRepository.GetByNameAsync(tableName);
-
-        await userSettingsManager.LoadAsync(nodeTable);
-    }
-
-    private async Task OnDeleteTable(string tableName)
-    {
-        await nodeTableRepository.DeleteTableAsync(tableName);
-
-        tablesToolStripMenuItem.DropDownItems.RemoveByKey(tableName);
-        tabControlService.RemoveRelatedTabPages(tableName);
-
-        await LoadTableNamesToMenuAsync();
-    }
-
-    private async Task HandleTableOperationAsync(string tableName, string operationDescription, Func<string, Task> operation)
-    {
-        if (string.IsNullOrEmpty(tableName)) 
+        if (string.IsNullOrEmpty(tableName))
             return;
 
-        if (operationDescription == "Loading table" && nodeTable.Name == tableName)
+        if (nodeTable?.Name == tableName)
         {
             ShowWarning($"Table {tableName} is already loaded");
             return;
         }
 
-        if (operationDescription == "Deleting table" && nodeTable.Name == tableName)
+        await ExecuteTableOperationAsync(tableName, "Loading table", OnLoadTable);
+    }
+
+    private async Task HandleDeleteTableAsync(string tableName)
+    {
+        if (string.IsNullOrEmpty(tableName))
+            return;
+
+        if (nodeTable?.Name == tableName)
         {
-            ShowWarning($"Can not delete table {tableName} while loaded");
+            ShowWarning($"Cannot delete table {tableName} while loaded");
             return;
         }
 
+        await ExecuteTableOperationAsync(tableName, "Deleting table", OnDeleteTable);
+    }
+
+    private async Task ExecuteTableOperationAsync(string tableName, string operationDescription, Func<string, Task> operation)
+    {
         using var loadingForm = new LoadingForm(operationDescription);
         loadingForm.Show();
         loadingForm.BringToFront();
@@ -291,6 +287,22 @@ public partial class MainForm : Form
             BringToFront();
             UpdateFormTitle();
         }
+    }
+
+    private async Task OnLoadTable(string tableName)
+    {
+        nodeTable = await nodeTableRepository.GetByNameAsync(tableName);
+        await userSettingsManager.LoadAsync(nodeTable);
+    }
+
+    private async Task OnDeleteTable(string tableName)
+    {
+        await nodeTableRepository.DeleteTableAsync(tableName);
+
+        tablesToolStripMenuItem.DropDownItems.RemoveByKey(tableName);
+        tabControlService.RemoveRelatedTabPages(tableName);
+
+        await LoadTableNamesToMenuAsync();
     }
 
     private void ApplySettingsToComponents()

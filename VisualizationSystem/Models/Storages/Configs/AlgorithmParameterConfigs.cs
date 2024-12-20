@@ -7,7 +7,7 @@ public class AlgorithmParameterConfigs
         FirstParameterLabel = "Threshold:",
         FirstParameterMin = 0,
         FirstParameterMax = 100,
-        IsFirstParameterInt = false,
+        FirstParameterDecimalPlaces = 2,
 
         HasSecondParameter = false,
     };
@@ -17,12 +17,12 @@ public class AlgorithmParameterConfigs
         FirstParameterLabel = "Number of clusters:",
         FirstParameterMin = 2,
         FirstParameterMax = 100,
-        IsFirstParameterInt = true,
+        FirstParameterDecimalPlaces = 0,
 
         SecondParameterLabel = "Max iterations:",
         SecondParameterMin = 10,
         SecondParameterMax = 1000,
-        IsSecondParameterInt = true,
+        SecondParameterDecimalPlaces = 0,
 
         HasSecondParameter = true,
     };
@@ -32,12 +32,12 @@ public class AlgorithmParameterConfigs
         FirstParameterLabel = "Epsilon:",
         FirstParameterMin = 0,
         FirstParameterMax = 20,
-        IsFirstParameterInt = false,
+        FirstParameterDecimalPlaces = 1,
 
         SecondParameterLabel = "Min points:",
         SecondParameterMin = 1,
         SecondParameterMax = 1000,
-        IsSecondParameterInt = true,
+        SecondParameterDecimalPlaces = 0,
 
         HasSecondParameter = true,
     };
