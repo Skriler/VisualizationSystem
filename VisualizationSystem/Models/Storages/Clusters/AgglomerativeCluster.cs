@@ -1,4 +1,4 @@
-﻿using VisualizationSystem.Models.Storages.Nodes;
+﻿using VisualizationSystem.Models.Entities.Nodes.Normalized;
 
 namespace VisualizationSystem.Models.Storages.Clusters;
 

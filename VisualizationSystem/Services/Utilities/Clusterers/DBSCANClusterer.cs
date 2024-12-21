@@ -1,7 +1,7 @@
 ﻿using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Entities.Nodes.Normalized;
 using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Models.Storages.Clusters;
-using VisualizationSystem.Models.Storages.Nodes;
 using VisualizationSystem.Services.Utilities.Normalizers;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
@@ -66,14 +66,14 @@ public class DBSCANClusterer : IClusterize
         List<NormalizedNode> neighbors,
         List<NormalizedNode> nodes)
     {
-        cluster.AddNode(node.Node);
+        cluster.AddNode(node.NodeObject);
 
         foreach (var neighbor in neighbors)
         {
-            if (cluster.Nodes.Contains(neighbor.Node))
+            if (cluster.Nodes.Contains(neighbor.NodeObject))
                 continue;
 
-            cluster.AddNode(neighbor.Node);
+            cluster.AddNode(neighbor.NodeObject);
 
             if (visitedNodes.Contains(neighbor))
                 continue;
@@ -89,7 +89,7 @@ public class DBSCANClusterer : IClusterize
         }
     }
 
-    private double GetMixedDistance(List<double> firstParameters, List<double> secondParameters)
+    private double GetMixedDistance(List<NormalizedNodeParameter> firstParameters, List<NormalizedNodeParameter> secondParameters)
     {
         if (firstParameters.Count != secondParameters.Count)
             throw new InvalidOperationException("Parameters must be the same length");
@@ -98,7 +98,7 @@ public class DBSCANClusterer : IClusterize
 
         for (int i = 0; i < firstParameters.Count; ++i)
         {
-            var diff = firstParameters[i] - secondParameters[i];
+            var diff = firstParameters[i].Value - secondParameters[i].Value;
             distance += diff * diff;
         }
 

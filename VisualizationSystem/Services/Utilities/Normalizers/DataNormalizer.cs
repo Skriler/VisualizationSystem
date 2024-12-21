@@ -1,5 +1,5 @@
 ﻿using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Models.Storages.Nodes;
+using VisualizationSystem.Models.Entities.Nodes.Normalized;
 using VisualizationSystem.Models.Storages.Ranges;
 
 namespace VisualizationSystem.Services.Utilities.Normalizers;
@@ -106,46 +106,59 @@ public class DataNormalizer
     {
         foreach (var parameter in node.Parameters)
         {
+            var normalizedParameter = new NormalizedNodeParameter()
+            {
+                Id = parameter.ParameterTypeId,
+            };
+
             if (IsNumeric(parameter.Value) && numericRanges.Any(range => range.Id == parameter.ParameterTypeId))
             {
-                ProcessNumericParameter(normalizedNode, parameter);
+                normalizedParameter.Value = ProcessNumericParameter(normalizedNode, parameter);
+                normalizedNode.NormalizedParameters.Add(normalizedParameter);
             }
             else if (stringRanges.Any(range => range.Id == parameter.ParameterTypeId))
             {
-                ProcessCategoricalParameter(normalizedNode, parameter);
+                var oneHotArray = ProcessCategoricalParameter(normalizedNode, parameter);
+
+                foreach (var val in oneHotArray)
+                {
+                    normalizedParameter = new NormalizedNodeParameter
+                    {
+                        Id = parameter.ParameterTypeId,
+                        Value = val
+                    };
+                    normalizedNode.NormalizedParameters.Add(normalizedParameter);
+                }
             }
             else
             {
-                normalizedNode.NormalizedParameters.Add(0);
+                normalizedParameter.Value = 0;
+                normalizedNode.NormalizedParameters.Add(normalizedParameter);
             }
         }
     }
 
-    private void ProcessNumericParameter(NormalizedNode normalizedNode, NodeParameter parameter)
+    private double ProcessNumericParameter(NormalizedNode normalizedNode, NodeParameter parameter)
     {
         var range = numericRanges
             .FirstOrDefault(range => range.Id == parameter.ParameterTypeId);
 
         if (range == null)
-            return;
+            return 0;
 
         var value = Convert.ToDouble(parameter.Value);
-        var normalizedValue = NormalizeMinMax(value, range.Min, range.Max);
-
-        normalizedNode.NormalizedParameters.Add(normalizedValue);
+        return NormalizeMinMax(value, range.Min, range.Max);
     }
 
-    private void ProcessCategoricalParameter(NormalizedNode normalizedNode, NodeParameter parameter)
+    private double[] ProcessCategoricalParameter(NormalizedNode normalizedNode, NodeParameter parameter)
     {
         var range = stringRanges
             .FirstOrDefault(range => range.Id == parameter.ParameterTypeId);
 
         if (range == null)
-            return;
+            return new double[0];
 
-        var oneHotArray = ConvertStringToOneHot(parameter.Value, range.Values);
-
-        normalizedNode.NormalizedParameters.AddRange(oneHotArray);
+        return ConvertStringToOneHot(parameter.Value, range.Values);
     }
 
     private double NormalizeMinMax(double value, double min, double max)

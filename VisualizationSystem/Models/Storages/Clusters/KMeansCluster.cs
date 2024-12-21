@@ -1,4 +1,6 @@
-﻿namespace VisualizationSystem.Models.Storages.Clusters;
+﻿using VisualizationSystem.Models.Entities.Nodes.Normalized;
+
+namespace VisualizationSystem.Models.Storages.Clusters;
 
 public class KMeansCluster : Cluster
 {
@@ -17,11 +19,11 @@ public class KMeansCluster : Cluster
         nodeData.CopyTo(Centroid, 0);
     }
 
-    public void RecalculateCentroid(List<List<double>> clusterData)
+    public void RecalculateCentroid(List<List<NormalizedNodeParameter>> clusterData)
     {
         for (int col = 0; col < Centroid.Length; ++col)
         {
-            Centroid[col] = clusterData.Average(dataRow => dataRow[col]);
+            Centroid[col] = clusterData.Average(dataRow => dataRow[col].Value);
         }
     }
 }

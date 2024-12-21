@@ -1,7 +1,7 @@
 ﻿using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Entities.Nodes.Normalized;
 using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Models.Storages.Clusters;
-using VisualizationSystem.Models.Storages.Nodes;
 using VisualizationSystem.Services.Utilities.Normalizers;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
@@ -106,13 +106,13 @@ public class KMeansClusterer : IClusterize
         }
     }
 
-    private List<List<double>> GetClusterData(List<NormalizedNode> data, KMeansCluster cluster)
+    private List<List<NormalizedNodeParameter>> GetClusterData(List<NormalizedNode> data, KMeansCluster cluster)
     {
-        var clusterData = new List<List<double>>();
+        var clusterData = new List<List<NormalizedNodeParameter>>();
 
         foreach (var node in cluster.Nodes)
         {
-            var nodeData = data.FirstOrDefault(nd => nd.Node.Name == node.Name);
+            var nodeData = data.FirstOrDefault(nd => nd.NodeObject.Name == node.Name);
 
             if (nodeData == null)
                 continue;
@@ -123,7 +123,7 @@ public class KMeansClusterer : IClusterize
         return clusterData;
     }
 
-    private double GetEuclideanDistance(List<double> data, double[] centroid)
+    private double GetEuclideanDistance(List<NormalizedNodeParameter> data, double[] centroid)
     {
         if (data.Count != centroid.Length)
             throw new InvalidOperationException("Node data and centroid must be the same length");
@@ -132,7 +132,7 @@ public class KMeansClusterer : IClusterize
 
         for (int i = 0; i < centroid.Length; ++i)
         {
-            var diff = data[i] - centroid[i];
+            var diff = data[i].Value - centroid[i];
             distance += diff * diff;
         }
 

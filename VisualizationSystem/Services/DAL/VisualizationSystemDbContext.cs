@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Entities.Nodes.Normalized;
 using VisualizationSystem.Models.Entities.Settings;
 
 namespace VisualizationSystem.Services.DAL;
@@ -20,6 +21,10 @@ public sealed class VisualizationSystemDbContext : DbContext
     public DbSet<ParameterState> ParameterStates { get; set; }
 
     public DbSet<ClusterAlgorithmSettings> ClusterAlgorithmSettings { get; set; }
+
+    public DbSet<NormalizedNode> NormalizedNodes { get; set; }
+
+    public DbSet<NormalizedNodeParameter> NormalizedNodeParameters { get; set; }
 
     public VisualizationSystemDbContext(DbContextOptions<VisualizationSystemDbContext> options)
         : base(options)
