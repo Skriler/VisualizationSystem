@@ -5,14 +5,16 @@ namespace VisualizationSystem.Models.Storages.Clusters;
 public class AgglomerativeCluster : Cluster
 {
     public bool IsMerged { get; set; }
-    public double[] AverageParameters { get; private set; }
+    public List<double> AverageParameters { get; private set; }
 
     public AgglomerativeCluster(NormalizedNode normalizedNode)
     {
         IsMerged = false;
-        AverageParameters = normalizedNode.NormalizedParameters.ToArray();
+        AverageParameters = normalizedNode.NormalizedParameters
+            .Select(nn => nn.Value)
+            .ToList();
 
-        Nodes.Add(normalizedNode.Node);
+        Nodes.Add(normalizedNode.NodeObject);
     }
 
     public void UpdateAverageParameters(AgglomerativeCluster mergedCluster)
@@ -24,7 +26,7 @@ public class AgglomerativeCluster : Cluster
         var mergedNodesCount = mergedCluster.Nodes.Count;
         var totalNodes = currentNodesCount + mergedNodesCount;
 
-        for (int i = 0; i < AverageParameters.Length; ++i)
+        for (int i = 0; i < AverageParameters.Count; ++i)
         {
             var weightedSum = (AverageParameters[i] * currentNodesCount) + (mergedCluster.AverageParameters[i] * mergedNodesCount);
 

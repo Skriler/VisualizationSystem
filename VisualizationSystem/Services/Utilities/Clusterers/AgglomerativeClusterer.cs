@@ -1,25 +1,21 @@
 ﻿using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Models.Storages.Clusters;
+using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.Utilities.Normalizers;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
 
-public class AgglomerativeClusterer : IClusterize
+public class AgglomerativeClusterer : BaseClusterer
 {
-    private readonly DataNormalizer dataNormalizer;
     private List<AgglomerativeCluster> agglomerativeClusters;
 
-    public ClusterAlgorithmSettings AlgorithmSettings { get; set; } = new();
+    public AgglomerativeClusterer(NormalizedNodeRepository normalizedNodeRepository, DataNormalizer dataNormalizer) 
+        : base(normalizedNodeRepository, dataNormalizer)
+    { }
 
-    public AgglomerativeClusterer(DataNormalizer dataNormalizer)
+    public override async Task<List<Cluster>> ClusterAsync(NodeTable nodeTable)
     {
-        this.dataNormalizer = dataNormalizer;
-    }
-
-    public List<Cluster> Cluster(List<NodeObject> nodes)
-    {
-        var normalizedNodes = dataNormalizer.GetNormalizedNodes(nodes);
+        var normalizedNodes = await GeNormalizedNodesAsync(nodeTable);
 
         agglomerativeClusters = normalizedNodes
             .Select(n => new AgglomerativeCluster(n))
@@ -68,9 +64,9 @@ public class AgglomerativeClusterer : IClusterize
         return clusterSimilarity;
     }
 
-    private float GetCosineSimilarity(double[] firstParameters, double[] secondParameters)
+    private float GetCosineSimilarity(List<double> firstParameters, List<double> secondParameters)
     {
-        if (firstParameters.Length != secondParameters.Length)
+        if (firstParameters.Count != secondParameters.Count)
             throw new InvalidOperationException("Parameters must be the same length");
 
         var dotProduct = firstParameters.Zip(secondParameters, (x, y) => x * y).Sum();

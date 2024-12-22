@@ -1,5 +1,4 @@
 ﻿using Microsoft.Msagl.Drawing;
-using System.Xml;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Models.Storages.Results;
@@ -7,7 +6,7 @@ using VisualizationSystem.Services.UI;
 using VisualizationSystem.Services.Utilities.Comparers;
 using VisualizationSystem.Services.Utilities.GraphBuilders;
 
-namespace VisualizationSystem.Services.Utilities;
+namespace VisualizationSystem.Services.Utilities.Managers;
 
 public class GraphManager
 {
@@ -20,8 +19,8 @@ public class GraphManager
     public NodeTable? NodeTable { get; private set; }
 
     public GraphManager(
-        IGraphBuilder<Graph> graphBuilder, 
-        GraphSaveManager graphSaveManager, 
+        IGraphBuilder<Graph> graphBuilder,
+        GraphSaveManager graphSaveManager,
         NodeComparisonManager nodeComparisonManager
         )
     {
@@ -34,30 +33,32 @@ public class GraphManager
     {
         NodeTable = nodeTable;
 
-        nodeComparisonManager.CalculateSimilarNodes(nodeTable.NodeObjects);
-        Graph = graphBuilder.Build(nodeTable.Name, nodeComparisonManager.SimilarityResults);
+        var similarityResults = nodeComparisonManager.CalculateSimilarNodes(nodeTable.NodeObjects);
+        Graph = graphBuilder.Build(nodeTable.Name, similarityResults);
 
         return Graph;
     }
 
-    public Graph BuildClusteredGraph(NodeTable nodeTable)
+    public async Task<Graph> BuildClusteredGraphAsync(NodeTable nodeTable)
     {
         NodeTable = nodeTable;
 
-        nodeComparisonManager.CalculateClusters(nodeTable.NodeObjects);
-        Graph = graphBuilder.Build(nodeTable.Name, nodeTable.NodeObjects, nodeComparisonManager.Clusters);
+        var clusters = await nodeComparisonManager.CalculateClustersAsync(nodeTable);
+        Graph = graphBuilder.Build(nodeTable.Name, nodeTable.NodeObjects, clusters);
 
         return Graph;
     }
 
     public async Task SaveGraphAsync(NodeTable nodeTable)
     {
-        await graphSaveManager.SaveGraphAsync(nodeTable.Name, nodeComparisonManager.SimilarityResults);
+        var similarityResults = nodeComparisonManager.CalculateSimilarNodes(nodeTable.NodeObjects);
+        await graphSaveManager.SaveGraphAsync(nodeTable.Name, similarityResults);
     }
 
     public async Task SaveClusteredGraphAsync(NodeTable nodeTable)
     {
-        await graphSaveManager.SaveClusteredGraphAsync(nodeTable.Name, nodeTable.NodeObjects, nodeComparisonManager.Clusters);
+        var clusters = await nodeComparisonManager.CalculateClustersAsync(nodeTable);
+        await graphSaveManager.SaveClusteredGraphAsync(nodeTable.Name, nodeTable.NodeObjects, clusters);
     }
 
     public void UpdateSettings(UserSettings userSettings)
@@ -65,13 +66,6 @@ public class GraphManager
         nodeComparisonManager.UpdateSettings(userSettings);
         graphBuilder.UpdateSettings(userSettings);
         graphSaveManager.UpdateSettings(userSettings);
-
-        if (Graph != null)
-        {
-            Graph = userSettings.UseClustering ?
-                BuildClusteredGraph(NodeTable) :
-                BuildGraph(NodeTable);
-        }
     }
 
     public bool TryGetNodeSimilarityResult(string nodeName, out NodeSimilarityResult nodeSimilarityResult)

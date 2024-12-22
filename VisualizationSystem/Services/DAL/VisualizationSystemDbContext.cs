@@ -76,5 +76,23 @@ public sealed class VisualizationSystemDbContext : DbContext
             .WithOne(us => us.AlgorithmSettings)
             .HasForeignKey<ClusterAlgorithmSettings>(cas => cas.UserSettingsId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<NormalizedNode>()
+            .HasOne(nn => nn.NodeTable)
+            .WithMany()
+            .HasForeignKey(nn => nn.NodeTableId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<NormalizedNode>()
+            .HasOne(nn => nn.NodeObject)
+            .WithMany() 
+            .HasForeignKey(nn => nn.NodeObjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<NormalizedNode>()
+            .HasMany(nn => nn.NormalizedParameters)
+            .WithOne(nnp => nnp.NormalizedNode)
+            .HasForeignKey(nnp => nnp.NormalizedNodeId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

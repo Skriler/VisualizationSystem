@@ -5,12 +5,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Msagl.Drawing;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.UI;
-using VisualizationSystem.Services.Utilities;
 using VisualizationSystem.Services.Utilities.Clusterers;
 using VisualizationSystem.Services.Utilities.Comparers;
 using VisualizationSystem.Services.Utilities.ExcelHandlers;
 using VisualizationSystem.Services.Utilities.Factories;
 using VisualizationSystem.Services.Utilities.GraphBuilders;
+using VisualizationSystem.Services.Utilities.Managers;
 using VisualizationSystem.Services.Utilities.Mappers;
 using VisualizationSystem.Services.Utilities.Normalizers;
 using VisualizationSystem.UI.Forms;
@@ -51,6 +51,7 @@ internal static class Program
 
         services.AddScoped<NodeTableRepository>();
         services.AddScoped<UserSettingsRepository>();
+        services.AddScoped<NormalizedNodeRepository>();
 
         services.AddSingleton<DialogManager>();
         services.AddSingleton<ExcelReader>();

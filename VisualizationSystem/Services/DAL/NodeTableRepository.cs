@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Xml;
 using VisualizationSystem.Models.Entities.Nodes;
 
 namespace VisualizationSystem.Services.DAL;
@@ -47,6 +45,7 @@ public class NodeTableRepository
             throw new ArgumentException("Table name cannot be null or whitespace.", tableName);
 
         var nodeTable = await db.NodeTables
+            .Include(table => table.ParameterTypes)
             .FirstOrDefaultAsync(table => table.Name == tableName);
 
         if (nodeTable == null)

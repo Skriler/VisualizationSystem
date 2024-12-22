@@ -2,8 +2,8 @@
 using VisualizationSystem.UI.Components.TabPages;
 using VisualizationSystem.Services.Utilities.ExcelHandlers;
 using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Services.Utilities;
 using VisualizationSystem.Services.DAL;
+using VisualizationSystem.Services.Utilities.Managers;
 
 namespace VisualizationSystem.UI.Forms;
 
@@ -55,7 +55,7 @@ public partial class MainForm : Form
             return;
 
         await LoadTableNamesToMenuAsync();
-        ApplySettingsToComponents();
+        await ApplySettingsToComponentsAsync();
         UpdateFormTitle();
 
         ShowSuccess("File uploaded successfully!");
@@ -104,7 +104,7 @@ public partial class MainForm : Form
         }
     }
 
-    private void buildGraphToolStripMenuItem_Click(object sender, EventArgs e)
+    private async void buildGraphToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (nodeTable == null)
         {
@@ -115,7 +115,7 @@ public partial class MainForm : Form
         try
         {
             var graph = userSettingsManager.UseClustering() ?
-                graphManager.BuildClusteredGraph(nodeTable) :
+                await graphManager.BuildClusteredGraphAsync(nodeTable) :
                 graphManager.BuildGraph(nodeTable);
 
             tabControlService.AddGViewerTabPage(graph, nodeTable.Name, OpenNodeDetailsForm);
@@ -142,7 +142,7 @@ public partial class MainForm : Form
                 return;
 
             await userSettingsManager.UpdateAsync(userSettings);
-            ApplySettingsToComponents();
+            await ApplySettingsToComponentsAsync();
         }
     }
 
@@ -293,6 +293,8 @@ public partial class MainForm : Form
     {
         nodeTable = await nodeTableRepository.GetByNameAsync(tableName);
         await userSettingsManager.LoadAsync(nodeTable);
+
+        await ApplySettingsToComponentsAsync();
     }
 
     private async Task OnDeleteTable(string tableName)
@@ -305,9 +307,16 @@ public partial class MainForm : Form
         await LoadTableNamesToMenuAsync();
     }
 
-    private void ApplySettingsToComponents()
+    private async Task ApplySettingsToComponentsAsync()
     {
         graphManager.UpdateSettings(userSettingsManager.UserSettings);
+
+        if (graphManager.Graph != null)
+        {
+            var graph = userSettingsManager.UseClustering() ?
+                await graphManager.BuildClusteredGraphAsync(nodeTable) :
+                graphManager.BuildGraph(nodeTable);
+        }
 
         tabControlService.UpdateDataGridViewTabPageIfOpen(nodeTable);
         tabControlService.UpdateGViewerTabPageIfOpen(graphManager.Graph, nodeTable.Name);

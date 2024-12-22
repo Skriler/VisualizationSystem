@@ -21,10 +21,12 @@ public class DataNormalizer
         stringRanges.Clear();
 
         InitializeParameterRanges(nodes);
-        var normalizedNodes = NormalizeNodes(nodes);
-
-        return normalizedNodes;
+        return CreateNormalizedNodes(nodes);
     }
+
+    private bool IsNumericParameter(NodeParameter parameter) => numericRanges.Any(range => range.Id == parameter.ParameterTypeId);
+
+    private bool IsStringParameter(NodeParameter parameter) => stringRanges.Any(range => range.Id == parameter.ParameterTypeId);
 
     private void InitializeParameterRanges(List<NodeObject> nodes)
     {
@@ -87,13 +89,17 @@ public class DataNormalizer
         range.AddValue(parameter.Value);
     }
 
-    private List<NormalizedNode> NormalizeNodes(List<NodeObject> nodes)
+    private List<NormalizedNode> CreateNormalizedNodes(List<NodeObject> nodes)
     {
         var normalizedNodes = new List<NormalizedNode>();
 
         foreach (var node in nodes)
         {
-            var normalizedNode = new NormalizedNode(node);
+            var normalizedNode = new NormalizedNode()
+            {
+                NodeObject = node,
+            };
+
             ProcessNodeForNormalization(normalizedNode, node);
 
             normalizedNodes.Add(normalizedNode);
@@ -106,40 +112,32 @@ public class DataNormalizer
     {
         foreach (var parameter in node.Parameters)
         {
-            var normalizedParameter = new NormalizedNodeParameter()
+            if (IsNumericParameter(parameter))
             {
-                Id = parameter.ParameterTypeId,
-            };
-
-            if (IsNumeric(parameter.Value) && numericRanges.Any(range => range.Id == parameter.ParameterTypeId))
-            {
-                normalizedParameter.Value = ProcessNumericParameter(normalizedNode, parameter);
-                normalizedNode.NormalizedParameters.Add(normalizedParameter);
+                ProcessNumericParameter(normalizedNode, parameter);
             }
-            else if (stringRanges.Any(range => range.Id == parameter.ParameterTypeId))
+            else if (IsStringParameter(parameter))
             {
-                var oneHotArray = ProcessCategoricalParameter(normalizedNode, parameter);
-
-                foreach (var val in oneHotArray)
-                {
-                    normalizedParameter = new NormalizedNodeParameter
-                    {
-                        Id = parameter.ParameterTypeId,
-                        Value = val
-                    };
-                    normalizedNode.NormalizedParameters.Add(normalizedParameter);
-                }
-            }
-            else
-            {
-                normalizedParameter.Value = 0;
-                normalizedNode.NormalizedParameters.Add(normalizedParameter);
+                ProcessStringParameter(normalizedNode, parameter);
             }
         }
     }
 
-    private double ProcessNumericParameter(NormalizedNode normalizedNode, NodeParameter parameter)
+    private void ProcessNumericParameter(NormalizedNode normalizedNode, NodeParameter parameter)
     {
+        var normalizedParameter = new NormalizedNodeParameter()
+        {
+            Value = GetNormalizedNumericParameter(normalizedNode, parameter),
+        };
+
+        normalizedNode.NormalizedParameters.Add(normalizedParameter);
+    }
+
+    private double GetNormalizedNumericParameter(NormalizedNode normalizedNode, NodeParameter parameter)
+    {
+        if (!IsNumeric(parameter.Value))
+            return 0;
+
         var range = numericRanges
             .FirstOrDefault(range => range.Id == parameter.ParameterTypeId);
 
@@ -150,7 +148,22 @@ public class DataNormalizer
         return NormalizeMinMax(value, range.Min, range.Max);
     }
 
-    private double[] ProcessCategoricalParameter(NormalizedNode normalizedNode, NodeParameter parameter)
+    private void ProcessStringParameter(NormalizedNode normalizedNode, NodeParameter parameter)
+    {
+        var oneHotArray = GetNormalizedStringParameter(normalizedNode, parameter);
+
+        foreach (var val in oneHotArray)
+        {
+            var normalizedParameter = new NormalizedNodeParameter
+            {
+                Value = val
+            };
+
+            normalizedNode.NormalizedParameters.Add(normalizedParameter);
+        }
+    }
+
+    private double[] GetNormalizedStringParameter(NormalizedNode normalizedNode, NodeParameter parameter)
     {
         var range = stringRanges
             .FirstOrDefault(range => range.Id == parameter.ParameterTypeId);

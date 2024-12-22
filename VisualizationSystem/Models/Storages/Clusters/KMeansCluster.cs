@@ -4,26 +4,20 @@ namespace VisualizationSystem.Models.Storages.Clusters;
 
 public class KMeansCluster : Cluster
 {
-    public double[] Centroid { get; set; }
+    public List<double> Centroid { get; set; } = default!;
 
-    public KMeansCluster(int parameterCount)
+    public KMeansCluster(List<NormalizedNodeParameter> nodeParameters)
     {
-        Centroid = new double[parameterCount];
+        Centroid = nodeParameters.Select(np => np.Value).ToList();
     }
 
-    public void InitializeCentroid(List<double> nodeData)
+    public void RecalculateCentroid(List<NormalizedNode> normalizedNodes)
     {
-        if (nodeData.Count != Centroid.Length)
-            throw new InvalidOperationException("Размерность данных не совпадает с размерностью центроида");
+        if (normalizedNodes.Any(nn => nn.NormalizedParameters.Count != Centroid.Count))
+            throw new InvalidOperationException("Node parameter count does not match centroid's");
 
-        nodeData.CopyTo(Centroid, 0);
-    }
-
-    public void RecalculateCentroid(List<List<NormalizedNodeParameter>> clusterData)
-    {
-        for (int col = 0; col < Centroid.Length; ++col)
-        {
-            Centroid[col] = clusterData.Average(dataRow => dataRow[col].Value);
-        }
+        Centroid = Enumerable.Range(0, Centroid.Count)
+            .Select(col => normalizedNodes.Average(nn => nn.NormalizedParameters[col].Value))
+            .ToList();
     }
 }

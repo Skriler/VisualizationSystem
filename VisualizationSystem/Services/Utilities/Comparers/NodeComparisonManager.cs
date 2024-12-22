@@ -13,10 +13,8 @@ public class NodeComparisonManager
     private readonly ClustererFactory clustererFactory;
     private readonly ICompare comparer;
 
-    private IClusterize clusterer;
+    private BaseClusterer clusterer;
 
-    public List<NodeSimilarityResult> SimilarityResults { get; private set; }
-    public List<Cluster> Clusters { get; private set; }
     public UserSettings Settings { get; private set; }
 
     public NodeComparisonManager(ClustererFactory clustererFactory, ICompare comparer)
@@ -32,7 +30,7 @@ public class NodeComparisonManager
         clusterer.UpdateSettings(settings.AlgorithmSettings);
     }
 
-    public void CalculateSimilarNodes(List<NodeObject> nodes)
+    public List<NodeSimilarityResult> CalculateSimilarNodes(List<NodeObject> nodes)
     {
         var similarityResultsDict = nodes
             .ToDictionary(node => node, node => new NodeSimilarityResult(node));
@@ -57,20 +55,22 @@ public class NodeComparisonManager
             }
         }
 
-        SimilarityResults = similarityResultsDict.Values.ToList();
+        var similarityResults = similarityResultsDict.Values.ToList();
 
-        SimilarityResults.ForEach(similarityResult =>
+        similarityResults.ForEach(similarityResult =>
         {
             similarityResult.UpdateSimilarNodesAboveThreshold(Settings.MinSimilarityPercentage);
         });
+
+        return similarityResults;
     }
 
-    public void CalculateClusters(List<NodeObject> nodes)
+    public async Task<List<Cluster>> CalculateClustersAsync(NodeTable nodeTable)
     {
-        if (nodes.Count <= 0)
+        if (nodeTable.NodeObjects.Count <= 0)
             throw new InvalidOperationException("Node analysis must be performed first before calculating clusters.");
 
-        Clusters = clusterer.Cluster(nodes);
+        return await clusterer.ClusterAsync(nodeTable);
     }
 
     private float GetSimilarityPercentage(NodeObject firstNode, NodeObject secondNode)

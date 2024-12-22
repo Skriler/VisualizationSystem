@@ -1,26 +1,22 @@
 ﻿using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Nodes.Normalized;
-using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Models.Storages.Clusters;
+using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.Utilities.Normalizers;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
 
-public class DBSCANClusterer : IClusterize
+public class DBSCANClusterer : BaseClusterer
 {
-    private readonly DataNormalizer dataNormalizer;
     private HashSet<NormalizedNode> visitedNodes;
 
-    public ClusterAlgorithmSettings AlgorithmSettings { get; set; } = new();
+    public DBSCANClusterer(NormalizedNodeRepository normalizedNodeRepository, DataNormalizer dataNormalizer)
+        : base(normalizedNodeRepository, dataNormalizer)
+    { }
 
-    public DBSCANClusterer(DataNormalizer dataNormalizer)
+    public override async Task<List<Cluster>> ClusterAsync(NodeTable nodeTable)
     {
-        this.dataNormalizer = dataNormalizer;
-    }
-
-    public List<Cluster> Cluster(List<NodeObject> nodes)
-    {
-        var normalizedNodes = dataNormalizer.GetNormalizedNodes(nodes);
+        var normalizedNodes = await GeNormalizedNodesAsync(nodeTable);
 
         var clusters = new List<Cluster>();
         visitedNodes = new HashSet<NormalizedNode>();

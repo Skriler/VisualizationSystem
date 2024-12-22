@@ -3,7 +3,7 @@ using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.Utilities.Clusterers;
 
-namespace VisualizationSystem.Services.Utilities;
+namespace VisualizationSystem.Services.Utilities.Managers;
 
 public class UserSettingsManager
 {

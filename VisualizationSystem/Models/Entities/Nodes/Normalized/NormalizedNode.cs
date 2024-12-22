@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using VisualizationSystem.Models.Entities.Nodes;
 
 namespace VisualizationSystem.Models.Entities.Nodes.Normalized;
 
@@ -17,9 +16,4 @@ public class NormalizedNode
     public NodeTable NodeTable { get; set; } = default!;
 
     public List<NormalizedNodeParameter> NormalizedParameters { get; set; } = new();
-
-    public NormalizedNode(NodeObject nodeObject)
-    {
-        NodeObject = nodeObject;
-    }
 }

@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using VisualizationSystem.Models.Entities.Nodes;
 
 namespace VisualizationSystem.Models.Entities;
 

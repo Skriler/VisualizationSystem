@@ -42,7 +42,7 @@ public class UserSettingsRepository
             .FirstAsync(us => us.NodeTable.Name == tableName);
     }
 
-    public async Task<bool> ExistsAsync(string? tableName)
+    public async Task<bool> ExistsAsync(string tableName)
     {
         if (string.IsNullOrWhiteSpace(tableName))
             throw new ArgumentException("Table name cannot be null or whitespace.", tableName);

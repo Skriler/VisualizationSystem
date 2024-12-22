@@ -12,7 +12,7 @@ public class ClustererFactory
         this.serviceProvider = serviceProvider;
     }
 
-    public IClusterize CreateClusterer(ClusterAlgorithm algorithm)
+    public BaseClusterer CreateClusterer(ClusterAlgorithm algorithm)
     {
         return algorithm switch
         {
