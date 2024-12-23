@@ -12,7 +12,6 @@ public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>
     protected readonly Random random = new();
     protected readonly Dictionary<string, Color> nodeColors = new();
 
-    public Dictionary<string, NodeSimilarityResult> NodeDataMap { get; } = new();
     public UserSettings Settings { get; set; } = new();
 
     protected GraphBuilder(GraphColorAssigner colorAssigner)
@@ -25,32 +24,30 @@ public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>
 
     protected virtual void AddNodes(TGraph graph, List<NodeSimilarityResult> similarityResults)
     {
-        NodeDataMap.Clear();
-
         var minSimilarity = similarityResults.Min(result => result.SimilarNodes.Min(s => s.SimilarityPercentage));
         var maxSimilarity = similarityResults.Max(result => result.SimilarNodes.Max(s => s.SimilarityPercentage));
+        var maxSimilarNodesAboveThreshold = similarityResults.Max(result => result.SimilarNodesAboveThreshold);
 
         foreach (var similarityResult in similarityResults)
         {
             var currentNodeName = similarityResult.Node.Name;
 
-            var nodeColor = colorAssigner
-                .GetNodeColorFromDensityWithSigmoid(similarityResult, similarityResults.Count, Settings.MinSimilarityPercentage);
+            var nodeColor = colorAssigner.GetNodeColorFromDensityWithSigmoid(
+                similarityResult,
+                maxSimilarNodesAboveThreshold,
+                Settings.MinSimilarityPercentage
+                );
 
             AddNode(
-                graph, 
-                currentNodeName, 
+                graph,
+                currentNodeName,
                 nodeColor
                 );
-            
-            NodeDataMap[currentNodeName] = similarityResult;
         }
     }
 
     protected virtual void AddNodes(TGraph graph, List<NodeObject> nodes, List<Cluster> clusters)
     {
-        NodeDataMap.Clear();
-
         foreach (var node in nodes)
         {
             var currentNodeName = node.Name;

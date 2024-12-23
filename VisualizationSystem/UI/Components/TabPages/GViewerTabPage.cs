@@ -1,16 +1,17 @@
-﻿using Microsoft.Msagl.Drawing;
-using Microsoft.Msagl.GraphViewerGdi;
+﻿using Microsoft.Msagl.GraphViewerGdi;
+using VisualizationSystem.Models.Storages.Graphs;
+using VisualizationSystem.Models.Storages.Results;
 
 namespace VisualizationSystem.UI.Components.TabPages;
 
 public sealed class ClosableGViewerTabPage : ClosableTabPageBase
 {
-    private readonly Action<string> onNodeClick;
+    private readonly Action<NodeSimilarityResult> onNodeClick;
     private readonly GViewer gViewer;
 
-    public Graph DisplayedGraph { get; set; }
+    public ExtendedGraph DisplayedGraph { get; set; }
 
-    public ClosableGViewerTabPage(string text, Graph graph, Action<string> onNodeClick) 
+    public ClosableGViewerTabPage(string text, ExtendedGraph graph, Action<NodeSimilarityResult> onNodeClick) 
         : base(text)
     {
         gViewer = new GViewer();
@@ -33,7 +34,7 @@ public sealed class ClosableGViewerTabPage : ClosableTabPageBase
 
     public override void UpdateContent(object newData)
     {
-        if (newData is not Graph newGraph)
+        if (newData is not ExtendedGraph newGraph)
             throw new ArgumentException("Invalid input data");
 
         DisplayedGraph = newGraph;
@@ -51,6 +52,8 @@ public sealed class ClosableGViewerTabPage : ClosableTabPageBase
         if (clickedObject is not DNode clickedNode)
             return;
 
-        onNodeClick?.Invoke(clickedNode.Node.Id);
+        var similarityResult = DisplayedGraph.NodeDataMap[clickedNode.Node.Id];
+
+        onNodeClick?.Invoke(similarityResult);
     }
 }

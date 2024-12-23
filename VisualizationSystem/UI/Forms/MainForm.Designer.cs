@@ -31,12 +31,12 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             menuStrip = new MenuStrip();
             dataToolStripMenuItem = new ToolStripMenuItem();
-            uploadExcelFileToolStripMenuItem = new ToolStripMenuItem();
+            uploadToolStripMenuItem = new ToolStripMenuItem();
             showToolStripMenuItem = new ToolStripMenuItem();
-            tablesToolStripMenuItem = new ToolStripMenuItem();
-            saveGraphImageToolStripMenuItem = new ToolStripMenuItem();
+            datasetsToolStripMenuItem = new ToolStripMenuItem();
             visualizationToolStripMenuItem = new ToolStripMenuItem();
             buildGraphToolStripMenuItem = new ToolStripMenuItem();
+            saveGraphImageToolStripMenuItem = new ToolStripMenuItem();
             settingsToolStripMenuItem = new ToolStripMenuItem();
             tabControl = new TabControl();
             menuStrip.SuspendLayout();
@@ -53,41 +53,35 @@
             // 
             // dataToolStripMenuItem
             // 
-            dataToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { uploadExcelFileToolStripMenuItem, showToolStripMenuItem, tablesToolStripMenuItem, saveGraphImageToolStripMenuItem });
+            dataToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { uploadToolStripMenuItem, showToolStripMenuItem, datasetsToolStripMenuItem });
             dataToolStripMenuItem.Name = "dataToolStripMenuItem";
             dataToolStripMenuItem.Size = new Size(43, 20);
             dataToolStripMenuItem.Text = "Data";
             // 
-            // uploadExcelFileToolStripMenuItem
+            // uploadToolStripMenuItem
             // 
-            uploadExcelFileToolStripMenuItem.Name = "uploadExcelFileToolStripMenuItem";
-            uploadExcelFileToolStripMenuItem.Size = new Size(180, 22);
-            uploadExcelFileToolStripMenuItem.Text = "Upload Excel File";
-            uploadExcelFileToolStripMenuItem.Click += uploadExcelFileToolStripMenuItem_Click;
+            uploadToolStripMenuItem.Name = "uploadToolStripMenuItem";
+            uploadToolStripMenuItem.Size = new Size(180, 22);
+            uploadToolStripMenuItem.Text = "Load excel";
+            uploadToolStripMenuItem.Click += uploadToolStripMenuItem_Click;
             // 
             // showToolStripMenuItem
             // 
+            showToolStripMenuItem.ForeColor = Color.Black;
             showToolStripMenuItem.Name = "showToolStripMenuItem";
             showToolStripMenuItem.Size = new Size(180, 22);
-            showToolStripMenuItem.Text = "Show";
+            showToolStripMenuItem.Text = "View data";
             showToolStripMenuItem.Click += showToolStripMenuItem_Click;
             // 
-            // tablesToolStripMenuItem
+            // datasetsToolStripMenuItem
             // 
-            tablesToolStripMenuItem.Name = "tablesToolStripMenuItem";
-            tablesToolStripMenuItem.Size = new Size(180, 22);
-            tablesToolStripMenuItem.Text = "Tables";
-            // 
-            // saveGraphImageToolStripMenuItem
-            // 
-            saveGraphImageToolStripMenuItem.Name = "saveGraphImageToolStripMenuItem";
-            saveGraphImageToolStripMenuItem.Size = new Size(180, 22);
-            saveGraphImageToolStripMenuItem.Text = "Save graph image";
-            saveGraphImageToolStripMenuItem.Click += saveGraphImageToolStripMenuItem_Click;
+            datasetsToolStripMenuItem.Name = "datasetsToolStripMenuItem";
+            datasetsToolStripMenuItem.Size = new Size(180, 22);
+            datasetsToolStripMenuItem.Text = "Datasets";
             // 
             // visualizationToolStripMenuItem
             // 
-            visualizationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { buildGraphToolStripMenuItem, settingsToolStripMenuItem });
+            visualizationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { buildGraphToolStripMenuItem, saveGraphImageToolStripMenuItem, settingsToolStripMenuItem });
             visualizationToolStripMenuItem.Name = "visualizationToolStripMenuItem";
             visualizationToolStripMenuItem.Size = new Size(85, 20);
             visualizationToolStripMenuItem.Text = "Visualization";
@@ -95,14 +89,21 @@
             // buildGraphToolStripMenuItem
             // 
             buildGraphToolStripMenuItem.Name = "buildGraphToolStripMenuItem";
-            buildGraphToolStripMenuItem.Size = new Size(136, 22);
-            buildGraphToolStripMenuItem.Text = "Build Graph";
+            buildGraphToolStripMenuItem.Size = new Size(135, 22);
+            buildGraphToolStripMenuItem.Text = "Build graph";
             buildGraphToolStripMenuItem.Click += buildGraphToolStripMenuItem_Click;
+            // 
+            // saveGraphImageToolStripMenuItem
+            // 
+            saveGraphImageToolStripMenuItem.Name = "saveGraphImageToolStripMenuItem";
+            saveGraphImageToolStripMenuItem.Size = new Size(135, 22);
+            saveGraphImageToolStripMenuItem.Text = "Save graph";
+            saveGraphImageToolStripMenuItem.Click += saveGraphImageToolStripMenuItem_Click;
             // 
             // settingsToolStripMenuItem
             // 
             settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            settingsToolStripMenuItem.Size = new Size(136, 22);
+            settingsToolStripMenuItem.Size = new Size(135, 22);
             settingsToolStripMenuItem.Text = "Settings";
             settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
             // 
@@ -140,12 +141,12 @@
 
         private MenuStrip menuStrip;
         private ToolStripMenuItem dataToolStripMenuItem;
-        private ToolStripMenuItem uploadExcelFileToolStripMenuItem;
+        private ToolStripMenuItem uploadToolStripMenuItem;
         private ToolStripMenuItem showToolStripMenuItem;
         private ToolStripMenuItem visualizationToolStripMenuItem;
         private ToolStripMenuItem settingsToolStripMenuItem;
         private ToolStripMenuItem buildGraphToolStripMenuItem;
-        private ToolStripMenuItem tablesToolStripMenuItem;
+        private ToolStripMenuItem datasetsToolStripMenuItem;
         private TabControl tabControl;
         private ToolStripMenuItem saveGraphImageToolStripMenuItem;
     }

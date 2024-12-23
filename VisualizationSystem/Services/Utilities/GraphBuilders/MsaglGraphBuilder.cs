@@ -2,6 +2,7 @@
 using Microsoft.Msagl.Layout.Layered;
 using Microsoft.Msagl.Layout.MDS;
 using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Storages.Graphs;
 using VisualizationSystem.Models.Storages.Results;
 using Cluster = VisualizationSystem.Models.Storages.Clusters.Cluster;
 using MsaglColor = Microsoft.Msagl.Drawing.Color;
@@ -9,15 +10,15 @@ using SystemColor = System.Drawing.Color;
 
 namespace VisualizationSystem.Services.Utilities.GraphBuilders;
 
-public class MsaglGraphBuilder : GraphBuilder<Graph>
+public class MsaglGraphBuilder : GraphBuilder<ExtendedGraph>
 {
     public MsaglGraphBuilder(GraphColorAssigner colorAssigner) 
         : base(colorAssigner)
     { }
 
-    public override Graph Build(string name, List<NodeSimilarityResult> similarityResults)
+    public override ExtendedGraph Build(string name, List<NodeSimilarityResult> similarityResults)
     {
-        var graph = new Graph(name)
+        var graph = new ExtendedGraph(name)
         {
             LayoutAlgorithmSettings = new MdsLayoutSettings(),
         };
@@ -28,9 +29,9 @@ public class MsaglGraphBuilder : GraphBuilder<Graph>
         return graph;
     }
 
-    public override Graph Build(string name, List<NodeObject> nodes, List<Cluster> clusters)
+    public override ExtendedGraph Build(string name, List<NodeObject> nodes, List<Cluster> clusters)
     {
-        var graph = new Graph(name)
+        var graph = new ExtendedGraph(name)
         {
             LayoutAlgorithmSettings = new SugiyamaLayoutSettings(),
         };
@@ -42,9 +43,9 @@ public class MsaglGraphBuilder : GraphBuilder<Graph>
         return graph;
     }
 
-    protected override void AddClusters(Graph graph, List<Cluster> clusters)
+    protected override void AddClusters(ExtendedGraph graph, List<Cluster> clusters)
     {
-        NodeDataMap.Clear();
+        graph.NodeDataMap.Clear();
 
         foreach (var cluster in clusters)
         {
@@ -67,7 +68,15 @@ public class MsaglGraphBuilder : GraphBuilder<Graph>
         }
     }
 
-    protected override void AddNode(Graph graph, string nodeName, SystemColor nodeColor)
+    protected override void AddNodes(ExtendedGraph graph, List<NodeSimilarityResult> similarityResults)
+    {
+        base.AddNodes(graph, similarityResults);
+
+        graph.NodeDataMap = similarityResults
+            .ToDictionary(sr => sr.Node.Name, sr => sr);
+    }
+
+    protected override void AddNode(ExtendedGraph graph, string nodeName, SystemColor nodeColor)
     {
         var node = new Node(nodeName)
         {
@@ -82,7 +91,7 @@ public class MsaglGraphBuilder : GraphBuilder<Graph>
         graph.AddNode(node);
     }
 
-    protected override void AddEdge(Graph graph, string firstNodeName, string secondNodeName, float similarityPercentage)
+    protected override void AddEdge(ExtendedGraph graph, string firstNodeName, string secondNodeName, float similarityPercentage)
     {
         var edge = graph.AddEdge(firstNodeName, secondNodeName);
 

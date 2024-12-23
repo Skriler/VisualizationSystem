@@ -7,9 +7,9 @@ namespace VisualizationSystem.UI.Forms;
 
 public partial class NodeDetailsForm : Form
 {
-    private readonly Action<string> onNodeCellClick;
+    private readonly Action<NodeSimilarityResult> onNodeCellClick;
 
-    public NodeDetailsForm(NodeSimilarityResult similarityResult, Action<string> onNodeCellClick)
+    public NodeDetailsForm(NodeSimilarityResult similarityResult, Action<NodeSimilarityResult> onNodeCellClick)
     {
         InitializeComponent();
 

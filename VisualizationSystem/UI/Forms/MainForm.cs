@@ -4,6 +4,7 @@ using VisualizationSystem.Services.Utilities.ExcelHandlers;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.Utilities.Managers;
+using VisualizationSystem.Models.Storages.Results;
 
 namespace VisualizationSystem.UI.Forms;
 
@@ -49,7 +50,7 @@ public partial class MainForm : Form
         saveGraphImageToolStripMenuItem.Visible = false;
     }
 
-    private async void uploadExcelFileToolStripMenuItem_Click(object sender, EventArgs e)
+    private async void uploadToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (!await TryLoadTableFromFileAsync())
             return;
@@ -79,6 +80,28 @@ public partial class MainForm : Form
         }
     }
 
+    private async void buildGraphToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        if (nodeTable == null)
+        {
+            ShowWarning("No data to visualize graph");
+            return;
+        }
+
+        try
+        {
+            var graph = userSettingsManager.UseClustering() ?
+                await graphManager.BuildClusteredGraphAsync(nodeTable) :
+                graphManager.BuildGraph(nodeTable);
+
+            tabControlService.AddGViewerTabPage(graph, nodeTable.Name, OpenNodeDetailsForm);
+        }
+        catch (Exception ex)
+        {
+            ShowError("Error while visualizing graph", ex);
+        }
+    }
+
     private async void saveGraphImageToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (nodeTable == null)
@@ -101,28 +124,6 @@ public partial class MainForm : Form
         catch (Exception ex)
         {
             ShowError("Error while showing data", ex);
-        }
-    }
-
-    private async void buildGraphToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (nodeTable == null)
-        {
-            ShowWarning("No data to visualize graph");
-            return;
-        }
-
-        try
-        {
-            var graph = userSettingsManager.UseClustering() ?
-                await graphManager.BuildClusteredGraphAsync(nodeTable) :
-                graphManager.BuildGraph(nodeTable);
-
-            tabControlService.AddGViewerTabPage(graph, nodeTable.Name, OpenNodeDetailsForm);
-        }
-        catch (Exception ex)
-        {
-            ShowError("Error while visualizing graph", ex);
         }
     }
 
@@ -197,19 +198,19 @@ public partial class MainForm : Form
 
     private async Task LoadTableNamesToMenuAsync()
     {
-        tablesToolStripMenuItem.DropDownItems.Clear();
+        datasetsToolStripMenuItem.DropDownItems.Clear();
 
         var nodeTables = await nodeTableRepository.GetAllAsync();
         var tableNames = nodeTables.Select(x => x.Name).ToList();
 
         if (!tableNames.Any())
         {
-            tablesToolStripMenuItem.Enabled = false;
+            datasetsToolStripMenuItem.Enabled = false;
             return;
         }
 
         tableNames.ForEach(AddTableToolStripMenuItem);
-        tablesToolStripMenuItem.Enabled = true;
+        datasetsToolStripMenuItem.Enabled = true;
     }
 
     private void AddTableToolStripMenuItem(string tableName)
@@ -217,13 +218,13 @@ public partial class MainForm : Form
         var tableMenuItem = new ToolStripMenuItem(tableName);
 
         tableMenuItem.DropDownItems.Add(
-            CreateMenuItem("Load", async () => await HandleLoadTableAsync(tableName))
+            CreateMenuItem("Select", async () => await HandleLoadTableAsync(tableName))
             );
         tableMenuItem.DropDownItems.Add(
-            CreateMenuItem("Delete", async () => await HandleDeleteTableAsync(tableName))
+            CreateMenuItem("Remove", async () => await HandleDeleteTableAsync(tableName))
             );
 
-        tablesToolStripMenuItem.DropDownItems.Add(tableMenuItem);
+        datasetsToolStripMenuItem.DropDownItems.Add(tableMenuItem);
     }
 
     private ToolStripMenuItem CreateMenuItem(string text, Func<Task> onClickAction)
@@ -301,7 +302,7 @@ public partial class MainForm : Form
     {
         await nodeTableRepository.DeleteTableAsync(tableName);
 
-        tablesToolStripMenuItem.DropDownItems.RemoveByKey(tableName);
+        datasetsToolStripMenuItem.DropDownItems.RemoveByKey(tableName);
         tabControlService.RemoveRelatedTabPages(tableName);
 
         await LoadTableNamesToMenuAsync();
@@ -322,9 +323,9 @@ public partial class MainForm : Form
         tabControlService.UpdateGViewerTabPageIfOpen(graphManager.Graph, nodeTable.Name);
     }
 
-    private void OpenNodeDetailsForm(string nodeName)
+    private void OpenNodeDetailsForm(NodeSimilarityResult nodeSimilarityResult)
     {
-        if (graphManager.TryGetNodeSimilarityResult(nodeName, out var nodeSimilarityResult))
+        if (nodeSimilarityResult == null)
             return;
 
         var detailsForm = new NodeDetailsForm(nodeSimilarityResult, OpenNodeDetailsForm);

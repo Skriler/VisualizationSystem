@@ -1,5 +1,5 @@
-﻿using Microsoft.Msagl.Drawing;
-using VisualizationSystem.Models.Entities.Nodes;
+﻿using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Storages.Graphs;
 using VisualizationSystem.UI.Components.TabPages;
 
 namespace VisualizationSystem.Services.UI;
@@ -15,7 +15,7 @@ public class TabControlManager
         tabPages = new Dictionary<string, ClosableTabPageBase>();
     }
 
-    private static string GetDataGridViewTabId(string tableName) => $"Table: {tableName}";
+    private static string GetDataGridViewTabId(string tableName) => $"Dataset: {tableName}";
 
     private static string GetGViewerTabId(string tableName) => $"Graph: {tableName}";
 
@@ -30,7 +30,7 @@ public class TabControlManager
         AddTabPage(id, tabPage);
     }
 
-    public void AddGViewerTabPage(Graph graph, string tableName, Action<string> onNodeClick)
+    public void AddGViewerTabPage(ExtendedGraph graph, string tableName, Action<string> onNodeClick)
     {
         var id = GetGViewerTabId(tableName);
 
@@ -48,7 +48,7 @@ public class TabControlManager
         TryUpdateTabPage(id, table, false);
     }
 
-    public void UpdateGViewerTabPageIfOpen(Graph graph, string tableName)
+    public void UpdateGViewerTabPageIfOpen(ExtendedGraph graph, string tableName)
     {
         var id = GetGViewerTabId(tableName);
 

@@ -70,9 +70,12 @@ public class GraphColorAssigner
         return Color.FromArgb(red, green, blue);
     }
 
-    private Color CalculateColorFromDensity(double density)
+    private Color CalculateColorFromDensity(double density, byte minBrightness = 128)
     {
         var brightness = (byte)(255 * (1 - density));
+
+        brightness = brightness < minBrightness ? minBrightness : brightness;
+
         return Color.FromArgb(brightness, brightness, 255);
     }
 }
