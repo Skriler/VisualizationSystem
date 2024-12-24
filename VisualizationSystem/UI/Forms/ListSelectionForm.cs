@@ -1,5 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;
-using VisualizationSystem.Models.Storages.Results;
+using VisualizationSystem.Models.DTOs;
 
 namespace VisualizationSystem.UI.Forms;
 

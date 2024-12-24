@@ -1,15 +1,15 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using VisualizationSystem.Models.Domain.Nodes;
+using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Models.Storages.Nodes;
-using VisualizationSystem.Models.Storages.Results;
 
 namespace VisualizationSystem.UI.Forms;
 
 public partial class NodeDetailsForm : Form
 {
-    private readonly Action<NodeSimilarityResult> onNodeCellClick;
+    private readonly Action<string> onNodeCellClick;
 
-    public NodeDetailsForm(NodeSimilarityResult similarityResult, Action<NodeSimilarityResult> onNodeCellClick)
+    public NodeDetailsForm(NodeSimilarityResult similarityResult, Action<string> onNodeCellClick)
     {
         InitializeComponent();
 

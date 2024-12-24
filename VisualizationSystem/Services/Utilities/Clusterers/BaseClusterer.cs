@@ -2,8 +2,8 @@
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.Utilities.Normalizers;
-using VisualizationSystem.Models.Storages.Clusters;
 using VisualizationSystem.Models.Entities.Settings;
+using VisualizationSystem.Models.Domain.Clusters;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
 

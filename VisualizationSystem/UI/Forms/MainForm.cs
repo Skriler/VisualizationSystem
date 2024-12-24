@@ -1,10 +1,11 @@
 ﻿using VisualizationSystem.Services.UI;
 using VisualizationSystem.UI.Components.TabPages;
-using VisualizationSystem.Services.Utilities.ExcelHandlers;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.Utilities.Managers;
-using VisualizationSystem.Models.Storages.Results;
+using VisualizationSystem.Services.Utilities.FileSystem.ExcelHandlers;
+using VisualizationSystem.Services.Utilities.Graph;
+using VisualizationSystem.Models.DTOs;
 
 namespace VisualizationSystem.UI.Forms;
 
@@ -16,7 +17,8 @@ public partial class MainForm : Form
 
     private readonly ExcelDataImporter fileService;
     private readonly UserSettingsManager userSettingsManager;
-    private readonly GraphManager graphManager;
+    private readonly GraphCreationManager graphCreationManager;
+    private readonly GraphSaveManager graphSaveManager;
 
     private readonly TabControlManager tabControlService;
 
@@ -26,7 +28,8 @@ public partial class MainForm : Form
         NodeTableRepository nodeTableRepository,
         ExcelDataImporter fileService,
         UserSettingsManager userSettingsManager,
-        GraphManager graphManager
+        GraphCreationManager graphCreationManager,
+        GraphSaveManager graphSaveManager
         )
     {
         InitializeComponent();
@@ -37,7 +40,8 @@ public partial class MainForm : Form
 
         this.fileService = fileService;
         this.userSettingsManager = userSettingsManager;
-        this.graphManager = graphManager;
+        this.graphCreationManager = graphCreationManager;
+        this.graphSaveManager = graphSaveManager;
 
         tabControlService = new TabControlManager(tabControl);
     }
@@ -47,7 +51,6 @@ public partial class MainForm : Form
         await LoadTableNamesToMenuAsync();
 
         tabControl.Padding = new Point(20, 3);
-        saveGraphImageToolStripMenuItem.Visible = false;
     }
 
     private async void uploadToolStripMenuItem_Click(object sender, EventArgs e)
@@ -91,10 +94,10 @@ public partial class MainForm : Form
         try
         {
             var graph = userSettingsManager.UseClustering() ?
-                await graphManager.BuildClusteredGraphAsync(nodeTable) :
-                graphManager.BuildGraph(nodeTable);
+                await graphCreationManager.BuildClusteredGraphAsync(nodeTable) :
+                graphCreationManager.BuildGraph(nodeTable);
 
-            tabControlService.AddGViewerTabPage(graph, nodeTable.Name, OpenNodeDetailsForm);
+            tabControlService.AddGViewerTabPage(graph, nodeTable.Name);
         }
         catch (Exception ex)
         {
@@ -114,11 +117,11 @@ public partial class MainForm : Form
         {
             if (userSettingsManager.UseClustering())
             {
-                await graphManager.SaveClusteredGraphAsync(nodeTable);
+                await graphSaveManager.SaveClusteredGraphAsync(nodeTable);
             }
             else
             {
-                await graphManager.SaveGraphAsync(nodeTable);
+                await graphSaveManager.SaveGraphAsync(nodeTable);
             }
         }
         catch (Exception ex)
@@ -310,27 +313,14 @@ public partial class MainForm : Form
 
     private async Task ApplySettingsToComponentsAsync()
     {
-        graphManager.UpdateSettings(userSettingsManager.UserSettings);
+        graphCreationManager.UpdateSettings(userSettingsManager.UserSettings);
 
-        if (graphManager.Graph != null)
-        {
-            var graph = userSettingsManager.UseClustering() ?
-                await graphManager.BuildClusteredGraphAsync(nodeTable) :
-                graphManager.BuildGraph(nodeTable);
-        }
+        var graph = userSettingsManager.UseClustering() ?
+                await graphCreationManager.BuildClusteredGraphAsync(nodeTable) :
+                graphCreationManager.BuildGraph(nodeTable);
 
         tabControlService.UpdateDataGridViewTabPageIfOpen(nodeTable);
-        tabControlService.UpdateGViewerTabPageIfOpen(graphManager.Graph, nodeTable.Name);
-    }
-
-    private void OpenNodeDetailsForm(NodeSimilarityResult nodeSimilarityResult)
-    {
-        if (nodeSimilarityResult == null)
-            return;
-
-        var detailsForm = new NodeDetailsForm(nodeSimilarityResult, OpenNodeDetailsForm);
-        detailsForm.Show();
-        detailsForm.BringToFront();
+        tabControlService.UpdateGViewerTabPageIfOpen(graph, nodeTable.Name);
     }
 
     private void UpdateFormTitle()

@@ -1,8 +1,8 @@
-﻿using VisualizationSystem.Models.Entities.Nodes;
+﻿using VisualizationSystem.Models.Domain.Clusters;
+using VisualizationSystem.Models.Domain.Nodes;
+using VisualizationSystem.Models.DTOs;
+using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Settings;
-using VisualizationSystem.Models.Storages.Clusters;
-using VisualizationSystem.Models.Storages.Nodes;
-using VisualizationSystem.Models.Storages.Results;
 using VisualizationSystem.Services.Utilities.Clusterers;
 using VisualizationSystem.Services.Utilities.Factories;
 

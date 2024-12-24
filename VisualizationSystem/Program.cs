@@ -2,14 +2,17 @@ using DotNetGraph.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Msagl.Drawing;
+using VisualizationSystem.Models.Domain.Graphs;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.UI;
 using VisualizationSystem.Services.Utilities.Clusterers;
 using VisualizationSystem.Services.Utilities.Comparers;
-using VisualizationSystem.Services.Utilities.ExcelHandlers;
 using VisualizationSystem.Services.Utilities.Factories;
-using VisualizationSystem.Services.Utilities.GraphBuilders;
+using VisualizationSystem.Services.Utilities.FileSystem;
+using VisualizationSystem.Services.Utilities.FileSystem.ExcelHandlers;
+using VisualizationSystem.Services.Utilities.Graph;
+using VisualizationSystem.Services.Utilities.Graph.Builders;
+using VisualizationSystem.Services.Utilities.Graph.Helpers;
 using VisualizationSystem.Services.Utilities.Managers;
 using VisualizationSystem.Services.Utilities.Mappers;
 using VisualizationSystem.Services.Utilities.Normalizers;
@@ -60,6 +63,7 @@ internal static class Program
         services.AddSingleton<NodeComparisonManager>();
         services.AddSingleton<GraphSaveManager>();
         services.AddSingleton<GraphColorAssigner>();
+        services.AddSingleton<FileWriter>();
 
         services.AddSingleton<DataNormalizer>();
         services.AddSingleton<KMeansClusterer>();
@@ -68,10 +72,10 @@ internal static class Program
 
         services.AddSingleton<ClustererFactory>();
         services.AddSingleton<UserSettingsManager>();
-        services.AddSingleton<GraphManager>();
+        services.AddSingleton<GraphCreationManager>();
 
         services.AddSingleton<ICompare, DefaultComparer>();
-        services.AddSingleton<IGraphBuilder<Graph>, MsaglGraphBuilder>();
+        services.AddSingleton<IGraphBuilder<ExtendedGraph>, MsaglGraphBuilder>();
         services.AddSingleton<IGraphBuilder<DotGraph>, DotNetGraphBuilder>();
 
         services.AddTransient<MainForm>();

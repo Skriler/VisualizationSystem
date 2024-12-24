@@ -1,5 +1,6 @@
-﻿using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Models.Storages.Graphs;
+﻿using VisualizationSystem.Models.Domain.Graphs;
+using VisualizationSystem.Models.DTOs;
+using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.UI.Components.TabPages;
 
 namespace VisualizationSystem.Services.UI;
@@ -30,14 +31,14 @@ public class TabControlManager
         AddTabPage(id, tabPage);
     }
 
-    public void AddGViewerTabPage(ExtendedGraph graph, string tableName, Action<string> onNodeClick)
+    public void AddGViewerTabPage(ExtendedGraph graph, string tableName)
     {
         var id = GetGViewerTabId(tableName);
 
         if (TryUpdateTabPage(id, graph))
             return;
 
-        var tabPage = new ClosableGViewerTabPage(id, graph, onNodeClick);
+        var tabPage = new ClosableGViewerTabPage(id, graph);
         AddTabPage(id, tabPage);
     }
 

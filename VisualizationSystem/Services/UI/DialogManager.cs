@@ -1,4 +1,4 @@
-﻿using VisualizationSystem.Models.Storages.Results;
+﻿using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.UI.Forms;
 
 namespace VisualizationSystem.Services.UI;

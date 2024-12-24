@@ -1,6 +1,6 @@
-﻿using VisualizationSystem.Models.Entities.Nodes;
+﻿using VisualizationSystem.Models.Domain.Ranges;
+using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Nodes.Normalized;
-using VisualizationSystem.Models.Storages.Ranges;
 
 namespace VisualizationSystem.Services.Utilities.Normalizers;
 

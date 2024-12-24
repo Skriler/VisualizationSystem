@@ -1,5 +1,5 @@
-﻿using VisualizationSystem.Models.Entities.Settings;
-using VisualizationSystem.Models.Storages.Configs;
+﻿using VisualizationSystem.Models.Configs;
+using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Services.Utilities.Clusterers;
 
 namespace VisualizationSystem.Services.UI.Panels;
