@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using VisualizationSystem.Models.Domain.Settings;
 using VisualizationSystem.Services.Utilities.Clusterers;
 
 namespace VisualizationSystem.Models.Entities.Settings;
@@ -50,5 +51,15 @@ public class ClusterAlgorithmSettings
         MaxIterations = DefaultMaxIterations;
         Epsilon = DefaultEpsilon;
         MinPoints = DefaultMinPoints;
+    }
+
+    public void SetData(ClusterAlgorithmSettingsData settingsData)
+    {
+        SelectedAlgorithm = settingsData.SelectedAlgorithm;
+        Threshold = settingsData.Threshold;
+        NumberOfClusters = settingsData.NumberOfClusters;
+        MaxIterations = settingsData.MaxIterations;
+        Epsilon = settingsData.Epsilon;
+        MinPoints = settingsData.MinPoints;
     }
 }

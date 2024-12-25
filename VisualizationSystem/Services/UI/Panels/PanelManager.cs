@@ -16,4 +16,5 @@ public abstract class PanelManager
     public abstract void Initialize();
     public abstract void UpdateContent();
     public abstract void SavePrevious();
+    public abstract void Save();
 }

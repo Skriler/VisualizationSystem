@@ -57,9 +57,10 @@ public class NodeComparisonManager
 
         var similarityResults = similarityResultsDict.Values.ToList();
 
-        similarityResults.ForEach(similarityResult =>
+        similarityResults.ForEach(sr =>
         {
-            similarityResult.UpdateSimilarNodesAboveThreshold(Settings.MinSimilarityPercentage);
+            sr.SimilarNodesAboveThreshold = sr.SimilarNodes
+                .Count(sn => sn.SimilarityPercentage > Settings.MinSimilarityPercentage);
         });
 
         return similarityResults;

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using VisualizationSystem.Models.Domain.Settings;
 
 namespace VisualizationSystem.Models.Entities.Settings;
 
@@ -40,5 +41,11 @@ public class ParameterState
     {
         IsActive = DefaultIsActive;
         Weight = DefaultWeight;
+    }
+
+    public void SetData(ParameterStateData parameterData)
+    {
+        IsActive = parameterData.IsActive;
+        Weight = parameterData.Weight;
     }
 }

@@ -1,4 +1,5 @@
-﻿using VisualizationSystem.Models.Entities.Settings;
+﻿using VisualizationSystem.Models.Domain.Settings;
+using VisualizationSystem.Models.Entities.Settings;
 
 namespace VisualizationSystem.Services.UI.Panels;
 
@@ -8,10 +9,11 @@ public class ParameterStatesPanelManager : PanelManager
     private readonly NumericUpDown nudWeight;
     private readonly CheckBox chkbxIsActive;
 
+    private List<ParameterStateData> parametersList;
     private string previousName;
 
     public ParameterStatesPanelManager(
-        UserSettings settings, Panel panel, ComboBox cmbNames, 
+        UserSettings settings, Panel panel, ComboBox cmbNames,
         NumericUpDown nudWeight, CheckBox chkbxIsActive
         )
         : base(settings, panel)
@@ -23,12 +25,16 @@ public class ParameterStatesPanelManager : PanelManager
 
     public override void Initialize()
     {
+        previousName = string.Empty;
+        parametersList = settings.ParameterStates
+            .ConvertAll(p => new ParameterStateData(p));
+
         panel.Visible = !settings.UseClustering;
 
         cmbNames.Items.Clear();
         cmbNames.Items.AddRange(
-            settings.ParameterStates
-                .Select(paramState => paramState.ParameterType.Name)
+            parametersList
+                .Select(p => p.Name)
                 .ToArray()
         );
 
@@ -46,27 +52,37 @@ public class ParameterStatesPanelManager : PanelManager
             return;
 
         var selectedName = cmbNames.SelectedItem?.ToString();
-        var newSelectedParameterState = settings.ParameterStates
-            .FirstOrDefault(p => p.ParameterType.Name == selectedName);
+        var selectedParameterState = parametersList
+            .FirstOrDefault(p => p.Name == selectedName);
 
-        if (newSelectedParameterState == null)
-            return;
-
-        nudWeight.Value = (decimal)newSelectedParameterState.Weight;
-        chkbxIsActive.Checked = newSelectedParameterState.IsActive;
+        nudWeight.Value = (decimal)selectedParameterState.Weight;
+        chkbxIsActive.Checked = selectedParameterState.IsActive;
 
         previousName = selectedName;
     }
 
     public override void SavePrevious()
     {
-        var parameterState = settings.ParameterStates
-            .FirstOrDefault(p => p.ParameterType.Name == previousName);
+        var parameterState = parametersList
+            .FirstOrDefault(p => p.Name == previousName);
 
         if (parameterState == null)
             return;
 
         parameterState.Weight = (float)nudWeight.Value;
         parameterState.IsActive = chkbxIsActive.Checked;
+    }
+
+    public override void Save()
+    {
+        SavePrevious();
+
+        foreach (var parameter in parametersList)
+        {
+            var parameterState = settings.ParameterStates
+                .FirstOrDefault(p => p.ParameterType.Name == parameter.Name);
+
+            parameterState?.SetData(parameter);
+        }
     }
 }

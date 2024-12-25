@@ -45,6 +45,7 @@ public class UserSettings
     {
         MinSimilarityPercentage = DefaultMinSimilarityPercentage;
         DeviationPercent = DefaultDeviationPercent;
+        UseClustering = false;
     }
 
     public void ResetParameterStates()

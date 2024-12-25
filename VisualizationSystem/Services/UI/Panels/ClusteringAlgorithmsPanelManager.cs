@@ -1,4 +1,5 @@
 ﻿using VisualizationSystem.Models.Configs;
+using VisualizationSystem.Models.Domain.Settings;
 using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Services.Utilities.Clusterers;
 
@@ -12,7 +13,8 @@ public class ClusteringAlgorithmsPanelManager : PanelManager
     private readonly Label lblFirstParameter;
     private readonly Label lblSecondParameter;
 
-    private int previousAlgorithmIndex = -1;
+    private ClusterAlgorithmSettingsData settingsData;
+    private int previousAlgorithmIndex;
 
     private Array algorithms;
 
@@ -30,22 +32,24 @@ public class ClusteringAlgorithmsPanelManager : PanelManager
         this.lblSecondParameter = lblSecondParameter;
 
         panel.Location = panelLocation;
+
+        algorithms = Enum.GetValues(typeof(ClusterAlgorithm));
     }
 
     public override void Initialize()
     {
+        previousAlgorithmIndex = -1;
+        settingsData = new ClusterAlgorithmSettingsData(settings.AlgorithmSettings);
+
         panel.Visible = settings.UseClustering;
 
-        var clusterAlgorithms = Enum.GetNames(typeof(ClusterAlgorithm));
-        algorithms = Enum.GetValues(typeof(ClusterAlgorithm));
-
         cmbClusterAlgorithm.Items.Clear();
-        cmbClusterAlgorithm.Items.AddRange(clusterAlgorithms);
+        cmbClusterAlgorithm.Items.AddRange(Enum.GetNames(typeof(ClusterAlgorithm)));
 
         if (cmbClusterAlgorithm.Items.Count <= 0)
             return;
 
-        cmbClusterAlgorithm.SelectedItem = settings.AlgorithmSettings.SelectedAlgorithm.ToString();
+        cmbClusterAlgorithm.SelectedItem = settingsData.SelectedAlgorithm.ToString();
 
         UpdateContent();
     }
@@ -57,8 +61,7 @@ public class ClusteringAlgorithmsPanelManager : PanelManager
             return;
 
         var algorithm = (ClusterAlgorithm)algorithms.GetValue(cmbClusterAlgorithm.SelectedIndex);
-
-        settings.AlgorithmSettings.SelectedAlgorithm = algorithm;
+        settingsData.SelectedAlgorithm = algorithm;
 
         Action algorithmSetupAction = algorithm switch
         {
@@ -90,27 +93,34 @@ public class ClusteringAlgorithmsPanelManager : PanelManager
         algorithmSetupAction();
     }
 
+    public override void Save()
+    {
+        SavePrevious();
+
+        settings.AlgorithmSettings.SetData(settingsData);
+    }
+
     private void UpdateClusteringOptionsForAgglomerative()
     {
         UpdateClusteringOptions(AlgorithmParameterConfigs.AgglomerativeConfig);
 
-        nudFirstParameter.Value = (decimal)settings.AlgorithmSettings.Threshold;
+        nudFirstParameter.Value = (decimal)settingsData.Threshold;
     }
 
     private void UpdateClusteringOptionsForKMeans()
     {
         UpdateClusteringOptions(AlgorithmParameterConfigs.KMeansConfig);
 
-        nudFirstParameter.Value = settings.AlgorithmSettings.NumberOfClusters;
-        nudSecondParameter.Value = settings.AlgorithmSettings.MaxIterations;
+        nudFirstParameter.Value = settingsData.NumberOfClusters;
+        nudSecondParameter.Value = settingsData.MaxIterations;
     }
 
     private void UpdateClusteringOptionsForDBSCAN()
     {
         UpdateClusteringOptions(AlgorithmParameterConfigs.DBSCANConfig);
 
-        nudFirstParameter.Value = (decimal)settings.AlgorithmSettings.Epsilon;
-        nudSecondParameter.Value = settings.AlgorithmSettings.MinPoints;
+        nudFirstParameter.Value = (decimal)settingsData.Epsilon;
+        nudSecondParameter.Value = settingsData.MinPoints;
     }
 
     private void UpdateClusteringOptions(AlgorithmParameterConfig config)
@@ -139,18 +149,18 @@ public class ClusteringAlgorithmsPanelManager : PanelManager
 
     private void SaveAgglomerativeSettings()
     {
-        settings.AlgorithmSettings.Threshold = (float)nudFirstParameter.Value;
+        settingsData.Threshold = (float)nudFirstParameter.Value;
     }
 
     private void SaveKMeansSettings()
     {
-        settings.AlgorithmSettings.NumberOfClusters = (int)nudFirstParameter.Value;
-        settings.AlgorithmSettings.MaxIterations = (int)nudSecondParameter.Value;
+        settingsData.NumberOfClusters = (int)nudFirstParameter.Value;
+        settingsData.MaxIterations = (int)nudSecondParameter.Value;
     }
 
     private void SaveDBSCANSettings()
     {
-        settings.AlgorithmSettings.Epsilon = (float)nudFirstParameter.Value;
-        settings.AlgorithmSettings.MinPoints = (int)nudSecondParameter.Value;
+        settingsData.Epsilon = (float)nudFirstParameter.Value;
+        settingsData.MinPoints = (int)nudSecondParameter.Value;
     }
 }

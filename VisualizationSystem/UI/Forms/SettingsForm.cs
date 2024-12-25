@@ -7,14 +7,14 @@ public partial class SettingsForm : Form
 {
     private readonly UserSettings settings;
 
-    private readonly ParameterStatesPanelManager parameterStatesPanel;
-    private readonly ClusteringAlgorithmsPanelManager clusteringOptionsPanel;
+    private readonly PanelManager parameterStatesPanel;
+    private readonly PanelManager clusteringOptionsPanel;
 
-    public SettingsForm(UserSettings comparisonSettings)
+    public SettingsForm(UserSettings settings)
     {
         InitializeComponent();
 
-        settings = comparisonSettings;
+        this.settings = settings;
 
         parameterStatesPanel = new ParameterStatesPanelManager(settings, panelParameterStates, cmbNames, nudWeight, chkbxIsActive);
         clusteringOptionsPanel = new ClusteringAlgorithmsPanelManager(
@@ -24,7 +24,6 @@ public partial class SettingsForm : Form
             );
 
         InitializeMainControls();
-
         parameterStatesPanel.Initialize();
         clusteringOptionsPanel.Initialize();
     }
@@ -59,8 +58,8 @@ public partial class SettingsForm : Form
         settings.DeviationPercent = (float)nudDeviationPercent.Value;
         settings.UseClustering = chkbxUseClustering.Checked;
 
-        parameterStatesPanel.SavePrevious();
-        clusteringOptionsPanel.SavePrevious();
+        parameterStatesPanel.Save();
+        clusteringOptionsPanel.Save();
 
         DialogResult = DialogResult.OK;
         Close();
@@ -70,8 +69,8 @@ public partial class SettingsForm : Form
     {
         settings.ResetToDefaults();
         InitializeMainControls();
-        parameterStatesPanel.UpdateContent();
-        clusteringOptionsPanel.UpdateContent();
+        parameterStatesPanel.Initialize();
+        clusteringOptionsPanel.Initialize();
     }
 
     private void InitializeMainControls()
