@@ -1,7 +1,6 @@
 ﻿using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.Utilities.Normalizers;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
@@ -10,13 +9,13 @@ public class AgglomerativeClusterer : BaseClusterer
 {
     private List<AgglomerativeCluster> agglomerativeClusters;
 
-    public AgglomerativeClusterer(NormalizedNodeRepository normalizedNodeRepository, DataNormalizer dataNormalizer) 
-        : base(normalizedNodeRepository, dataNormalizer)
+    public AgglomerativeClusterer(DataNormalizer dataNormalizer, MetricDistanceCalculator distanceCalculator)
+        : base(dataNormalizer, distanceCalculator)
     { }
 
     public override async Task<List<Cluster>> ClusterAsync(NodeTable nodeTable)
     {
-        var normalizedNodes = await GeNormalizedNodesAsync(nodeTable);
+        var normalizedNodes = await dataNormalizer.GeNormalizedNodesAsync(nodeTable);
 
         agglomerativeClusters = normalizedNodes
             .Select(n => new AgglomerativeCluster(n))
@@ -50,7 +49,7 @@ public class AgglomerativeClusterer : BaseClusterer
                 if (agglomerativeClusters[j].IsMerged)
                     continue;
 
-                var similarity = GetCosineSimilarity(
+                var similarity = distanceCalculator.CalculateCosine(
                     agglomerativeClusters[i].AverageParameters,
                     agglomerativeClusters[j].AverageParameters
                     );
@@ -63,17 +62,5 @@ public class AgglomerativeClusterer : BaseClusterer
         }
 
         return clusterSimilarity;
-    }
-
-    private float GetCosineSimilarity(List<double> firstParameters, List<double> secondParameters)
-    {
-        if (firstParameters.Count != secondParameters.Count)
-            throw new InvalidOperationException("Parameters must be the same length");
-
-        var dotProduct = firstParameters.Zip(secondParameters, (x, y) => x * y).Sum();
-        var firstMagnitude = Math.Sqrt(firstParameters.Sum(x => x * x));
-        var secondMagnitude = Math.Sqrt(secondParameters.Sum(x => x * x));
-
-        return (float)(dotProduct / (firstMagnitude * secondMagnitude));
     }
 }

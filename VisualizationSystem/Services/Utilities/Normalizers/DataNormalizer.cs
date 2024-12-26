@@ -1,32 +1,45 @@
 ﻿using VisualizationSystem.Models.Domain.Ranges;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Nodes.Normalized;
+using VisualizationSystem.Services.DAL;
 
 namespace VisualizationSystem.Services.Utilities.Normalizers;
 
 public class DataNormalizer
 {
-    private readonly List<ParameterNumericRange> numericRanges;
-    private readonly List<ParameterStringRange> stringRanges;
+    private readonly NormalizedNodeRepository normalizedNodeRepository;
 
-    public DataNormalizer()
+    private readonly List<ParameterNumericRange> numericRanges = new();
+    private readonly List<ParameterStringRange> stringRanges = new();
+
+    public DataNormalizer(NormalizedNodeRepository normalizedNodeRepository)
     {
-        numericRanges = new();
-        stringRanges = new();
+        this.normalizedNodeRepository = normalizedNodeRepository;
     }
 
-    public List<NormalizedNode> GetNormalizedNodes(List<NodeObject> nodes)
+    public async Task<List<NormalizedNode>> GeNormalizedNodesAsync(NodeTable nodeTable)
+    {
+        if (await normalizedNodeRepository.ExistsAsync(nodeTable.Name))
+        {
+            return await normalizedNodeRepository.GetByTableNameAsync(nodeTable.Name);
+        }
+
+        var normalizedNodes = CreateNormalizedNodes(nodeTable.NodeObjects);
+
+        normalizedNodes.ForEach(nn => nn.NodeTable = nodeTable);
+        await normalizedNodeRepository.AddRangeAsync(normalizedNodes);
+
+        return normalizedNodes;
+    }
+
+    private List<NormalizedNode> CreateNormalizedNodes(List<NodeObject> nodes)
     {
         numericRanges.Clear();
         stringRanges.Clear();
 
         InitializeParameterRanges(nodes);
-        return CreateNormalizedNodes(nodes);
+        return MapNodesToNormalizedNodes(nodes);
     }
-
-    private bool IsNumericParameter(NodeParameter parameter) => numericRanges.Any(range => range.Id == parameter.ParameterTypeId);
-
-    private bool IsStringParameter(NodeParameter parameter) => stringRanges.Any(range => range.Id == parameter.ParameterTypeId);
 
     private void InitializeParameterRanges(List<NodeObject> nodes)
     {
@@ -89,7 +102,7 @@ public class DataNormalizer
         range.AddValue(parameter.Value);
     }
 
-    private List<NormalizedNode> CreateNormalizedNodes(List<NodeObject> nodes)
+    private List<NormalizedNode> MapNodesToNormalizedNodes(List<NodeObject> nodes)
     {
         var normalizedNodes = new List<NormalizedNode>();
 
@@ -101,7 +114,6 @@ public class DataNormalizer
             };
 
             ProcessNodeForNormalization(normalizedNode, node);
-
             normalizedNodes.Add(normalizedNode);
         }
 
@@ -123,11 +135,16 @@ public class DataNormalizer
         }
     }
 
+    private bool IsNumericParameter(NodeParameter parameter) => numericRanges.Any(range => range.Id == parameter.ParameterTypeId);
+
+    private bool IsStringParameter(NodeParameter parameter) => stringRanges.Any(range => range.Id == parameter.ParameterTypeId);
+
     private void ProcessNumericParameter(NormalizedNode normalizedNode, NodeParameter parameter)
     {
         var normalizedParameter = new NormalizedNodeParameter()
         {
             Value = GetNormalizedNumericParameter(normalizedNode, parameter),
+            Weight = 1,
         };
 
         normalizedNode.NormalizedParameters.Add(normalizedParameter);
@@ -156,7 +173,8 @@ public class DataNormalizer
         {
             var normalizedParameter = new NormalizedNodeParameter
             {
-                Value = val
+                Value = val,
+                Weight = 1 / oneHotArray.Length,
             };
 
             normalizedNode.NormalizedParameters.Add(normalizedParameter);

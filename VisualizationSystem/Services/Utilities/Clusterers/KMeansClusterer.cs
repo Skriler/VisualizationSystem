@@ -1,7 +1,6 @@
 ﻿using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Nodes.Normalized;
-using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.Utilities.Normalizers;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
@@ -11,13 +10,13 @@ public class KMeansClusterer : BaseClusterer
     private readonly Random random = new();
     private List<KMeansCluster> kMeansClusters;
 
-    public KMeansClusterer(NormalizedNodeRepository normalizedNodeRepository, DataNormalizer dataNormalizer)
-        : base(normalizedNodeRepository, dataNormalizer)
+    public KMeansClusterer(DataNormalizer dataNormalizer, MetricDistanceCalculator distanceCalculator)
+        : base(dataNormalizer, distanceCalculator)
     { }
 
     public override async Task<List<Cluster>> ClusterAsync(NodeTable nodeTable)
     {
-        var normalizedNodes = await GeNormalizedNodesAsync(nodeTable);
+        var normalizedNodes = await dataNormalizer.GeNormalizedNodesAsync(nodeTable);
         var parametersCount = normalizedNodes.FirstOrDefault()?.NormalizedParameters.Count ?? 0;
 
         if (normalizedNodes.Count < AlgorithmSettings.NumberOfClusters)

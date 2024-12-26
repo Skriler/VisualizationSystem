@@ -11,6 +11,9 @@ public class NormalizedNodeParameter
     public double Value { get; set; }
 
     [Required]
+    public double Weight { get; set; }
+
+    [Required]
     public int NormalizedNodeId { get; set; }
     public NormalizedNode NormalizedNode { get; set; } = default!;
 }

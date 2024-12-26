@@ -1,7 +1,6 @@
 ﻿using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Nodes.Normalized;
-using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.Utilities.Normalizers;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
@@ -10,13 +9,13 @@ public class DBSCANClusterer : BaseClusterer
 {
     private HashSet<NormalizedNode> visitedNodes;
 
-    public DBSCANClusterer(NormalizedNodeRepository normalizedNodeRepository, DataNormalizer dataNormalizer)
-        : base(normalizedNodeRepository, dataNormalizer)
+    public DBSCANClusterer(DataNormalizer dataNormalizer, MetricDistanceCalculator distanceCalculator)
+        : base(dataNormalizer, distanceCalculator)
     { }
 
     public override async Task<List<Cluster>> ClusterAsync(NodeTable nodeTable)
     {
-        var normalizedNodes = await GeNormalizedNodesAsync(nodeTable);
+        var normalizedNodes = await dataNormalizer.GeNormalizedNodesAsync(nodeTable);
 
         var clusters = new List<Cluster>();
         visitedNodes = new HashSet<NormalizedNode>();
@@ -51,8 +50,7 @@ public class DBSCANClusterer : BaseClusterer
 
     private bool IsNeighbor(NormalizedNode node, NormalizedNode other)
     {
-        var distance = GetMixedDistance(node.NormalizedParameters, other.NormalizedParameters);
-
+        var distance = distanceCalculator.CalculateEuclidean(node.NormalizedParameters, other.NormalizedParameters);
         return distance <= AlgorithmSettings.Epsilon;
     }
 
@@ -60,7 +58,8 @@ public class DBSCANClusterer : BaseClusterer
         Cluster cluster,
         NormalizedNode node,
         List<NormalizedNode> neighbors,
-        List<NormalizedNode> nodes)
+        List<NormalizedNode> nodes
+        )
     {
         cluster.AddNode(node.NodeObject);
 
@@ -83,21 +82,5 @@ public class DBSCANClusterer : BaseClusterer
 
             ExpandCluster(cluster, neighbor, neighborNeighbors, nodes);
         }
-    }
-
-    private double GetMixedDistance(List<NormalizedNodeParameter> firstParameters, List<NormalizedNodeParameter> secondParameters)
-    {
-        if (firstParameters.Count != secondParameters.Count)
-            throw new InvalidOperationException("Parameters must be the same length");
-
-        double distance = 0;
-
-        for (int i = 0; i < firstParameters.Count; ++i)
-        {
-            var diff = firstParameters[i].Value - secondParameters[i].Value;
-            distance += diff * diff;
-        }
-
-        return Math.Sqrt(distance);
     }
 }

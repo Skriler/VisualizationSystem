@@ -4,14 +4,14 @@ public class ClusterSimilarityResult
 {
     public int FirstClusterId { get; set; }
     public int SecondClusterId { get; set; }
-    public float Similarity { get; set; }
+    public double Similarity { get; set; }
 
     public ClusterSimilarityResult()
     {
         Similarity = 0;
     }
 
-    public void Update(int firstClusterId, int secondClusterId, float similarity)
+    public void Update(int firstClusterId, int secondClusterId, double similarity)
     {
         FirstClusterId = firstClusterId;
         SecondClusterId = secondClusterId;

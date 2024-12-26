@@ -66,6 +66,7 @@ internal static class Program
         services.AddSingleton<FileWriter>();
 
         services.AddSingleton<DataNormalizer>();
+        services.AddSingleton<MetricDistanceCalculator>();
         services.AddSingleton<KMeansClusterer>();
         services.AddSingleton<AgglomerativeClusterer>();
         services.AddSingleton<DBSCANClusterer>();
