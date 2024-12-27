@@ -22,9 +22,11 @@ public sealed class VisualizationSystemDbContext : DbContext
 
     public DbSet<ClusterAlgorithmSettings> ClusterAlgorithmSettings { get; set; }
 
-    public DbSet<NormalizedNode> NormalizedNodes { get; set; }
+    public DbSet<NormNode> NormNodes { get; set; }
 
-    public DbSet<NormalizedNodeParameter> NormalizedNodeParameters { get; set; }
+    public DbSet<NormParameterState> NormParameterState { get; set; }
+
+    public DbSet<NormParameter> NormNodeParameters { get; set; }
 
     public VisualizationSystemDbContext(DbContextOptions<VisualizationSystemDbContext> options)
         : base(options)
@@ -77,22 +79,28 @@ public sealed class VisualizationSystemDbContext : DbContext
             .HasForeignKey<ClusterAlgorithmSettings>(cas => cas.UserSettingsId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<NormalizedNode>()
+        modelBuilder.Entity<NormNode>()
             .HasOne(nn => nn.NodeTable)
             .WithMany()
             .HasForeignKey(nn => nn.NodeTableId)
             .OnDelete(DeleteBehavior.NoAction);
 
-        modelBuilder.Entity<NormalizedNode>()
+        modelBuilder.Entity<NormNode>()
             .HasOne(nn => nn.NodeObject)
             .WithMany() 
             .HasForeignKey(nn => nn.NodeObjectId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<NormalizedNode>()
-            .HasMany(nn => nn.NormalizedParameters)
-            .WithOne(nnp => nnp.NormalizedNode)
-            .HasForeignKey(nnp => nnp.NormalizedNodeId)
+        modelBuilder.Entity<NormNode>()
+            .HasMany(nn => nn.NormParameters)
+            .WithOne(nnp => nnp.NormNode)
+            .HasForeignKey(nnp => nnp.NormNodeId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<NormParameter>()
+            .HasOne(np => np.NormParameterState)
+            .WithMany()
+            .HasForeignKey(nnp => nnp.NormNodeId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -4,19 +4,19 @@ namespace VisualizationSystem.Services.Utilities.Clusterers;
 
 public class MetricDistanceCalculator
 {
-    public double CalculateEuclidean(List<NormalizedNodeParameter> firstParameters, List<NormalizedNodeParameter> secondParameters)
+    public double CalculateEuclidean(List<NormParameter> firstParameters, List<NormParameter> secondParameters)
     {
         var secondValues = secondParameters.Select(p => p.Value).ToList();
 
         return CalculateWeightedEuclidean(firstParameters, secondValues);
     }
 
-    public double CalculateEuclidean(List<NormalizedNodeParameter> firstParameters, List<double> secondParameters)
+    public double CalculateEuclidean(List<NormParameter> firstParameters, List<double> secondParameters)
     {
         return CalculateWeightedEuclidean(firstParameters, secondParameters);
     }
 
-    private double CalculateWeightedEuclidean(List<NormalizedNodeParameter> parameters, List<double> values)
+    private double CalculateWeightedEuclidean(List<NormParameter> parameters, List<double> values)
     {
         if (parameters.Count != values.Count)
             throw new InvalidOperationException("Parameters must be the same length");
@@ -26,7 +26,7 @@ public class MetricDistanceCalculator
         for (int i = 0; i < parameters.Count; ++i)
         {
             var diff = parameters[i].Value - values[i];
-            distance += (diff * diff) * parameters[i].Weight;
+            distance += (diff * diff) * parameters[i].NormParameterState.Weight;
         }
 
         return Math.Sqrt(distance);

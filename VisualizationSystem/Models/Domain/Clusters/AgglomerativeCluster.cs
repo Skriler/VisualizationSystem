@@ -7,10 +7,10 @@ public class AgglomerativeCluster : Cluster
     public bool IsMerged { get; set; }
     public List<double> AverageParameters { get; private set; }
 
-    public AgglomerativeCluster(NormalizedNode normalizedNode)
+    public AgglomerativeCluster(NormNode normalizedNode)
     {
         IsMerged = false;
-        AverageParameters = normalizedNode.NormalizedParameters
+        AverageParameters = normalizedNode.NormParameters
             .Select(nn => nn.Value)
             .ToList();
 

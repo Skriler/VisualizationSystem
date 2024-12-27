@@ -12,16 +12,16 @@ public class NormalizedNodeRepository
         db = context;
     }
 
-    public async Task AddRangeAsync(List<NormalizedNode> normalizedNodes)
+    public async Task AddRangeAsync(List<NormNode> normalizedNodes)
     {
         if (normalizedNodes == null || normalizedNodes.Count == 0)
             throw new ArgumentNullException("Normalized nodes list must be initialized and cannot be empty.");
 
-        db.NormalizedNodes.AddRange(normalizedNodes);
+        db.NormNodes.AddRange(normalizedNodes);
         await db.SaveChangesAsync();
     }
 
-    public async Task<List<NormalizedNode>> GetByTableNameAsync(string tableName)
+    public async Task<List<NormNode>> GetByTableNameAsync(string tableName)
     {
         if (string.IsNullOrWhiteSpace(tableName))
             throw new ArgumentException("Node table name cannot be null or whitespace.", tableName);
@@ -29,9 +29,9 @@ public class NormalizedNodeRepository
         if (!await ExistsAsync(tableName))
             throw new InvalidOperationException($"Normalized nodes for table {tableName} does not exist.");
 
-        return await db.NormalizedNodes
+        return await db.NormNodes
             .Where(nn => nn.NodeTable.Name == tableName)
-            .Include(nn => nn.NormalizedParameters)
+            .Include(nn => nn.NormParameters)
             .Include(nn => nn.NodeTable)
             .ToListAsync();
     }
@@ -41,7 +41,7 @@ public class NormalizedNodeRepository
         if (string.IsNullOrWhiteSpace(tableName))
             throw new ArgumentException("Table name cannot be null or whitespace.", tableName);
 
-        return await db.NormalizedNodes
+        return await db.NormNodes
             .AnyAsync(nn => nn.NodeTable.Name == tableName);
     }
 }

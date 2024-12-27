@@ -2,7 +2,7 @@
 
 namespace VisualizationSystem.Models.Entities.Nodes.Normalized;
 
-public class NormalizedNode
+public class NormNode
 {
     [Key]
     public int Id { get; set; }
@@ -15,5 +15,5 @@ public class NormalizedNode
     public int NodeTableId { get; set; }
     public NodeTable NodeTable { get; set; } = default!;
 
-    public List<NormalizedNodeParameter> NormalizedParameters { get; set; } = new();
+    public List<NormParameter> NormParameters { get; set; } = new();
 }

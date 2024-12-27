@@ -7,7 +7,7 @@ namespace VisualizationSystem.Services.Utilities.Clusterers;
 
 public class DBSCANClusterer : BaseClusterer
 {
-    private HashSet<NormalizedNode> visitedNodes;
+    private HashSet<NormNode> visitedNodes;
 
     public DBSCANClusterer(DataNormalizer dataNormalizer, MetricDistanceCalculator distanceCalculator)
         : base(dataNormalizer, distanceCalculator)
@@ -18,7 +18,7 @@ public class DBSCANClusterer : BaseClusterer
         var normalizedNodes = await dataNormalizer.GeNormalizedNodesAsync(nodeTable);
 
         var clusters = new List<Cluster>();
-        visitedNodes = new HashSet<NormalizedNode>();
+        visitedNodes = new HashSet<NormNode>();
 
         foreach (var node in normalizedNodes)
         {
@@ -41,24 +41,24 @@ public class DBSCANClusterer : BaseClusterer
         return clusters;
     }
 
-    private List<NormalizedNode> GetNeighbors(NormalizedNode node, List<NormalizedNode> nodes)
+    private List<NormNode> GetNeighbors(NormNode node, List<NormNode> nodes)
     {
         return nodes
             .Where(other => IsNeighbor(node, other))
             .ToList();
     }
 
-    private bool IsNeighbor(NormalizedNode node, NormalizedNode other)
+    private bool IsNeighbor(NormNode node, NormNode other)
     {
-        var distance = distanceCalculator.CalculateEuclidean(node.NormalizedParameters, other.NormalizedParameters);
+        var distance = distanceCalculator.CalculateEuclidean(node.NormParameters, other.NormParameters);
         return distance <= AlgorithmSettings.Epsilon;
     }
 
     private void ExpandCluster(
         Cluster cluster,
-        NormalizedNode node,
-        List<NormalizedNode> neighbors,
-        List<NormalizedNode> nodes
+        NormNode node,
+        List<NormNode> neighbors,
+        List<NormNode> nodes
         )
     {
         cluster.AddNode(node.NodeObject);
