@@ -15,9 +15,9 @@ public class AgglomerativeClusterer : BaseClusterer
 
     public override async Task<List<Cluster>> ClusterAsync(NodeTable nodeTable)
     {
-        var normalizedNodes = await dataNormalizer.GeNormalizedNodesAsync(nodeTable);
+        var nodes = await dataNormalizer.GetNormalizedNodesAsync(nodeTable);
 
-        agglomerativeClusters = normalizedNodes
+        agglomerativeClusters = nodes
             .Select(n => new AgglomerativeCluster(n))
             .ToList();
 

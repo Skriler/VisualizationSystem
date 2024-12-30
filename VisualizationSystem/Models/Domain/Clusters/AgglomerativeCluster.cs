@@ -1,4 +1,4 @@
-﻿using VisualizationSystem.Models.Entities.Nodes.Normalized;
+﻿using VisualizationSystem.Models.Entities.Nodes;
 
 namespace VisualizationSystem.Models.Domain.Clusters;
 
@@ -7,14 +7,14 @@ public class AgglomerativeCluster : Cluster
     public bool IsMerged { get; set; }
     public List<double> AverageParameters { get; private set; }
 
-    public AgglomerativeCluster(NormNode normalizedNode)
+    public AgglomerativeCluster(NodeObject node)
     {
         IsMerged = false;
-        AverageParameters = normalizedNode.NormParameters
+        AverageParameters = node.NormalizedParameters
             .Select(nn => nn.Value)
             .ToList();
 
-        Nodes.Add(normalizedNode.NodeObject);
+        Nodes.Add(node);
     }
 
     public void UpdateAverageParameters(AgglomerativeCluster mergedCluster)

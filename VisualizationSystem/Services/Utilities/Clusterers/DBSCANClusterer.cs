@@ -1,13 +1,12 @@
 ﻿using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Models.Entities.Nodes.Normalized;
 using VisualizationSystem.Services.Utilities.Normalizers;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
 
 public class DBSCANClusterer : BaseClusterer
 {
-    private HashSet<NormNode> visitedNodes;
+    private HashSet<NodeObject> visitedNodes;
 
     public DBSCANClusterer(DataNormalizer dataNormalizer, MetricDistanceCalculator distanceCalculator)
         : base(dataNormalizer, distanceCalculator)
@@ -15,19 +14,19 @@ public class DBSCANClusterer : BaseClusterer
 
     public override async Task<List<Cluster>> ClusterAsync(NodeTable nodeTable)
     {
-        var normalizedNodes = await dataNormalizer.GeNormalizedNodesAsync(nodeTable);
+        var nodes = await dataNormalizer.GetNormalizedNodesAsync(nodeTable);
 
         var clusters = new List<Cluster>();
-        visitedNodes = new HashSet<NormNode>();
+        visitedNodes = new HashSet<NodeObject>();
 
-        foreach (var node in normalizedNodes)
+        foreach (var node in nodes)
         {
             if (visitedNodes.Contains(node))
                 continue;
 
             visitedNodes.Add(node);
 
-            var neighbors = GetNeighbors(node, normalizedNodes);
+            var neighbors = GetNeighbors(node, nodes);
 
             if (neighbors.Count < AlgorithmSettings.MinPoints)
                 continue;
@@ -35,40 +34,40 @@ public class DBSCANClusterer : BaseClusterer
             var cluster = new Cluster();
             clusters.Add(cluster);
 
-            ExpandCluster(cluster, node, neighbors, normalizedNodes);
+            ExpandCluster(cluster, node, neighbors, nodes);
         }
 
         return clusters;
     }
 
-    private List<NormNode> GetNeighbors(NormNode node, List<NormNode> nodes)
+    private List<NodeObject> GetNeighbors(NodeObject node, List<NodeObject> nodes)
     {
         return nodes
             .Where(other => IsNeighbor(node, other))
             .ToList();
     }
 
-    private bool IsNeighbor(NormNode node, NormNode other)
+    private bool IsNeighbor(NodeObject node, NodeObject other)
     {
-        var distance = distanceCalculator.CalculateEuclidean(node.NormParameters, other.NormParameters);
+        var distance = distanceCalculator.CalculateEuclidean(node.NormalizedParameters, other.NormalizedParameters);
         return distance <= AlgorithmSettings.Epsilon;
     }
 
     private void ExpandCluster(
         Cluster cluster,
-        NormNode node,
-        List<NormNode> neighbors,
-        List<NormNode> nodes
+        NodeObject node,
+        List<NodeObject> neighbors,
+        List<NodeObject> nodes
         )
     {
-        cluster.AddNode(node.NodeObject);
+        cluster.AddNode(node);
 
         foreach (var neighbor in neighbors)
         {
-            if (cluster.Nodes.Contains(neighbor.NodeObject))
+            if (cluster.Nodes.Contains(neighbor))
                 continue;
 
-            cluster.AddNode(neighbor.NodeObject);
+            cluster.AddNode(neighbor);
 
             if (visitedNodes.Contains(neighbor))
                 continue;

@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using VisualizationSystem.Models.Entities.Nodes.Normalized;
+using VisualizationSystem.Models.Entities.Nodes;
 
 namespace VisualizationSystem.Services.DAL;
 
@@ -12,16 +12,27 @@ public class NormalizedNodeRepository
         db = context;
     }
 
-    public async Task AddRangeAsync(List<NormNode> normalizedNodes)
+    public async Task AddNormalizedParameterStateListAsync(List<NormalizedParameterState> normalizedParameterStates)
     {
-        if (normalizedNodes == null || normalizedNodes.Count == 0)
-            throw new ArgumentNullException("Normalized nodes list must be initialized and cannot be empty.");
+        if (normalizedParameterStates == null || normalizedParameterStates.Count == 0)
+            throw new ArgumentNullException("Normalized parameter states list must be initialized and cannot be empty.");
 
-        db.NormNodes.AddRange(normalizedNodes);
+        db.NormalizedParameterStates.AddRange(normalizedParameterStates);
         await db.SaveChangesAsync();
     }
 
-    public async Task<List<NormNode>> GetByTableNameAsync(string tableName)
+    public async Task AddAllNormalizedParametersAsync(List<NodeObject> nodes)
+    {
+        if (nodes == null || nodes.Count == 0)
+            throw new ArgumentNullException("Normalized nodes list must be initialized and cannot be empty.");
+
+        var allParameters = nodes.SelectMany(n => n.NormalizedParameters).ToList();
+
+        await db.NormalizedParameters.AddRangeAsync(allParameters);
+        await db.SaveChangesAsync();
+    }
+
+    public async Task<List<NodeObject>> GetByTableNameAsync(string tableName)
     {
         if (string.IsNullOrWhiteSpace(tableName))
             throw new ArgumentException("Node table name cannot be null or whitespace.", tableName);
@@ -29,10 +40,11 @@ public class NormalizedNodeRepository
         if (!await ExistsAsync(tableName))
             throw new InvalidOperationException($"Normalized nodes for table {tableName} does not exist.");
 
-        return await db.NormNodes
-            .Where(nn => nn.NodeTable.Name == tableName)
-            .Include(nn => nn.NormParameters)
-            .Include(nn => nn.NodeTable)
+        return await db.NodeObjects
+            .Where(no => no.NodeTable.Name == tableName)
+            .Include(nn => nn.NormalizedParameters)
+            .ThenInclude(np => np.NormalizedParameterState)
+            .AsNoTracking()
             .ToListAsync();
     }
 
@@ -41,7 +53,8 @@ public class NormalizedNodeRepository
         if (string.IsNullOrWhiteSpace(tableName))
             throw new ArgumentException("Table name cannot be null or whitespace.", tableName);
 
-        return await db.NormNodes
-            .AnyAsync(nn => nn.NodeTable.Name == tableName);
+        return await db.NodeObjects
+            .Where(no => no.NodeTable.Name == tableName)
+            .AnyAsync(no => no.NormalizedParameters.Any());
     }
 }

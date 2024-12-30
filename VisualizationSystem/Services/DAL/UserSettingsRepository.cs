@@ -36,10 +36,10 @@ public class UserSettingsRepository
             throw new InvalidOperationException($"Settings for table {tableName} does not exist.");
 
         return await db.UserSettings
-            .Include(us => us.NodeTable)
-            .Include(us => us.ParameterStates)
-            .Include(us => us.AlgorithmSettings)
-            .FirstAsync(us => us.NodeTable.Name == tableName);
+            .Include(settings => settings.NodeTable)
+            .Include(settings => settings.ParameterStates)
+            .Include(settings => settings.AlgorithmSettings)
+            .FirstAsync(settings => settings.NodeTable.Name == tableName);
     }
 
     public async Task<bool> ExistsAsync(string tableName)
