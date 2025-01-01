@@ -11,7 +11,6 @@ public class ParameterType
     [Required]
     public string Name { get; set; } = default!;
 
-    [Required]
-    public int NodeTableId { get; set; }
-    public NodeTable NodeTable { get; set; } = default!;
+    public int? NodeTableId { get; set; }
+    public NodeTable? NodeTable { get; set; } = default!;
 }

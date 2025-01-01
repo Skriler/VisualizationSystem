@@ -5,6 +5,7 @@ using VisualizationSystem.Models.Domain.Graphs;
 using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Services.Utilities.Graph.Helpers;
+using VisualizationSystem.Services.Utilities.Settings;
 using Cluster = VisualizationSystem.Models.Domain.Clusters.Cluster;
 using MsaglColor = Microsoft.Msagl.Drawing.Color;
 using SystemColor = System.Drawing.Color;
@@ -13,8 +14,11 @@ namespace VisualizationSystem.Services.Utilities.Graph.Builders;
 
 public class MsaglGraphBuilder : GraphBuilder<ExtendedGraph>
 {
-    public MsaglGraphBuilder(GraphColorAssigner colorAssigner)
-        : base(colorAssigner)
+    public MsaglGraphBuilder(
+        GraphColorAssigner colorAssigner,
+        ISettingsSubject settingsSubject
+        )
+        : base(colorAssigner, settingsSubject)
     { }
 
     public override ExtendedGraph Build(string name, List<NodeSimilarityResult> similarityResults)
@@ -103,7 +107,7 @@ public class MsaglGraphBuilder : GraphBuilder<ExtendedGraph>
         //edge.LabelText = $"{similarityPercentage:F1}%";
         //edge.Attr.Length = 1.0 / similarityPercentage;
 
-        var edgeColor = colorAssigner.CalculateEdgeColor(similarityPercentage, Settings.MinSimilarityPercentage);
+        var edgeColor = colorAssigner.CalculateEdgeColor(similarityPercentage, settings.MinSimilarityPercentage);
         edge.Attr.Color = new MsaglColor(edgeColor.A, edgeColor.R, edgeColor.G, edgeColor.B);
     }
 }

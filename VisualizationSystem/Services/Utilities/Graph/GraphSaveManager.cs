@@ -24,12 +24,6 @@ public class GraphSaveManager
         this.fileWriter = fileWriter;
     }
 
-    public void UpdateSettings(UserSettings settings)
-    {
-        nodeComparisonManager.UpdateSettings(settings);
-        graphBuilder.UpdateSettings(settings);
-    }
-
     public async Task SaveGraphAsync(NodeTable nodeTable)
     {
         var similarityResults = nodeComparisonManager.CalculateSimilarNodes(nodeTable.NodeObjects);

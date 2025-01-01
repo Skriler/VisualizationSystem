@@ -1,6 +1,7 @@
 ﻿using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Services.Utilities.Normalizers;
+using VisualizationSystem.Services.Utilities.Settings;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
 
@@ -8,8 +9,12 @@ public class DBSCANClusterer : BaseClusterer
 {
     private HashSet<NodeObject> visitedNodes;
 
-    public DBSCANClusterer(DataNormalizer dataNormalizer, MetricDistanceCalculator distanceCalculator)
-        : base(dataNormalizer, distanceCalculator)
+    public DBSCANClusterer(
+        DataNormalizer dataNormalizer,
+        MetricDistanceCalculator distanceCalculator,
+        ISettingsSubject settingsSubject
+        )
+        : base(dataNormalizer, distanceCalculator, settingsSubject)
     { }
 
     public override async Task<List<Cluster>> ClusterAsync(NodeTable nodeTable)
@@ -28,7 +33,7 @@ public class DBSCANClusterer : BaseClusterer
 
             var neighbors = GetNeighbors(node, nodes);
 
-            if (neighbors.Count < AlgorithmSettings.MinPoints)
+            if (neighbors.Count < settings.AlgorithmSettings.MinPoints)
                 continue;
 
             var cluster = new Cluster();
@@ -50,7 +55,7 @@ public class DBSCANClusterer : BaseClusterer
     private bool IsNeighbor(NodeObject node, NodeObject other)
     {
         var distance = distanceCalculator.CalculateEuclidean(node.NormalizedParameters, other.NormalizedParameters);
-        return distance <= AlgorithmSettings.Epsilon;
+        return distance <= settings.AlgorithmSettings.Epsilon;
     }
 
     private void ExpandCluster(
@@ -76,7 +81,7 @@ public class DBSCANClusterer : BaseClusterer
 
             var neighborNeighbors = GetNeighbors(neighbor, nodes);
 
-            if (neighborNeighbors.Count < AlgorithmSettings.MinPoints)
+            if (neighborNeighbors.Count < settings.AlgorithmSettings.MinPoints)
                 continue;
 
             ExpandCluster(cluster, neighbor, neighborNeighbors, nodes);

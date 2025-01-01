@@ -13,9 +13,9 @@ using VisualizationSystem.Services.Utilities.FileSystem.ExcelHandlers;
 using VisualizationSystem.Services.Utilities.Graph;
 using VisualizationSystem.Services.Utilities.Graph.Builders;
 using VisualizationSystem.Services.Utilities.Graph.Helpers;
-using VisualizationSystem.Services.Utilities.Managers;
 using VisualizationSystem.Services.Utilities.Mappers;
 using VisualizationSystem.Services.Utilities.Normalizers;
+using VisualizationSystem.Services.Utilities.Settings;
 using VisualizationSystem.UI.Forms;
 
 namespace VisualizationSystem;
@@ -72,8 +72,11 @@ internal static class Program
         services.AddSingleton<DBSCANClusterer>();
 
         services.AddSingleton<ClustererFactory>();
-        services.AddSingleton<UserSettingsManager>();
         services.AddSingleton<GraphCreationManager>();
+
+        services.AddSingleton<UserSettingsManager>();
+        services.AddSingleton<ISettingsSubject>(sp => sp.GetRequiredService<UserSettingsManager>());
+        services.AddSingleton<ISettingsManager>(sp => sp.GetRequiredService<UserSettingsManager>());
 
         services.AddSingleton<ICompare, DefaultComparer>();
         services.AddSingleton<IGraphBuilder<ExtendedGraph>, MsaglGraphBuilder>();

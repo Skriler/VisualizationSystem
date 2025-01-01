@@ -43,63 +43,70 @@ public sealed class VisualizationSystemDbContext : DbContext
         modelBuilder.Entity<NodeTable>(entity =>
         {
             entity.HasMany(e => e.NodeObjects)
-                  .WithOne(no => no.NodeTable)
-                  .HasForeignKey(no => no.NodeTableId)
-                  .OnDelete(DeleteBehavior.Cascade);
+                .WithOne(node => node.NodeTable)
+                .HasForeignKey(node => node.NodeTableId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasMany(e => e.ParameterTypes)
-                  .WithOne(pt => pt.NodeTable)
-                  .HasForeignKey(no => no.NodeTableId)
-                  .OnDelete(DeleteBehavior.NoAction);
+                .WithOne(type => type.NodeTable)
+                .HasForeignKey(type => type.NodeTableId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<NodeObject>(entity =>
         {
             entity.HasMany(e => e.Parameters)
-                  .WithOne(np => np.NodeObject)
-                  .HasForeignKey(np => np.NodeObjectId)
-                  .OnDelete(DeleteBehavior.Cascade);
+                .WithOne(parameter => parameter.NodeObject)
+                .HasForeignKey(parameter => parameter.NodeObjectId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasMany(e => e.NormalizedParameters)
-                  .WithOne(np => np.NodeObject)
-                  .HasForeignKey(np => np.NodeObjectId)
-                  .OnDelete(DeleteBehavior.Cascade);
+                .WithOne(parameter => parameter.NodeObject)
+                .HasForeignKey(parameter => parameter.NodeObjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<UserSettings>(entity =>
+        {
+            entity.HasOne(e => e.NodeTable)
+                .WithMany()
+                .HasForeignKey(e => e.NodeTableId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.AlgorithmSettings)
+                .WithOne(algorithm => algorithm.UserSettings)
+                .HasForeignKey<ClusterAlgorithmSettings>(algorithm => algorithm.UserSettingsId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<NodeParameter>()
-            .HasOne(np => np.ParameterType)
+            .HasOne(parameter => parameter.ParameterType)
             .WithMany()
-            .HasForeignKey(np => np.ParameterTypeId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        modelBuilder.Entity<UserSettings>()
-            .HasOne(us => us.NodeTable)
-            .WithMany()
-            .HasForeignKey(us => us.NodeTableId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        modelBuilder.Entity<ParameterState>()
-            .HasOne(ps => ps.UserSettings)
-            .WithMany(us => us.ParameterStates)
-            .HasForeignKey(ps => ps.UserSettingsId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        modelBuilder.Entity<ClusterAlgorithmSettings>()
-            .HasOne(cas => cas.UserSettings)
-            .WithOne(us => us.AlgorithmSettings)
-            .HasForeignKey<ClusterAlgorithmSettings>(cas => cas.UserSettingsId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        modelBuilder.Entity<NormalizedParameterState>()
-            .HasOne(nps => nps.ParameterType)
-            .WithMany()
-            .HasForeignKey(nps => nps.ParameterTypeId)
+            .HasForeignKey(parameter => parameter.ParameterTypeId)
             .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<NormalizedParameter>()
-            .HasOne(np => np.NormalizedParameterState)
+            .HasOne(parameter => parameter.NormalizedParameterState)
             .WithMany()
-            .HasForeignKey(np => np.NormalizedParameterStateId)
+            .HasForeignKey(parameter => parameter.NormalizedParameterStateId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<NormalizedParameterState>()
+            .HasOne(state => state.ParameterType)
+            .WithMany()
+            .HasForeignKey(state => state.ParameterTypeId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ParameterState>()
+            .HasOne(state => state.UserSettings)
+            .WithMany(settings => settings.ParameterStates)
+            .HasForeignKey(state => state.UserSettingsId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ParameterState>()
+            .HasOne(state => state.ParameterType)
+            .WithOne()
+            .HasForeignKey<ParameterState>(state => state.ParameterTypeId)
             .OnDelete(DeleteBehavior.NoAction);
     }
 }

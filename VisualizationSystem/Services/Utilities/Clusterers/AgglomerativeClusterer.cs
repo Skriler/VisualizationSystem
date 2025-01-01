@@ -2,6 +2,7 @@
 using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Services.Utilities.Normalizers;
+using VisualizationSystem.Services.Utilities.Settings;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
 
@@ -9,8 +10,12 @@ public class AgglomerativeClusterer : BaseClusterer
 {
     private List<AgglomerativeCluster> agglomerativeClusters;
 
-    public AgglomerativeClusterer(DataNormalizer dataNormalizer, MetricDistanceCalculator distanceCalculator)
-        : base(dataNormalizer, distanceCalculator)
+    public AgglomerativeClusterer(
+        DataNormalizer dataNormalizer,
+        MetricDistanceCalculator distanceCalculator,
+        ISettingsSubject settingsSubject
+        )
+        : base(dataNormalizer, distanceCalculator, settingsSubject)
     { }
 
     public override async Task<List<Cluster>> ClusterAsync(NodeTable nodeTable)
@@ -25,7 +30,7 @@ public class AgglomerativeClusterer : BaseClusterer
         {
             var similarCluster = FindMostSimilarClusters();
 
-            if (similarCluster.Similarity < AlgorithmSettings.Threshold)
+            if (similarCluster.Similarity < settings.AlgorithmSettings.Threshold)
                 break;
 
             agglomerativeClusters[similarCluster.FirstClusterId]

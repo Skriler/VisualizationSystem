@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Entities.Nodes;
 
 namespace VisualizationSystem.Services.DAL;
@@ -54,8 +55,17 @@ public class NodeTableRepository
         var parameterTypes = nodeTable.ParameterTypes;
 
         db.NodeTables.Remove(nodeTable);
-        db.ParameterTypes.RemoveRange(parameterTypes);
+        await db.SaveChangesAsync();
 
+        await DeleteParameterTypesAsync(parameterTypes);
+    }
+
+    private async Task DeleteParameterTypesAsync(List<ParameterType> parameterTypes)
+    {
+        if (parameterTypes == null || parameterTypes.Count == 0)
+            throw new ArgumentNullException("Parameter types must be initialized and cannot be empty.");
+
+        db.ParameterTypes.RemoveRange(parameterTypes);
         await db.SaveChangesAsync();
     }
 

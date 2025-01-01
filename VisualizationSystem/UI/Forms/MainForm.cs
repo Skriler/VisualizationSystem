@@ -2,10 +2,9 @@
 using VisualizationSystem.UI.Components.TabPages;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Services.DAL;
-using VisualizationSystem.Services.Utilities.Managers;
 using VisualizationSystem.Services.Utilities.FileSystem.ExcelHandlers;
 using VisualizationSystem.Services.Utilities.Graph;
-using VisualizationSystem.Models.DTOs;
+using VisualizationSystem.Services.Utilities.Settings;
 
 namespace VisualizationSystem.UI.Forms;
 
@@ -16,7 +15,7 @@ public partial class MainForm : Form
     private readonly NodeTableRepository nodeTableRepository;
 
     private readonly ExcelDataImporter fileService;
-    private readonly UserSettingsManager userSettingsManager;
+    private readonly ISettingsManager userSettingsManager;
     private readonly GraphCreationManager graphCreationManager;
     private readonly GraphSaveManager graphSaveManager;
 
@@ -27,7 +26,7 @@ public partial class MainForm : Form
     public MainForm(
         NodeTableRepository nodeTableRepository,
         ExcelDataImporter fileService,
-        UserSettingsManager userSettingsManager,
+        ISettingsManager userSettingsManager,
         GraphCreationManager graphCreationManager,
         GraphSaveManager graphSaveManager
         )
@@ -59,7 +58,6 @@ public partial class MainForm : Form
             return;
 
         await LoadTableNamesToMenuAsync();
-        await ApplySettingsToComponentsAsync();
         UpdateFormTitle();
 
         ShowSuccess("File uploaded successfully!");
@@ -138,15 +136,9 @@ public partial class MainForm : Form
             return;
         }
 
-        var userSettings = userSettingsManager.UserSettings;
-
-        using (var settingsForm = new SettingsForm(userSettings))
+        if (await userSettingsManager.TryOpenSettingsForm())
         {
-            if (settingsForm.ShowDialog() != DialogResult.OK)
-                return;
-
-            await userSettingsManager.UpdateAsync(userSettings);
-            await ApplySettingsToComponentsAsync();
+            await UpdateGraphIfNeededAsync();
         }
     }
 
@@ -298,7 +290,7 @@ public partial class MainForm : Form
         nodeTable = await nodeTableRepository.GetByNameAsync(tableName);
         await userSettingsManager.LoadAsync(nodeTable);
 
-        await ApplySettingsToComponentsAsync();
+        await UpdateGraphIfNeededAsync();
     }
 
     private async Task OnDeleteTable(string tableName)
@@ -311,10 +303,8 @@ public partial class MainForm : Form
         await LoadTableNamesToMenuAsync();
     }
 
-    private async Task ApplySettingsToComponentsAsync()
+    private async Task UpdateGraphIfNeededAsync()
     {
-        graphCreationManager.UpdateSettings(userSettingsManager.UserSettings);
-
         var graph = userSettingsManager.UseClustering() ?
                 await graphCreationManager.BuildClusteredGraphAsync(nodeTable) :
                 graphCreationManager.BuildGraph(nodeTable);

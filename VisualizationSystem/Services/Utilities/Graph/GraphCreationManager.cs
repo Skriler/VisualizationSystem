@@ -1,6 +1,5 @@
 ﻿using VisualizationSystem.Models.Domain.Graphs;
 using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Services.Utilities.Comparers;
 using VisualizationSystem.Services.Utilities.Graph.Builders;
 
@@ -18,12 +17,6 @@ public class GraphCreationManager
     {
         this.graphBuilder = graphBuilder;
         this.nodeComparisonManager = nodeComparisonManager;
-    }
-
-    public void UpdateSettings(UserSettings settings)
-    {
-        nodeComparisonManager.UpdateSettings(settings);
-        graphBuilder.UpdateSettings(settings);
     }
 
     public ExtendedGraph BuildGraph(NodeTable nodeTable)

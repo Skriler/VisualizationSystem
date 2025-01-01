@@ -5,29 +5,34 @@ using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Services.Utilities.Clusterers;
 using VisualizationSystem.Services.Utilities.Factories;
+using VisualizationSystem.Services.Utilities.Settings;
 
 namespace VisualizationSystem.Services.Utilities.Comparers;
 
-public class NodeComparisonManager
+public class NodeComparisonManager : ISettingsObserver
 {
     private readonly ClustererFactory clustererFactory;
     private readonly ICompare comparer;
 
     private BaseClusterer clusterer;
+    private UserSettings settings;
 
-    public UserSettings Settings { get; private set; }
-
-    public NodeComparisonManager(ClustererFactory clustererFactory, ICompare comparer)
+    public NodeComparisonManager(
+        ClustererFactory clustererFactory,
+        ICompare comparer,
+        ISettingsSubject settingsSubject
+        )
     {
         this.clustererFactory = clustererFactory;
         this.comparer = comparer;
+
+        settingsSubject.Attach(this);
     }
 
-    public void UpdateSettings(UserSettings settings)
+    public void Update(UserSettings settings)
     {
-        Settings = settings;
-        clusterer = clustererFactory.CreateClusterer(Settings.AlgorithmSettings.SelectedAlgorithm);
-        clusterer.UpdateSettings(settings.AlgorithmSettings);
+        this.settings = settings;
+        clusterer = clustererFactory.CreateClusterer(settings.AlgorithmSettings.SelectedAlgorithm);
     }
 
     public List<NodeSimilarityResult> CalculateSimilarNodes(List<NodeObject> nodes)
@@ -60,7 +65,7 @@ public class NodeComparisonManager
         similarityResults.ForEach(sr =>
         {
             sr.SimilarNodesAboveThreshold = sr.SimilarNodes
-                .Count(sn => sn.SimilarityPercentage > Settings.MinSimilarityPercentage);
+                .Count(sn => sn.SimilarityPercentage > settings.MinSimilarityPercentage);
         });
 
         return similarityResults;
@@ -82,7 +87,7 @@ public class NodeComparisonManager
         float totalMatchedWeight = 0;
         float totalActiveWeight = 0;
 
-        var activeParameterStates = Settings.GetActiveParameters();
+        var activeParameterStates = settings.GetActiveParameters();
         var firstNodeParameters = firstNode.Parameters.ToDictionary(p => p.ParameterType);
         var secondNodeParameters = secondNode.Parameters.ToDictionary(p => p.ParameterType);
 
@@ -99,7 +104,7 @@ public class NodeComparisonManager
             if (firstParameter.ParameterType.Name != secondParameter.ParameterType.Name)
                 continue;
 
-            if (!comparer.Compare(firstParameter.Value, secondParameter.Value, Settings.DeviationPercent))
+            if (!comparer.Compare(firstParameter.Value, secondParameter.Value, settings.DeviationPercent))
                 continue;
 
             totalMatchedWeight += parameterState.Weight;

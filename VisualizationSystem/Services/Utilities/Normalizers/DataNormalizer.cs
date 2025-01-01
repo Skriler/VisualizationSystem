@@ -1,5 +1,7 @@
 ﻿using VisualizationSystem.Models.Domain.Ranges;
+using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Services.DAL;
 
 namespace VisualizationSystem.Services.Utilities.Normalizers;
@@ -26,6 +28,7 @@ public class DataNormalizer
 
         numericRanges.Clear();
         stringRanges.Clear();
+        parameterStates.Clear();
 
         InitializeParameterRanges(nodeTable.NodeObjects);
 
@@ -105,20 +108,27 @@ public class DataNormalizer
         {
             if (!IsStringParameter(parameter))
             {
-                parameterStates.Add(new NormalizedParameterState() { Weight = 1.0 });
+                parameterStates.Add(CreateSingleParameterState(parameter.ParameterType, 1));
                 continue;
             }
 
             var range = stringRanges.First(r => r.Id == parameter.ParameterTypeId);
-            var weight = 1.0 / range.Values.Count;
-
             var newParameterStates = Enumerable
                 .Range(0, range.Values.Count)
-                .Select(i => new NormalizedParameterState() { Weight = weight })
+                .Select(i => CreateSingleParameterState(parameter.ParameterType, range.Values.Count))
                 .ToList();
 
             parameterStates.AddRange(newParameterStates);
         }
+    }
+
+    private NormalizedParameterState CreateSingleParameterState(ParameterType parameterType, int valuesCount)
+    {
+        return new NormalizedParameterState
+        {
+            Weight = CalculateWeight(valuesCount),
+            ParameterType = parameterType
+        };
     }
 
     private void ProcessNodeForNormalization(NodeObject node)
@@ -197,7 +207,7 @@ public class DataNormalizer
         return ConvertStringToOneHot(parameter.Value, range.Values);
     }
 
-    private double NormalizeMinMax(double value, double min, double max)
+    private static double NormalizeMinMax(double value, double min, double max)
     {
         if (max == min)
             return 1;
@@ -205,7 +215,7 @@ public class DataNormalizer
         return (value - min) / (max - min);
     }
 
-    private bool IsNumeric(string value)
+    private static bool IsNumeric(string value)
     {
         return double.TryParse(value, out _);
     }
@@ -222,4 +232,6 @@ public class DataNormalizer
 
         return encoded;
     }
+
+    private static double CalculateWeight(int valuesCount) => 1.0 / valuesCount;
 }

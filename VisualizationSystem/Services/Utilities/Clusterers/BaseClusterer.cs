@@ -1,24 +1,31 @@
 ﻿using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Services.Utilities.Normalizers;
 using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Models.Domain.Clusters;
+using VisualizationSystem.Services.Utilities.Normalizers;
+using VisualizationSystem.Services.Utilities.Settings;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
 
-public abstract class BaseClusterer
+public abstract class BaseClusterer : ISettingsObserver
 {
     protected readonly DataNormalizer dataNormalizer;
     protected readonly MetricDistanceCalculator distanceCalculator;
 
-    public ClusterAlgorithmSettings AlgorithmSettings { get; set; }
+    protected UserSettings settings;
 
-    protected BaseClusterer(DataNormalizer dataNormalizer, MetricDistanceCalculator distanceCalculator)
+    protected BaseClusterer(
+        DataNormalizer dataNormalizer,
+        MetricDistanceCalculator distanceCalculator,
+        ISettingsSubject settingsSubject
+        )
     {
         this.dataNormalizer = dataNormalizer;
         this.distanceCalculator = distanceCalculator;
+
+        settingsSubject.Attach(this);
     }
 
     public abstract Task<List<Cluster>> ClusterAsync(NodeTable nodeTable);
 
-    public void UpdateSettings(ClusterAlgorithmSettings algorithmSettings) => AlgorithmSettings = algorithmSettings;
+    public void Update(UserSettings settings) => this.settings = settings;
 }

@@ -3,25 +3,34 @@ using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Services.Utilities.Graph.Helpers;
+using VisualizationSystem.Services.Utilities.Settings;
 
 namespace VisualizationSystem.Services.Utilities.Graph.Builders;
 
-public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>
+public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISettingsObserver
 {
     protected readonly GraphColorAssigner colorAssigner;
 
     protected readonly Random random = new();
     protected readonly Dictionary<string, Color> nodeColors = new();
 
-    public UserSettings Settings { get; set; } = new();
+    protected UserSettings settings;
 
-    protected GraphBuilder(GraphColorAssigner colorAssigner)
+    protected GraphBuilder(
+        GraphColorAssigner colorAssigner,
+        ISettingsSubject settingsSubject
+        )
     {
         this.colorAssigner = colorAssigner;
+
+        settingsSubject.Attach(this);
     }
 
     public abstract TGraph Build(string name, List<NodeSimilarityResult> similarityResults);
+
     public abstract TGraph Build(string name, List<NodeObject> nodes, List<Cluster> clusters);
+
+    public void Update(UserSettings settings) => this.settings = settings;
 
     protected virtual void AddNodes(TGraph graph, List<NodeSimilarityResult> similarityResults)
     {
@@ -36,7 +45,7 @@ public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>
             var nodeColor = colorAssigner.GetNodeColorFromDensityWithSigmoid(
                 similarityResult,
                 maxSimilarNodesAboveThreshold,
-                Settings.MinSimilarityPercentage
+                settings.MinSimilarityPercentage
                 );
 
             AddNode(
@@ -76,7 +85,7 @@ public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>
 
             foreach (var similarNode in similarityResult.SimilarNodes)
             {
-                if (similarNode.SimilarityPercentage < Settings.MinSimilarityPercentage)
+                if (similarNode.SimilarityPercentage < settings.MinSimilarityPercentage)
                     continue;
 
                 var similarNodeName = similarNode.Node.Name;

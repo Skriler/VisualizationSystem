@@ -1,6 +1,7 @@
 ﻿using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Services.Utilities.Normalizers;
+using VisualizationSystem.Services.Utilities.Settings;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
 
@@ -9,8 +10,12 @@ public class KMeansClusterer : BaseClusterer
     private readonly Random random = new();
     private List<KMeansCluster> kMeansClusters;
 
-    public KMeansClusterer(DataNormalizer dataNormalizer, MetricDistanceCalculator distanceCalculator)
-        : base(dataNormalizer, distanceCalculator)
+    public KMeansClusterer(
+        DataNormalizer dataNormalizer,
+        MetricDistanceCalculator distanceCalculator,
+        ISettingsSubject settingsSubject
+        )
+        : base(dataNormalizer, distanceCalculator, settingsSubject)
     { }
 
     public override async Task<List<Cluster>> ClusterAsync(NodeTable nodeTable)
@@ -18,13 +23,13 @@ public class KMeansClusterer : BaseClusterer
         var nodes = await dataNormalizer.GetNormalizedNodesAsync(nodeTable);
         var parametersCount = nodes.FirstOrDefault()?.NormalizedParameters.Count ?? 0;
 
-        if (nodes.Count < AlgorithmSettings.NumberOfClusters)
+        if (nodes.Count < settings.AlgorithmSettings.NumberOfClusters)
             throw new InvalidOperationException("Nodes amount is less than the number of clusters");
 
-        kMeansClusters = new List<KMeansCluster>(AlgorithmSettings.NumberOfClusters);
+        kMeansClusters = new List<KMeansCluster>(settings.AlgorithmSettings.NumberOfClusters);
         InitializeClusters(nodes, parametersCount);
 
-        for (int iteration = 0; iteration < AlgorithmSettings.MaxIterations; ++iteration)
+        for (int iteration = 0; iteration < settings.AlgorithmSettings.MaxIterations; ++iteration)
         {
             var assignmentsChanged = false;
 
@@ -55,7 +60,7 @@ public class KMeansClusterer : BaseClusterer
     {
         var selectedIndices = new HashSet<int>();
 
-        for (int i = 0; i < AlgorithmSettings.NumberOfClusters; ++i)
+        for (int i = 0; i < settings.AlgorithmSettings.NumberOfClusters; ++i)
         {
             int randomIndex;
             do
