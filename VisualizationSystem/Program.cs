@@ -10,9 +10,9 @@ using VisualizationSystem.Services.Utilities.Comparers;
 using VisualizationSystem.Services.Utilities.Factories;
 using VisualizationSystem.Services.Utilities.FileSystem;
 using VisualizationSystem.Services.Utilities.FileSystem.ExcelHandlers;
-using VisualizationSystem.Services.Utilities.Graph;
 using VisualizationSystem.Services.Utilities.Graph.Builders;
 using VisualizationSystem.Services.Utilities.Graph.Helpers;
+using VisualizationSystem.Services.Utilities.Graph.Managers;
 using VisualizationSystem.Services.Utilities.Mappers;
 using VisualizationSystem.Services.Utilities.Normalizers;
 using VisualizationSystem.Services.Utilities.Settings;
@@ -27,14 +27,8 @@ internal static class Program
     [STAThread]
     static void Main()
     {
-        Application.EnableVisualStyles();
-        Application.SetCompatibleTextRenderingDefault(false);
-
-        var builder = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
-        Configuration = builder.Build();
+        ConfigureApplication();
+        InitializeConfiguration();
 
         var services = new ServiceCollection();
         ConfigureServices(services);
@@ -46,42 +40,77 @@ internal static class Program
         }
     }
 
+    private static void ConfigureApplication()
+    {
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+    }
+
+    private static void InitializeConfiguration()
+    {
+        var builder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+        Configuration = builder.Build();
+    }
+
     private static void ConfigureServices(IServiceCollection services)
     {
         services.AddDbContext<VisualizationSystemDbContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))
         );
 
-        services.AddScoped<NodeTableRepository>();
-        services.AddScoped<UserSettingsRepository>();
-        services.AddScoped<NormalizedNodeRepository>();
-
-        services.AddSingleton<DialogManager>();
-        services.AddSingleton<ExcelReader>();
-        services.AddSingleton<NodeTableMapper>();
-        services.AddSingleton<ExcelDataImporter>();
-        services.AddSingleton<NodeComparisonManager>();
-        services.AddSingleton<GraphSaveManager>();
-        services.AddSingleton<GraphColorAssigner>();
-        services.AddSingleton<FileWriter>();
-
-        services.AddSingleton<DataNormalizer>();
-        services.AddSingleton<MetricDistanceCalculator>();
-        services.AddSingleton<KMeansClusterer>();
-        services.AddSingleton<AgglomerativeClusterer>();
-        services.AddSingleton<DBSCANClusterer>();
-
-        services.AddSingleton<ClustererFactory>();
-        services.AddSingleton<GraphCreationManager>();
-
-        services.AddSingleton<UserSettingsManager>();
-        services.AddSingleton<ISettingsSubject>(sp => sp.GetRequiredService<UserSettingsManager>());
-        services.AddSingleton<ISettingsManager>(sp => sp.GetRequiredService<UserSettingsManager>());
-
-        services.AddSingleton<ICompare, DefaultComparer>();
-        services.AddSingleton<IGraphBuilder<ExtendedGraph>, MsaglGraphBuilder>();
-        services.AddSingleton<IGraphBuilder<DotGraph>, DotNetGraphBuilder>();
+        services.AddRepositories()
+            .AddUIServices()
+            .AddDataProcessingServices()
+            .AddClusteringServices()
+            .AddGraphServices();
 
         services.AddTransient<MainForm>();
+    }
+
+    private static IServiceCollection AddRepositories(this IServiceCollection services)
+    {
+        return services.AddScoped<NodeTableRepository>()
+            .AddScoped<UserSettingsRepository>()
+            .AddScoped<NormalizedNodeRepository>();
+    }
+
+    private static IServiceCollection AddUIServices(this IServiceCollection services)
+    {
+        return services.AddSingleton<DialogManager>()
+            .AddSingleton<FileWriter>()
+            .AddSingleton<UserSettingsManager>()
+            .AddSingleton<ISettingsSubject>(sp => sp.GetRequiredService<UserSettingsManager>())
+            .AddSingleton<ISettingsManager>(sp => sp.GetRequiredService<UserSettingsManager>());
+    }
+
+    private static IServiceCollection AddDataProcessingServices(this IServiceCollection services)
+    {
+        return services.AddSingleton<ExcelReader>()
+            .AddSingleton<NodeTableMapper>()
+            .AddSingleton<ExcelDataImporter>()
+            .AddSingleton<DataNormalizer>()
+            .AddSingleton<MetricDistanceCalculator>()
+            .AddSingleton<SimilarityComparer>()
+            .AddSingleton<ICompare, DefaultComparer>();
+    }
+
+    private static IServiceCollection AddClusteringServices(this IServiceCollection services)
+    {
+        return services.AddSingleton<KMeansClusterer>()
+            .AddSingleton<AgglomerativeClusterer>()
+            .AddSingleton<DBSCANClusterer>()
+            .AddSingleton<ClustererFactory>();
+    }
+
+    private static IServiceCollection AddGraphServices(this IServiceCollection services)
+    {
+        return services.AddSingleton<GraphColorAssigner>()
+            .AddSingleton<GraphCreationManager<ExtendedGraph>>()
+            .AddSingleton<GraphSaveManager>()
+            .AddSingleton<IGraphBuilder<ExtendedGraph>, MsaglGraphBuilder>()
+            .AddSingleton<IGraphBuilder<DotGraph>, DotNetGraphBuilder>();
     }
 }

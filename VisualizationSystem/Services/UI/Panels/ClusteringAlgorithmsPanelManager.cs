@@ -19,9 +19,9 @@ public class ClusteringAlgorithmsPanelManager : PanelManager
     private Array algorithms;
 
     public ClusteringAlgorithmsPanelManager(
-        UserSettings settings, Panel panel, ComboBox cmbClusterAlgorithm, 
-        NumericUpDown nudFirstParameter, NumericUpDown nudSecondParameter, 
-        Label lblFirstParameter, Label lblSecondParameter, Point panelLocation
+        UserSettings settings, Panel panel, ComboBox cmbClusterAlgorithm,
+        NumericUpDown nudFirstParameter, NumericUpDown nudSecondParameter,
+        Label lblFirstParameter, Label lblSecondParameter
         )
         : base(settings, panel)
     {
@@ -30,8 +30,6 @@ public class ClusteringAlgorithmsPanelManager : PanelManager
         this.nudSecondParameter = nudSecondParameter;
         this.lblFirstParameter = lblFirstParameter;
         this.lblSecondParameter = lblSecondParameter;
-
-        panel.Location = panelLocation;
 
         algorithms = Enum.GetValues(typeof(ClusterAlgorithm));
     }

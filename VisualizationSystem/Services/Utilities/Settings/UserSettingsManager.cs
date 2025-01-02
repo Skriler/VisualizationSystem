@@ -18,13 +18,17 @@ public class UserSettingsManager : ISettingsSubject, ISettingsManager
         this.settingsRepository = settingsRepository;
     }
 
-    public void Attach(ISettingsObserver observer) => settingsObservers.Add(observer);
-
     public void Detach(ISettingsObserver observer) => settingsObservers.Remove(observer);
 
     public void Notify() => settingsObservers.ForEach(observer => observer.Update(userSettings));
 
     public bool UseClustering() => userSettings.UseClustering;
+
+    public void Attach(ISettingsObserver observer)
+    {
+        settingsObservers.Add(observer);
+        Notify();
+    }
 
     public async Task LoadAsync(NodeTable table)
     {

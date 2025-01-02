@@ -1,39 +1,28 @@
-﻿using VisualizationSystem.Models.Domain.Clusters;
-using VisualizationSystem.Models.Domain.Nodes;
+﻿using VisualizationSystem.Models.Domain.Nodes;
 using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Settings;
-using VisualizationSystem.Services.Utilities.Clusterers;
-using VisualizationSystem.Services.Utilities.Factories;
 using VisualizationSystem.Services.Utilities.Settings;
 
 namespace VisualizationSystem.Services.Utilities.Comparers;
 
-public class NodeComparisonManager : ISettingsObserver
+public class SimilarityComparer : ISettingsObserver
 {
-    private readonly ClustererFactory clustererFactory;
     private readonly ICompare comparer;
 
-    private BaseClusterer clusterer;
     private UserSettings settings;
 
-    public NodeComparisonManager(
-        ClustererFactory clustererFactory,
+    public SimilarityComparer(
         ICompare comparer,
         ISettingsSubject settingsSubject
         )
     {
-        this.clustererFactory = clustererFactory;
         this.comparer = comparer;
 
         settingsSubject.Attach(this);
     }
 
-    public void Update(UserSettings settings)
-    {
-        this.settings = settings;
-        clusterer = clustererFactory.CreateClusterer(settings.AlgorithmSettings.SelectedAlgorithm);
-    }
+    public void Update(UserSettings settings) => this.settings = settings;
 
     public List<NodeSimilarityResult> CalculateSimilarNodes(List<NodeObject> nodes)
     {
@@ -69,14 +58,6 @@ public class NodeComparisonManager : ISettingsObserver
         });
 
         return similarityResults;
-    }
-
-    public async Task<List<Cluster>> CalculateClustersAsync(NodeTable nodeTable)
-    {
-        if (nodeTable.NodeObjects.Count <= 0)
-            throw new InvalidOperationException("Node analysis must be performed first before calculating clusters.");
-
-        return await clusterer.ClusterAsync(nodeTable);
     }
 
     private float GetSimilarityPercentage(NodeObject firstNode, NodeObject secondNode)

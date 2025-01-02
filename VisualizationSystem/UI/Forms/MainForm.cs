@@ -3,8 +3,9 @@ using VisualizationSystem.UI.Components.TabPages;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.Utilities.FileSystem.ExcelHandlers;
-using VisualizationSystem.Services.Utilities.Graph;
 using VisualizationSystem.Services.Utilities.Settings;
+using VisualizationSystem.Services.Utilities.Graph.Managers;
+using VisualizationSystem.Models.Domain.Graphs;
 
 namespace VisualizationSystem.UI.Forms;
 
@@ -16,7 +17,7 @@ public partial class MainForm : Form
 
     private readonly ExcelDataImporter fileService;
     private readonly ISettingsManager userSettingsManager;
-    private readonly GraphCreationManager graphCreationManager;
+    private readonly GraphCreationManager<ExtendedGraph> graphCreationManager;
     private readonly GraphSaveManager graphSaveManager;
 
     private readonly TabControlManager tabControlService;
@@ -27,7 +28,7 @@ public partial class MainForm : Form
         NodeTableRepository nodeTableRepository,
         ExcelDataImporter fileService,
         ISettingsManager userSettingsManager,
-        GraphCreationManager graphCreationManager,
+        GraphCreationManager<ExtendedGraph> graphCreationManager,
         GraphSaveManager graphSaveManager
         )
     {
@@ -91,9 +92,7 @@ public partial class MainForm : Form
 
         try
         {
-            var graph = userSettingsManager.UseClustering() ?
-                await graphCreationManager.BuildClusteredGraphAsync(nodeTable) :
-                graphCreationManager.BuildGraph(nodeTable);
+            var graph = await graphCreationManager.BuildGraphAsync(nodeTable);
 
             tabControlService.AddGViewerTabPage(graph, nodeTable.Name);
         }
@@ -113,14 +112,7 @@ public partial class MainForm : Form
 
         try
         {
-            if (userSettingsManager.UseClustering())
-            {
-                await graphSaveManager.SaveClusteredGraphAsync(nodeTable);
-            }
-            else
-            {
-                await graphSaveManager.SaveGraphAsync(nodeTable);
-            }
+            await graphSaveManager.SaveGraphAsync(nodeTable);
         }
         catch (Exception ex)
         {
@@ -305,9 +297,7 @@ public partial class MainForm : Form
 
     private async Task UpdateGraphIfNeededAsync()
     {
-        var graph = userSettingsManager.UseClustering() ?
-                await graphCreationManager.BuildClusteredGraphAsync(nodeTable) :
-                graphCreationManager.BuildGraph(nodeTable);
+        var graph = await graphCreationManager.BuildGraphAsync(nodeTable);
 
         tabControlService.UpdateDataGridViewTabPageIfOpen(nodeTable);
         tabControlService.UpdateGViewerTabPageIfOpen(graph, nodeTable.Name);

@@ -76,7 +76,7 @@
             // 
             // btnSubmit
             // 
-            btnSubmit.Location = new Point(10, 298);
+            btnSubmit.Location = new Point(12, 375);
             btnSubmit.Name = "btnSubmit";
             btnSubmit.Size = new Size(120, 30);
             btnSubmit.TabIndex = 4;
@@ -157,7 +157,7 @@
             // 
             // btnSetDefaults
             // 
-            btnSetDefaults.Location = new Point(140, 298);
+            btnSetDefaults.Location = new Point(140, 375);
             btnSetDefaults.Name = "btnSetDefaults";
             btnSetDefaults.Size = new Size(120, 30);
             btnSetDefaults.TabIndex = 12;
@@ -174,7 +174,7 @@
             panelClusteringOptions.Controls.Add(lblFirstParameter);
             panelClusteringOptions.Controls.Add(cmbClusterAlgorithm);
             panelClusteringOptions.Controls.Add(nudFirstParameter);
-            panelClusteringOptions.Location = new Point(280, 132);
+            panelClusteringOptions.Location = new Point(10, 228);
             panelClusteringOptions.Name = "panelClusteringOptions";
             panelClusteringOptions.Size = new Size(250, 141);
             panelClusteringOptions.TabIndex = 10;
@@ -228,7 +228,7 @@
             // chkbxUseClustering
             // 
             chkbxUseClustering.AutoSize = true;
-            chkbxUseClustering.Location = new Point(12, 92);
+            chkbxUseClustering.Location = new Point(152, 96);
             chkbxUseClustering.Name = "chkbxUseClustering";
             chkbxUseClustering.Size = new Size(102, 19);
             chkbxUseClustering.TabIndex = 1;
@@ -240,7 +240,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(268, 341);
+            ClientSize = new Size(267, 413);
             Controls.Add(panelClusteringOptions);
             Controls.Add(chkbxUseClustering);
             Controls.Add(btnSetDefaults);
@@ -281,11 +281,11 @@
         private NumericUpDown nudDeviationPercent;
         private Button btnSetDefaults;
         private Panel panelClusteringOptions;
-        private CheckBox chkbxUseClustering;
         private ComboBox cmbClusterAlgorithm;
         private NumericUpDown nudSecondParameter;
         private Label lblSecondParameter;
         private Label lblFirstParameter;
         private NumericUpDown nudFirstParameter;
+        private CheckBox chkbxUseClustering;
     }
 }

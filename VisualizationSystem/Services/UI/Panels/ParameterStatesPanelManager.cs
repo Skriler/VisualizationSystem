@@ -29,8 +29,6 @@ public class ParameterStatesPanelManager : PanelManager
         parametersList = settings.ParameterStates
             .ConvertAll(p => new ParameterStateData(p));
 
-        panel.Visible = !settings.UseClustering;
-
         cmbNames.Items.Clear();
         cmbNames.Items.AddRange(
             parametersList
