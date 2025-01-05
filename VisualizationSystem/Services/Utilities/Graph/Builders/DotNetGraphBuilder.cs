@@ -9,7 +9,7 @@ using Color = System.Drawing.Color;
 
 namespace VisualizationSystem.Services.Utilities.Graph.Builders;
 
-public sealed class DotNetGraphBuilder : GraphBuilder<DotGraph>
+public sealed class DotNetGraphBuilder : BaseGraphBuilder<DotGraph>
 {
     public DotNetGraphBuilder(
         GraphColorAssigner colorAssigner,
@@ -36,6 +36,17 @@ public sealed class DotNetGraphBuilder : GraphBuilder<DotGraph>
 
         AddNodes(graph, nodes, clusters);
         AddClusters(graph, clusters);
+
+        return graph;
+    }
+
+    public override DotGraph Build(string name, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters)
+    {
+        var graph = new DotGraph()
+            .WithIdentifier(name);
+
+        AddNodes(graph, similarityResults);
+        AddEdges(graph, similarityResults);
 
         return graph;
     }
@@ -80,14 +91,14 @@ public sealed class DotNetGraphBuilder : GraphBuilder<DotGraph>
         graph.Add(node);
     }
 
-    protected override void AddEdge(DotGraph graph, string firstNodeName, string secondNodeName, float similarityPercentage)
+    protected override void AddEdge(DotGraph graph, string sourceName, string targetName, float similarityPercentage)
     {
         // Interpolate edge color based on similarity
         var edgeColor = colorAssigner.CalculateEdgeColor(similarityPercentage, settings.MinSimilarityPercentage);
-
+        
         var edge = new DotEdge()
-            .From(firstNodeName)
-            .To(secondNodeName)
+            .From(sourceName)
+            .To(targetName)
             .WithColor(new DotColor(edgeColor.R, edgeColor.G, edgeColor.B));
 
         graph.Add(edge);

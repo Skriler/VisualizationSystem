@@ -52,9 +52,4 @@ public class UserSettings
     {
         ParameterStates.ForEach(p => p.ResetToDefaults());
     }
-
-    public List<ParameterState> GetActiveParameters()
-    {
-        return ParameterStates.Where(p => p.IsActive).ToList();
-    }
 }

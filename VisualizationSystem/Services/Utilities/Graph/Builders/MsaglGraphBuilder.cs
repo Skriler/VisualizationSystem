@@ -12,8 +12,10 @@ using SystemColor = System.Drawing.Color;
 
 namespace VisualizationSystem.Services.Utilities.Graph.Builders;
 
-public class MsaglGraphBuilder : GraphBuilder<ExtendedGraph>
+public class MsaglGraphBuilder : BaseGraphBuilder<ExtendedGraph>
 {
+    private const int MinEdgesPerNode = 3;
+
     public MsaglGraphBuilder(
         GraphColorAssigner colorAssigner,
         ISettingsSubject settingsSubject
@@ -42,11 +44,25 @@ public class MsaglGraphBuilder : GraphBuilder<ExtendedGraph>
         };
 
         AddNodes(graph, nodes, clusters);
-        //AddEdges(graph, similarityResults);
         AddClusters(graph, clusters);
 
         return graph;
     }
+
+    public override ExtendedGraph Build(string name, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters)
+    {
+        var graph = new ExtendedGraph(name)
+        {
+            LayoutAlgorithmSettings = new MdsLayoutSettings(),
+        };
+
+        AddNodes(graph, similarityResults, clusters);
+        AddEdges(graph, similarityResults);
+        AddExtraEdges(graph, similarityResults);
+
+        return graph;
+    }
+
 
     protected override void AddClusters(ExtendedGraph graph, List<Cluster> clusters)
     {
@@ -56,7 +72,7 @@ public class MsaglGraphBuilder : GraphBuilder<ExtendedGraph>
         {
             var subgraph = new Subgraph(cluster.Id.ToString())
             {
-                LabelText = $"Cluster: {cluster.Id}",
+                LabelText = string.Empty,
             };
 
             foreach (var node in cluster.Nodes)
@@ -81,6 +97,50 @@ public class MsaglGraphBuilder : GraphBuilder<ExtendedGraph>
             .ToDictionary(sr => sr.Node.Name, sr => sr);
     }
 
+    protected void AddNodes(ExtendedGraph graph, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters)
+    {
+        var nodes = similarityResults
+            .ConvertAll(result => result.Node);
+
+        base.AddNodes(graph, nodes, clusters);
+
+        graph.NodeDataMap = similarityResults
+            .ToDictionary(sr => sr.Node.Name, sr => sr);
+    }
+
+    protected void AddExtraEdges(ExtendedGraph graph, List<NodeSimilarityResult> similarityResults)
+    {
+        foreach (var similarityResult in similarityResults)
+        {
+            var sourceNode = graph.FindNode(similarityResult.Node.Name);
+
+            if (sourceNode == null)
+                continue;
+
+            var edgesCount = sourceNode.InEdges.Count() +
+                sourceNode.OutEdges.Count();
+
+            if (edgesCount > MinEdgesPerNode)
+                continue;
+
+            var similarNodes = similarityResult.SimilarNodes
+                .Where(sn => sn.SimilarityPercentage > 0)
+                .OrderByDescending(sr => sr.SimilarityPercentage)
+                .Take(edgesCount + MinEdgesPerNode)
+                .ToList();
+
+            foreach (var similarNode in similarNodes)
+            {
+                var targetNode = graph.FindNode(similarNode.Node.Name);
+
+                if (graph.Edges.Any(e => HasEdge(e, sourceNode, targetNode)))
+                    continue;
+
+                AddEdge(graph, sourceNode.Id, targetNode.Id, similarNode.SimilarityPercentage);
+            }
+        }
+    }
+
     protected override void AddNode(ExtendedGraph graph, string nodeName, SystemColor nodeColor)
     {
         var node = new Node(nodeName)
@@ -96,9 +156,9 @@ public class MsaglGraphBuilder : GraphBuilder<ExtendedGraph>
         graph.AddNode(node);
     }
 
-    protected override void AddEdge(ExtendedGraph graph, string firstNodeName, string secondNodeName, float similarityPercentage)
+    protected override void AddEdge(ExtendedGraph graph, string sourceName, string targetName, float similarityPercentage)
     {
-        var edge = graph.AddEdge(firstNodeName, secondNodeName);
+        var edge = graph.AddEdge(sourceName, targetName);
 
         edge.Attr.ArrowheadAtSource = ArrowStyle.None;
         edge.Attr.ArrowheadAtTarget = ArrowStyle.None;
@@ -107,7 +167,14 @@ public class MsaglGraphBuilder : GraphBuilder<ExtendedGraph>
         //edge.LabelText = $"{similarityPercentage:F1}%";
         //edge.Attr.Length = 1.0 / similarityPercentage;
 
-        var edgeColor = colorAssigner.CalculateEdgeColor(similarityPercentage, settings.MinSimilarityPercentage);
+        var minSimilarityPercentage = Math.Min(settings.MinSimilarityPercentage, similarityPercentage);
+        var edgeColor = colorAssigner.CalculateEdgeColor(similarityPercentage, minSimilarityPercentage);
         edge.Attr.Color = new MsaglColor(edgeColor.A, edgeColor.R, edgeColor.G, edgeColor.B);
+    }
+
+    protected bool HasEdge(Edge edge, Node source, Node target)
+    {
+        return (edge.SourceNode == source && edge.TargetNode == target) ||
+               (edge.SourceNode == target && edge.TargetNode == source);
     }
 }

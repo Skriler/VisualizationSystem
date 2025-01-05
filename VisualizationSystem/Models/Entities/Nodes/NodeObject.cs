@@ -17,4 +17,14 @@ public class NodeObject
     public List<NodeParameter> Parameters { get; set; } = new();
 
     public List<NormalizedParameter> NormalizedParameters { get; set; } = new();
+
+    public override int GetHashCode() => Name.GetHashCode();
+
+    public override bool Equals(object obj)
+    {
+        if (obj is NodeObject otherNode)
+            return Name == otherNode.Name;
+
+        return false;
+    }
 }

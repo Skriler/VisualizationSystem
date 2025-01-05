@@ -55,4 +55,13 @@ public class GraphCreationManager<TGraph> : ISettingsObserver
 
         return graphBuilder.Build(nodeTable.Name, nodeTable.NodeObjects, clusters);
     }
+
+    public async Task<TGraph> BuildClusteredGraphWithEdges(NodeTable nodeTable)
+    {
+        var similarityResults = similarityComparer.CalculateSimilarNodes(nodeTable.NodeObjects);
+        var clusterer = clustererFactory.CreateClusterer(settings.AlgorithmSettings.SelectedAlgorithm);
+        var clusters = await clusterer.ClusterAsync(nodeTable);
+
+        return graphBuilder.Build(nodeTable.Name, similarityResults, clusters);
+    }
 }

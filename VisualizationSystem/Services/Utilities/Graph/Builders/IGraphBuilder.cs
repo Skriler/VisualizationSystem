@@ -9,4 +9,6 @@ public interface IGraphBuilder<TGraph>
     TGraph Build(string name, List<NodeSimilarityResult> similarityResults);
 
     TGraph Build(string name, List<NodeObject> nodes, List<Cluster> clusters);
+
+    TGraph Build(string name, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters);
 }

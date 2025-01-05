@@ -1,4 +1,6 @@
 ﻿using VisualizationSystem.Models.Domain.Clusters;
+using VisualizationSystem.Models.Domain.Graphs;
+using VisualizationSystem.Models.Domain.Nodes;
 using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Settings;
@@ -7,7 +9,7 @@ using VisualizationSystem.Services.Utilities.Settings;
 
 namespace VisualizationSystem.Services.Utilities.Graph.Builders;
 
-public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISettingsObserver
+public abstract class BaseGraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISettingsObserver
 {
     protected readonly GraphColorAssigner colorAssigner;
 
@@ -16,7 +18,7 @@ public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISettingsObs
 
     protected UserSettings settings;
 
-    protected GraphBuilder(
+    protected BaseGraphBuilder(
         GraphColorAssigner colorAssigner,
         ISettingsSubject settingsSubject
         )
@@ -30,13 +32,18 @@ public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISettingsObs
 
     public abstract TGraph Build(string name, List<NodeObject> nodes, List<Cluster> clusters);
 
+    public abstract TGraph Build(string name, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters);
+
     public void Update(UserSettings settings) => this.settings = settings;
 
     protected virtual void AddNodes(TGraph graph, List<NodeSimilarityResult> similarityResults)
     {
         var minSimilarity = similarityResults.Min(result => result.SimilarNodes.Min(s => s.SimilarityPercentage));
         var maxSimilarity = similarityResults.Max(result => result.SimilarNodes.Max(s => s.SimilarityPercentage));
-        var maxSimilarNodesAboveThreshold = similarityResults.Max(result => result.SimilarNodesAboveThreshold);
+        var maxSimilarNodesAboveThreshold = similarityResults
+            .Max(result => result.SimilarNodes
+                .Count(sn => sn.SimilarityPercentage > settings.MinSimilarityPercentage)
+            );
 
         foreach (var similarityResult in similarityResults)
         {
@@ -77,30 +84,30 @@ public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISettingsObs
 
     protected virtual void AddEdges(TGraph graph, List<NodeSimilarityResult> similarityResults)
     {
-        var addedEdges = new HashSet<(string, string)>();
+        var addedEdges = new HashSet<CustomEdge>();
 
         foreach (var similarityResult in similarityResults)
         {
-            var currentNodeName = similarityResult.Node.Name;
+            var sourceNode = similarityResult.Node;
 
             foreach (var similarNode in similarityResult.SimilarNodes)
             {
-                if (similarNode.SimilarityPercentage < settings.MinSimilarityPercentage)
+                if (IsNeighbor(similarNode))
                     continue;
 
-                var similarNodeName = similarNode.Node.Name;
-                var edgeKey = (currentNodeName, similarNodeName);
-                var edgeKeyReversed = (similarNodeName, currentNodeName);
+                var targetNode = similarNode.Node;
+                var edge = new CustomEdge(sourceNode, targetNode);
 
-                if (addedEdges.Contains(edgeKey) || addedEdges.Contains(edgeKeyReversed))
+                if (addedEdges.Any(e => e.Equals(edge)))
                     continue;
 
-                AddEdge(graph, currentNodeName, similarNodeName, similarNode.SimilarityPercentage);
-                addedEdges.Add(edgeKey);
-                addedEdges.Add(edgeKeyReversed);
+                AddEdge(graph, sourceNode.Name, targetNode.Name, similarNode.SimilarityPercentage);
+                addedEdges.Add(edge);
             }
         }
     }
+
+    private bool IsNeighbor(SimilarNode similarNode) => similarNode.SimilarityPercentage < settings.MinSimilarityPercentage;
 
     protected Color GetColorByName(string name)
     {
@@ -136,5 +143,5 @@ public abstract class GraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISettingsObs
 
     protected abstract void AddClusters(TGraph graph, List<Cluster> clusters);
     protected abstract void AddNode(TGraph graph, string nodeName, Color nodeColor);
-    protected abstract void AddEdge(TGraph graph, string firstNodeName, string secondNodeName, float similarityPercentage);
+    protected abstract void AddEdge(TGraph graph, string sourceName, string targetName, float similarityPercentage);
 }

@@ -21,8 +21,9 @@ public class ParameterState
     public int UserSettingsId { get; set; }
     public UserSettings UserSettings { get; set; } = default!;
 
-    public int? ParameterTypeId { get; set; }
-    public ParameterType? ParameterType { get; set; } = default!;
+    [Required]
+    public int ParameterTypeId { get; set; }
+    public ParameterType ParameterType { get; set; } = default!;
 
     public ParameterState()
     {

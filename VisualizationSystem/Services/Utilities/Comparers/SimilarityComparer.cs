@@ -11,6 +11,7 @@ public class SimilarityComparer : ISettingsObserver
     private readonly ICompare comparer;
 
     private UserSettings settings;
+    private Dictionary<NodeObject, NodeSimilarityResult> similarityResultsDict = new();
 
     public SimilarityComparer(
         ICompare comparer,
@@ -26,9 +27,16 @@ public class SimilarityComparer : ISettingsObserver
 
     public List<NodeSimilarityResult> CalculateSimilarNodes(List<NodeObject> nodes)
     {
-        var similarityResultsDict = nodes
+        similarityResultsDict = nodes
             .ToDictionary(node => node, node => new NodeSimilarityResult(node));
 
+        CompareNodes(nodes);
+
+        return similarityResultsDict.Values.ToList();
+    }
+
+    private void CompareNodes(List<NodeObject> nodes)
+    {
         for (int i = 0; i < nodes.Count; ++i)
         {
             var firstNode = nodes[i];
@@ -36,28 +44,12 @@ public class SimilarityComparer : ISettingsObserver
             for (int j = i + 1; j < nodes.Count; ++j)
             {
                 var secondNode = nodes[j];
-
                 var similarityPercentage = GetSimilarityPercentage(firstNode, secondNode);
 
-                similarityResultsDict[firstNode]
-                    .SimilarNodes
-                    .Add(new SimilarNode(secondNode, similarityPercentage));
-
-                similarityResultsDict[secondNode]
-                    .SimilarNodes
-                    .Add(new SimilarNode(firstNode, similarityPercentage));
+                AddSimilarNode(firstNode, secondNode, similarityPercentage);
+                AddSimilarNode(secondNode, firstNode, similarityPercentage);
             }
         }
-
-        var similarityResults = similarityResultsDict.Values.ToList();
-
-        similarityResults.ForEach(sr =>
-        {
-            sr.SimilarNodesAboveThreshold = sr.SimilarNodes
-                .Count(sn => sn.SimilarityPercentage > settings.MinSimilarityPercentage);
-        });
-
-        return similarityResults;
     }
 
     private float GetSimilarityPercentage(NodeObject firstNode, NodeObject secondNode)
@@ -65,24 +57,21 @@ public class SimilarityComparer : ISettingsObserver
         if (firstNode.Parameters.Count != secondNode.Parameters.Count)
             throw new InvalidOperationException("NodeObjects must have the same number of parameters");
 
-        float totalMatchedWeight = 0;
-        float totalActiveWeight = 0;
+        var totalMatchedWeight = 0f;
+        var totalActiveWeight = 0f;
 
-        var activeParameterStates = settings.GetActiveParameters();
-        var firstNodeParameters = firstNode.Parameters.ToDictionary(p => p.ParameterType);
-        var secondNodeParameters = secondNode.Parameters.ToDictionary(p => p.ParameterType);
+        var activeParameterStates = settings.ParameterStates
+            .Where(p => p.IsActive)
+            .ToList();
 
         foreach (var parameterState in activeParameterStates)
         {
             totalActiveWeight += parameterState.Weight;
 
-            firstNodeParameters.TryGetValue(parameterState.ParameterType, out var firstParameter);
-            secondNodeParameters.TryGetValue(parameterState.ParameterType, out var secondParameter);
-
-            if (firstParameter == null || secondParameter == null)
+            if (!TryGetParameterByState(firstNode, parameterState, out var firstParameter))
                 continue;
 
-            if (firstParameter.ParameterType.Name != secondParameter.ParameterType.Name)
+            if (!TryGetParameterByState(secondNode, parameterState, out var secondParameter))
                 continue;
 
             if (!comparer.Compare(firstParameter.Value, secondParameter.Value, settings.DeviationPercent))
@@ -91,7 +80,26 @@ public class SimilarityComparer : ISettingsObserver
             totalMatchedWeight += parameterState.Weight;
         }
 
-        return totalActiveWeight > 0 ? totalMatchedWeight / totalActiveWeight * 100 : 0;
+        return CalculateSimilarityPercentage(totalMatchedWeight, totalActiveWeight);
+    }
 
+    private void AddSimilarNode(NodeObject source, NodeObject target, float similarityPercentage)
+    {
+        similarityResultsDict[source].SimilarNodes
+            .Add(new SimilarNode(target, similarityPercentage));
+    }
+
+    private static bool TryGetParameterByState(NodeObject node, ParameterState state, out NodeParameter? parameter)
+    {
+        parameter = node.Parameters
+            .Where(p => p.ParameterType == state.ParameterType)
+            .FirstOrDefault();
+
+        return parameter != null;
+    }
+
+    private static float CalculateSimilarityPercentage(float totalMatchedWeight, float totalActiveWeight)
+    {
+        return totalActiveWeight > 0 ? (totalMatchedWeight / totalActiveWeight) * 100 : 0;
     }
 }

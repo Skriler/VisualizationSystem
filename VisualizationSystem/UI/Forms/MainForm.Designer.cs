@@ -39,6 +39,7 @@
             saveGraphImageToolStripMenuItem = new ToolStripMenuItem();
             settingsToolStripMenuItem = new ToolStripMenuItem();
             tabControl = new TabControl();
+            buildClusterEdgeGraphToolStripMenuItem = new ToolStripMenuItem();
             menuStrip.SuspendLayout();
             SuspendLayout();
             // 
@@ -61,7 +62,7 @@
             // uploadToolStripMenuItem
             // 
             uploadToolStripMenuItem.Name = "uploadToolStripMenuItem";
-            uploadToolStripMenuItem.Size = new Size(180, 22);
+            uploadToolStripMenuItem.Size = new Size(129, 22);
             uploadToolStripMenuItem.Text = "Load excel";
             uploadToolStripMenuItem.Click += uploadToolStripMenuItem_Click;
             // 
@@ -69,19 +70,19 @@
             // 
             showToolStripMenuItem.ForeColor = Color.Black;
             showToolStripMenuItem.Name = "showToolStripMenuItem";
-            showToolStripMenuItem.Size = new Size(180, 22);
+            showToolStripMenuItem.Size = new Size(129, 22);
             showToolStripMenuItem.Text = "View data";
             showToolStripMenuItem.Click += showToolStripMenuItem_Click;
             // 
             // datasetsToolStripMenuItem
             // 
             datasetsToolStripMenuItem.Name = "datasetsToolStripMenuItem";
-            datasetsToolStripMenuItem.Size = new Size(180, 22);
+            datasetsToolStripMenuItem.Size = new Size(129, 22);
             datasetsToolStripMenuItem.Text = "Datasets";
             // 
             // visualizationToolStripMenuItem
             // 
-            visualizationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { buildGraphToolStripMenuItem, saveGraphImageToolStripMenuItem, settingsToolStripMenuItem });
+            visualizationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { buildGraphToolStripMenuItem, saveGraphImageToolStripMenuItem, settingsToolStripMenuItem, buildClusterEdgeGraphToolStripMenuItem });
             visualizationToolStripMenuItem.Name = "visualizationToolStripMenuItem";
             visualizationToolStripMenuItem.Size = new Size(85, 20);
             visualizationToolStripMenuItem.Text = "Visualization";
@@ -89,21 +90,21 @@
             // buildGraphToolStripMenuItem
             // 
             buildGraphToolStripMenuItem.Name = "buildGraphToolStripMenuItem";
-            buildGraphToolStripMenuItem.Size = new Size(135, 22);
+            buildGraphToolStripMenuItem.Size = new Size(202, 22);
             buildGraphToolStripMenuItem.Text = "Build graph";
             buildGraphToolStripMenuItem.Click += buildGraphToolStripMenuItem_Click;
             // 
             // saveGraphImageToolStripMenuItem
             // 
             saveGraphImageToolStripMenuItem.Name = "saveGraphImageToolStripMenuItem";
-            saveGraphImageToolStripMenuItem.Size = new Size(135, 22);
+            saveGraphImageToolStripMenuItem.Size = new Size(202, 22);
             saveGraphImageToolStripMenuItem.Text = "Save graph";
             saveGraphImageToolStripMenuItem.Click += saveGraphImageToolStripMenuItem_Click;
             // 
             // settingsToolStripMenuItem
             // 
             settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            settingsToolStripMenuItem.Size = new Size(135, 22);
+            settingsToolStripMenuItem.Size = new Size(202, 22);
             settingsToolStripMenuItem.Text = "Settings";
             settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
             // 
@@ -118,6 +119,13 @@
             tabControl.TabIndex = 3;
             tabControl.DrawItem += tabControl_DrawItem;
             tabControl.MouseDown += tabControl_MouseDown;
+            // 
+            // buildClusterEdgeGraphToolStripMenuItem
+            // 
+            buildClusterEdgeGraphToolStripMenuItem.Name = "buildClusterEdgeGraphToolStripMenuItem";
+            buildClusterEdgeGraphToolStripMenuItem.Size = new Size(202, 22);
+            buildClusterEdgeGraphToolStripMenuItem.Text = "Build cluster edge graph";
+            buildClusterEdgeGraphToolStripMenuItem.Click += buildClusterEdgeGraphToolStripMenuItem_Click;
             // 
             // MainForm
             // 
@@ -149,5 +157,6 @@
         private ToolStripMenuItem datasetsToolStripMenuItem;
         private TabControl tabControl;
         private ToolStripMenuItem saveGraphImageToolStripMenuItem;
+        private ToolStripMenuItem buildClusterEdgeGraphToolStripMenuItem;
     }
 }

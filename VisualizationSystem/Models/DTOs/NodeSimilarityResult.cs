@@ -6,8 +6,8 @@ namespace VisualizationSystem.Models.DTOs;
 public class NodeSimilarityResult
 {
     public NodeObject Node { get; }
+
     public List<SimilarNode> SimilarNodes { get; } = new();
-    public int SimilarNodesAboveThreshold { get; set; }
 
     public NodeSimilarityResult(NodeObject node)
     {
