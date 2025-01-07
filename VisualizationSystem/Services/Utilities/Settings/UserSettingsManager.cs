@@ -38,7 +38,7 @@ public class UserSettingsManager : ISettingsSubject, ISettingsManager
         }
         else
         {
-            userSettings = InitializeNodeTableData(table, ClusterAlgorithm.Agglomerative);
+            userSettings = InitializeNodeTableData(table, ClusterAlgorithm.KMeans);
             await settingsRepository.AddAsync(userSettings);
         }
 

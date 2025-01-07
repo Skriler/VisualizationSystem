@@ -25,7 +25,7 @@ public class MsaglGraphBuilder : BaseGraphBuilder<ExtendedGraph>
 
     public override ExtendedGraph Build(string name, List<NodeSimilarityResult> similarityResults)
     {
-        var graph = new ExtendedGraph(name)
+        var graph = new ExtendedGraph(name, "Graph")
         {
             LayoutAlgorithmSettings = new MdsLayoutSettings(),
         };
@@ -38,7 +38,7 @@ public class MsaglGraphBuilder : BaseGraphBuilder<ExtendedGraph>
 
     public override ExtendedGraph Build(string name, List<NodeObject> nodes, List<Cluster> clusters)
     {
-        var graph = new ExtendedGraph(name)
+        var graph = new ExtendedGraph(name, "Graph")
         {
             LayoutAlgorithmSettings = new SugiyamaLayoutSettings(),
         };
@@ -51,7 +51,7 @@ public class MsaglGraphBuilder : BaseGraphBuilder<ExtendedGraph>
 
     public override ExtendedGraph Build(string name, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters)
     {
-        var graph = new ExtendedGraph(name)
+        var graph = new ExtendedGraph(name, "Clusters")
         {
             LayoutAlgorithmSettings = new MdsLayoutSettings(),
         };
@@ -62,7 +62,6 @@ public class MsaglGraphBuilder : BaseGraphBuilder<ExtendedGraph>
 
         return graph;
     }
-
 
     protected override void AddClusters(ExtendedGraph graph, List<Cluster> clusters)
     {

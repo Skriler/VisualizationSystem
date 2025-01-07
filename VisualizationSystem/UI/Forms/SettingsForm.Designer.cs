@@ -47,6 +47,7 @@
             cmbClusterAlgorithm = new ComboBox();
             nudFirstParameter = new NumericUpDown();
             chkbxUseClustering = new CheckBox();
+            chkbxWithEdges = new CheckBox();
             panelParameterStates.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nudWeight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudMinSimilarityPercentage).BeginInit();
@@ -228,7 +229,7 @@
             // chkbxUseClustering
             // 
             chkbxUseClustering.AutoSize = true;
-            chkbxUseClustering.Location = new Point(152, 96);
+            chkbxUseClustering.Location = new Point(22, 97);
             chkbxUseClustering.Name = "chkbxUseClustering";
             chkbxUseClustering.Size = new Size(102, 19);
             chkbxUseClustering.TabIndex = 1;
@@ -236,11 +237,22 @@
             chkbxUseClustering.UseVisualStyleBackColor = true;
             chkbxUseClustering.CheckedChanged += chkbxUseClustering_CheckedChanged;
             // 
+            // chkbxWithEdges
+            // 
+            chkbxWithEdges.AutoSize = true;
+            chkbxWithEdges.Location = new Point(160, 97);
+            chkbxWithEdges.Name = "chkbxWithEdges";
+            chkbxWithEdges.Size = new Size(85, 19);
+            chkbxWithEdges.TabIndex = 13;
+            chkbxWithEdges.Text = "With edges";
+            chkbxWithEdges.UseVisualStyleBackColor = true;
+            // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(267, 413);
+            Controls.Add(chkbxWithEdges);
             Controls.Add(panelClusteringOptions);
             Controls.Add(chkbxUseClustering);
             Controls.Add(btnSetDefaults);
@@ -287,5 +299,6 @@
         private Label lblFirstParameter;
         private NumericUpDown nudFirstParameter;
         private CheckBox chkbxUseClustering;
+        private CheckBox chkbxWithEdges;
     }
 }

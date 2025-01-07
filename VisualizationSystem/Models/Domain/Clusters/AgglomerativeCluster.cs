@@ -1,18 +1,18 @@
-﻿using VisualizationSystem.Models.Entities.Nodes;
+﻿using VisualizationSystem.Models.Domain.Nodes;
+using VisualizationSystem.Models.Entities.Nodes;
 
 namespace VisualizationSystem.Models.Domain.Clusters;
 
 public class AgglomerativeCluster : Cluster
 {
     public bool IsMerged { get; set; }
-    public List<double> AverageParameters { get; private set; }
+    public List<WeightedParameter> AverageParameters { get; private set; }
 
     public AgglomerativeCluster(NodeObject node)
     {
         IsMerged = false;
         AverageParameters = node.NormalizedParameters
-            .Select(nn => nn.Value)
-            .ToList();
+            .ConvertAll(nn => new WeightedParameter(nn.Value, nn.NormalizedParameterState.Weight));
 
         Nodes.Add(node);
     }
@@ -28,9 +28,10 @@ public class AgglomerativeCluster : Cluster
 
         for (int i = 0; i < AverageParameters.Count; ++i)
         {
-            var weightedSum = AverageParameters[i] * currentNodesCount + mergedCluster.AverageParameters[i] * mergedNodesCount;
+            var weightedSum = AverageParameters[i].Value * currentNodesCount +
+                mergedCluster.AverageParameters[i].Value * mergedNodesCount;
 
-            AverageParameters[i] = weightedSum / totalNodes;
+            AverageParameters[i].Value = weightedSum / totalNodes;
         }
     }
 

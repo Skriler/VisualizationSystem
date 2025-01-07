@@ -9,6 +9,7 @@ namespace VisualizationSystem.Services.Utilities.Clusterers;
 public class AgglomerativeClusterer : BaseClusterer
 {
     private List<AgglomerativeCluster> agglomerativeClusters;
+    private List<NormalizedParameterState> parameterStates;
 
     public AgglomerativeClusterer(
         DataNormalizer dataNormalizer,

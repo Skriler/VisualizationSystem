@@ -102,26 +102,6 @@ public partial class MainForm : Form
         }
     }
 
-    private async void buildClusterEdgeGraphToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (nodeTable == null)
-        {
-            ShowWarning("No data to visualize graph");
-            return;
-        }
-
-        try
-        {
-            var graph = await graphCreationManager.BuildClusteredGraphWithEdges(nodeTable);
-
-            tabControlService.AddGViewerTabPage(graph, nodeTable.Name);
-        }
-        catch (Exception ex)
-        {
-            ShowError("Error while visualizing graph", ex);
-        }
-    }
-
     private async void saveGraphImageToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (nodeTable == null)

@@ -1,4 +1,5 @@
-﻿using VisualizationSystem.Models.Entities.Nodes;
+﻿using VisualizationSystem.Models.Domain.Nodes;
+using VisualizationSystem.Models.Entities.Nodes;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
 
@@ -32,15 +33,24 @@ public class MetricDistanceCalculator
         return Math.Sqrt(distance);
     }
 
-    public double CalculateCosine(List<double> firstParameters, List<double> secondParameters)
+    public double CalculateCosine(List<WeightedParameter> firstParameters, List<WeightedParameter> secondParameters)
     {
         if (firstParameters.Count != secondParameters.Count)
             throw new InvalidOperationException("Parameters must be the same length");
 
-        var dotProduct = firstParameters.Zip(secondParameters, (x, y) => x * y).Sum();
-        var firstMagnitude = Math.Sqrt(firstParameters.Sum(x => x * x));
-        var secondMagnitude = Math.Sqrt(secondParameters.Sum(x => x * x));
+        var dotProduct = firstParameters
+            .Zip(secondParameters, (x, y) => x.Value * y.Value * x.Weight)
+            .Sum();
 
-        return (float)(dotProduct / (firstMagnitude * secondMagnitude));
+        var firstMagnitude = firstParameters
+            .Sum(x => x.Value * x.Value * x.Weight);
+
+        var secondMagnitude = secondParameters
+            .Sum(y => y.Value * y.Value * y.Weight);
+
+        if (firstMagnitude == 0 || secondMagnitude == 0)
+            return 0;
+
+        return dotProduct / (Math.Sqrt(firstMagnitude) * Math.Sqrt(secondMagnitude));
     }
 }

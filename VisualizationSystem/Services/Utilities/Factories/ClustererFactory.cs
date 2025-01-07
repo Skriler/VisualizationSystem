@@ -16,7 +16,7 @@ public class ClustererFactory
     {
         return algorithm switch
         {
-            ClusterAlgorithm.Agglomerative => serviceProvider.GetRequiredService<AgglomerativeClusterer>(),
+            ClusterAlgorithm.HierarchicalAgglomerative => serviceProvider.GetRequiredService<AgglomerativeClusterer>(),
             ClusterAlgorithm.KMeans => serviceProvider.GetRequiredService<KMeansClusterer>(),
             ClusterAlgorithm.DBSCAN => serviceProvider.GetRequiredService<DBSCANClusterer>(),
             _ => throw new ArgumentOutOfRangeException(nameof(algorithm))

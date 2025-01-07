@@ -2,7 +2,7 @@
 
 public enum ClusterAlgorithm
 {
-    Agglomerative,
     KMeans,
     DBSCAN,
+    HierarchicalAgglomerative,
 }

@@ -67,24 +67,33 @@ public class DBSCANClusterer : BaseClusterer
     {
         cluster.AddNode(node);
 
-        foreach (var neighbor in neighbors)
-        {
-            if (cluster.Nodes.Contains(neighbor))
-                continue;
+        var сonnectedNodes = new Queue<NodeObject>(neighbors);
 
-            cluster.AddNode(neighbor);
+        while (сonnectedNodes.Count > 0)
+        {
+            var neighbor = сonnectedNodes.Dequeue();
 
             if (visitedNodes.Contains(neighbor))
                 continue;
 
             visitedNodes.Add(neighbor);
-
             var neighborNeighbors = GetNeighbors(neighbor, nodes);
 
-            if (neighborNeighbors.Count < settings.AlgorithmSettings.MinPoints)
-                continue;
+            if (neighborNeighbors.Count >= settings.AlgorithmSettings.MinPoints)
+            {
+                foreach (var newNeighbor in neighborNeighbors)
+                {
+                    if (!cluster.Nodes.Contains(newNeighbor) && !сonnectedNodes.Contains(newNeighbor))
+                    {
+                        сonnectedNodes.Enqueue(newNeighbor);
+                    }
+                }
+            }
 
-            ExpandCluster(cluster, neighbor, neighborNeighbors, nodes);
+            if (!cluster.Nodes.Contains(neighbor))
+            {
+                cluster.AddNode(neighbor);
+            }
         }
     }
 }

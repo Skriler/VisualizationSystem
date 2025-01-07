@@ -1,5 +1,5 @@
-﻿using VisualizationSystem.Models.Domain.Graphs;
-using VisualizationSystem.Models.DTOs;
+﻿using System.Windows.Forms;
+using VisualizationSystem.Models.Domain.Graphs;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.UI.Components.TabPages;
 
@@ -18,7 +18,7 @@ public class TabControlManager
 
     private static string GetDataGridViewTabId(string tableName) => $"Dataset: {tableName}";
 
-    private static string GetGViewerTabId(string tableName) => $"Graph: {tableName}";
+    private static string GetGViewerTabId(ExtendedGraph graph, string tableName) => $"{graph.Type}: {tableName}";
 
     public void AddDataGridViewTabPage(NodeTable table)
     {
@@ -33,7 +33,7 @@ public class TabControlManager
 
     public void AddGViewerTabPage(ExtendedGraph graph, string tableName)
     {
-        var id = GetGViewerTabId(tableName);
+        var id = GetGViewerTabId(graph, tableName);
 
         if (TryUpdateTabPage(id, graph))
             return;
@@ -51,7 +51,7 @@ public class TabControlManager
 
     public void UpdateGViewerTabPageIfOpen(ExtendedGraph graph, string tableName)
     {
-        var id = GetGViewerTabId(tableName);
+        var id = GetGViewerTabId(graph, tableName);
 
         TryUpdateTabPage(id, graph, false);
     }
@@ -69,17 +69,18 @@ public class TabControlManager
         RemoveTabPage(tabPage, tabId);
     }
 
-    public void RemoveTabPage(string tabId)
+    public void RemoveTabPage(string tableName)
     {
-        var tabPage = tabPages
-            .Where(kvp => kvp.Key == tabId)
-            .Select(kvp => kvp.Value)
-            .FirstOrDefault();
+        var graphPages = tabPages
+            .Where(kvp => kvp.Key.Contains(tableName))
+            .ToList();
 
-        if (tabPage == null)
+        if (graphPages == null || graphPages.Count == 0)
             return;
 
-        RemoveTabPage(tabPage, tabId);
+        graphPages.ForEach(
+            g => RemoveTabPage(g.Value, g.Key)
+            );
     }
 
     private void RemoveTabPage(TabPage tabPage, string tabId)
@@ -91,10 +92,9 @@ public class TabControlManager
     public void RemoveRelatedTabPages(string tableName)
     {
         var dataGridViewTabId = GetDataGridViewTabId(tableName);
-        var gViewerTabId = GetGViewerTabId(tableName);
 
         RemoveTabPage(dataGridViewTabId);
-        RemoveTabPage(gViewerTabId);
+        RemoveTabPage(tableName);
     }
 
     private void AddTabPage(string tabId, ClosableTabPageBase tabPage)

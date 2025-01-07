@@ -1,6 +1,5 @@
 ﻿using Microsoft.Msagl.GraphViewerGdi;
 using VisualizationSystem.Models.Domain.Graphs;
-using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.UI.Forms;
 
 namespace VisualizationSystem.UI.Components.TabPages;

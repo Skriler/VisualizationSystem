@@ -6,12 +6,12 @@ namespace VisualizationSystem.Models.Entities.Settings;
 
 public class ClusterAlgorithmSettings
 {
-    private const ClusterAlgorithm DefaultSelectedAlgorithm = ClusterAlgorithm.Agglomerative;
-    private const float DefaultThreshold = 0.75f;
-    private const int DefaultNumberOfClusters = 5;
-    private const int DefaultMaxIterations = 100;
-    private const float DefaultEpsilon = 4;
-    private const int DefaultMinPoints = 4;
+    private const ClusterAlgorithm DefaultSelectedAlgorithm = ClusterAlgorithm.KMeans;
+    private const float DefaultThreshold = 0.8f;
+    private const int DefaultNumberOfClusters = 7;
+    private const int DefaultMaxIterations = 500;
+    private const float DefaultEpsilon = 2;
+    private const int DefaultMinPoints = 2;
 
     [Key]
     public int Id { get; set; }
@@ -35,6 +35,9 @@ public class ClusterAlgorithmSettings
     public int MinPoints { get; set; }
 
     [Required]
+    public bool WithEdges { get; set; }
+
+    [Required]
     public int UserSettingsId { get; set; }
     public UserSettings UserSettings { get; set; } = default!;
 
@@ -51,6 +54,7 @@ public class ClusterAlgorithmSettings
         MaxIterations = DefaultMaxIterations;
         Epsilon = DefaultEpsilon;
         MinPoints = DefaultMinPoints;
+        WithEdges = false;
     }
 
     public void SetData(ClusterAlgorithmSettingsData settingsData)

@@ -66,6 +66,7 @@ public partial class SettingsForm : Form
         settings.MinSimilarityPercentage = (float)nudMinSimilarityPercentage.Value;
         settings.DeviationPercent = (float)nudDeviationPercent.Value;
         settings.UseClustering = chkbxUseClustering.Checked;
+        settings.AlgorithmSettings.WithEdges = chkbxWithEdges.Checked;
 
         parameterStatesPanel.Save();
         clusteringOptionsPanel.Save();
@@ -92,6 +93,7 @@ public partial class SettingsForm : Form
     private void UpdateFormLayout(bool isClusteringEnabled)
     {
         panelClusteringOptions.Visible = isClusteringEnabled;
+        chkbxWithEdges.Visible = isClusteringEnabled;
         UpdateButtonPositions(isClusteringEnabled);
         UpdateFormSize(isClusteringEnabled);
     }

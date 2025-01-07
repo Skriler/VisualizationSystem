@@ -63,7 +63,7 @@ public class ClusteringAlgorithmsPanelManager : PanelManager
 
         Action algorithmSetupAction = algorithm switch
         {
-            ClusterAlgorithm.Agglomerative => UpdateClusteringOptionsForAgglomerative,
+            ClusterAlgorithm.HierarchicalAgglomerative => UpdateClusteringOptionsForAgglomerative,
             ClusterAlgorithm.KMeans => UpdateClusteringOptionsForKMeans,
             ClusterAlgorithm.DBSCAN => UpdateClusteringOptionsForDBSCAN,
             _ => throw new ArgumentOutOfRangeException(nameof(algorithm), "Unknown clustering algorithm selected")
@@ -82,7 +82,7 @@ public class ClusteringAlgorithmsPanelManager : PanelManager
 
         Action algorithmSetupAction = previousAlgorithm switch
         {
-            ClusterAlgorithm.Agglomerative => SaveAgglomerativeSettings,
+            ClusterAlgorithm.HierarchicalAgglomerative => SaveAgglomerativeSettings,
             ClusterAlgorithm.KMeans => SaveKMeansSettings,
             ClusterAlgorithm.DBSCAN => SaveDBSCANSettings,
             _ => throw new ArgumentOutOfRangeException(nameof(previousAlgorithm), "Unknown clustering algorithm selected")
