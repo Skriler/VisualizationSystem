@@ -1,14 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using VisualizationSystem.Models.Entities.Nodes;
 
-namespace VisualizationSystem.Models.Entities.Nodes;
+namespace VisualizationSystem.Models.Entities.Normalized;
 
 public class NormalizedParameter
 {
     [Key]
     public int Id { get; set; }
-
-    [Required]
-    public double Value { get; set; }
 
     [Required]
     public int NodeObjectId { get; set; }

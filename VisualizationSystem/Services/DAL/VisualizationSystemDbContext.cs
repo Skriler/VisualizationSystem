@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Entities.Normalized;
 using VisualizationSystem.Models.Entities.Settings;
 
 namespace VisualizationSystem.Services.DAL;
@@ -35,10 +37,20 @@ public sealed class VisualizationSystemDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        ConfigureCascadeDeleteForNodeTable(modelBuilder);
+        ConfigureTablePerHierarchy(modelBuilder);
+        ConfigureCascadeDelete(modelBuilder);
     }
 
-    private void ConfigureCascadeDeleteForNodeTable(ModelBuilder modelBuilder)
+    private void ConfigureTablePerHierarchy(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<NormalizedParameter>()
+            .ToTable("NormalizedParameters")
+            .HasDiscriminator<string>("ParameterType")
+            .HasValue<NormalizedNumericParameter>("Numeric")
+            .HasValue<NormalizedCategoricalParameter>("Categorical");
+    }
+
+    private void ConfigureCascadeDelete(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<NodeTable>(entity =>
         {

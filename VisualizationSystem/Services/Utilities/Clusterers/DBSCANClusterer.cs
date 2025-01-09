@@ -54,8 +54,9 @@ public class DBSCANClusterer : BaseClusterer
 
     private bool IsNeighbor(NodeObject node, NodeObject other)
     {
-        var distance = distanceCalculator.CalculateEuclidean(node.NormalizedParameters, other.NormalizedParameters);
-        return distance <= settings.AlgorithmSettings.Epsilon;
+        //var distance = distanceCalculator.CalculateEuclidean(node.NormalizedParameters, other.NormalizedParameters);
+        //return distance <= settings.AlgorithmSettings.Epsilon;
+        return false;
     }
 
     private void ExpandCluster(

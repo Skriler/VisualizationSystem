@@ -32,7 +32,7 @@ public class AlgorithmParameterConfigs
         FirstParameterLabel = "Epsilon:",
         FirstParameterMin = 0,
         FirstParameterMax = 20,
-        FirstParameterDecimalPlaces = 1,
+        FirstParameterDecimalPlaces = 2,
 
         SecondParameterLabel = "Min points:",
         SecondParameterMin = 1,

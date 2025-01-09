@@ -80,7 +80,8 @@ public class KMeansClusterer : BaseClusterer
         
         for (int i = 0; i < kMeansClusters.Count; ++i)
         {
-            var distance = GetEuclideanDistance(node.NormalizedParameters, kMeansClusters[i].Centroid);
+            //var distance = distanceCalculator.CalculateEuclidean(node.NormalizedParameters, kMeansClusters[i].Centroid);
+            var distance = 0;
 
             if (distance >= minDistance)
                 continue;
@@ -116,21 +117,5 @@ public class KMeansClusterer : BaseClusterer
         }
 
         return clusterNodes;
-    }
-
-    private double GetEuclideanDistance(List<NormalizedParameter> data, List<double> centroid)
-    {
-        if (data.Count != centroid.Count)
-            throw new InvalidOperationException("Node data and centroid must be the same length");
-
-        double distance = 0;
-
-        for (int i = 0; i < centroid.Count; ++i)
-        {
-            var diff = data[i].Value - centroid[i];
-            distance += diff * diff;
-        }
-
-        return Math.Sqrt(distance);
     }
 }

@@ -1,7 +1,5 @@
-﻿using VisualizationSystem.Models.Domain.Ranges;
-using VisualizationSystem.Models.Entities;
-using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Models.Entities.Settings;
+﻿using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Entities.Normalized;
 using VisualizationSystem.Services.DAL;
 
 namespace VisualizationSystem.Services.Utilities.Normalizers;
@@ -10,8 +8,7 @@ public class DataNormalizer
 {
     private readonly NormalizedNodeRepository normalizedNodesRepository;
 
-    private readonly List<ParameterNumericRange> numericRanges = new();
-    private readonly List<ParameterStringRange> stringRanges = new();
+    private readonly Dictionary<int, ITypeNormalizer> parameterNormalizers = new();
     private readonly List<NormalizedParameterState> parameterStates = new();
 
     public DataNormalizer(NormalizedNodeRepository normalizedNodesRepository)
@@ -26,12 +23,10 @@ public class DataNormalizer
             return await normalizedNodesRepository.GetByTableNameAsync(nodeTable.Name);
         }
 
-        numericRanges.Clear();
-        stringRanges.Clear();
+        parameterNormalizers.Clear();
         parameterStates.Clear();
 
         InitializeParameterRanges(nodeTable.NodeObjects);
-
         InitializeParameterStates(nodeTable.NodeObjects.First());
         await normalizedNodesRepository.AddNormalizedParameterStateListAsync(parameterStates);
 
@@ -47,191 +42,71 @@ public class DataNormalizer
         {
             foreach (var parameter in node.Parameters)
             {
-                if (IsNumeric(parameter.Value))
-                {
-                    AddToNumericRange(parameter);
-                }
-                else
-                {
-                    AddToStringParameterList(parameter);
-                }
+                var valueType = GetParameterValueType(parameter.Value);
+                AddToParameterRange(parameter, valueType);
             }
         }
     }
 
-    private void AddToNumericRange(NodeParameter parameter)
+    private ParameterValueType GetParameterValueType(string value)
+        => IsNumeric(value) ? ParameterValueType.Numeric : ParameterValueType.Categorical;
+
+    private void AddToParameterRange(NodeParameter parameter, ParameterValueType valueType)
     {
-        if (stringRanges.Any(range => range.Id == parameter.ParameterTypeId))
-            throw new InvalidOperationException($"Conflict detected: string data already exists for {parameter.ParameterTypeId}");
-
-        var value = Convert.ToDouble(parameter.Value);
-
-        var range = numericRanges
-            .FirstOrDefault(range => range.Id == parameter.ParameterTypeId);
-
-        if (range == null)
+        if (parameterNormalizers.TryGetValue(parameter.ParameterTypeId, out var existingRange))
         {
-            range = new ParameterNumericRange(parameter.ParameterTypeId, value, value);
-            numericRanges.Add(range);
+            existingRange.AddValue(parameter.Value);
             return;
         }
 
-        range.Update(
-            Math.Min(range.Min, value),
-            Math.Max(range.Max, value)
-            );
+        var range = CreateParameterRange(valueType, parameter.ParameterTypeId, parameter.Value);
+        parameterNormalizers.Add(parameter.ParameterTypeId, range);
     }
 
-    private void AddToStringParameterList(NodeParameter parameter)
+    private ITypeNormalizer CreateParameterRange(ParameterValueType valueType, int id, string value)
     {
-        if (string.IsNullOrWhiteSpace(parameter.Value))
-            return;
-
-        if (numericRanges.Any(range => range.Id == parameter.ParameterTypeId))
-            throw new InvalidOperationException($"Conflict detected: numeric range already exists for {parameter.ParameterTypeId}");
-
-        var range = stringRanges
-            .FirstOrDefault(range => range.Id == parameter.ParameterTypeId);
-
-        if (range == null)
+        return valueType switch
         {
-            range = new ParameterStringRange(parameter.ParameterTypeId);
-            stringRanges.Add(range);
-        }
-
-        range.AddValue(parameter.Value);
+            ParameterValueType.Numeric => new NumericNormalizer(id, Convert.ToDouble(value)),
+            ParameterValueType.Categorical => new CategoricalNormalizer(id, value),
+            _ => throw new ArgumentException($"Unsupported parameter type: {valueType}")
+        };
     }
 
     private void InitializeParameterStates(NodeObject node)
     {
         foreach (var parameter in node.Parameters)
         {
-            if (!IsStringParameter(parameter))
+            var range = parameterNormalizers[parameter.ParameterTypeId];
+
+            var parameterState = new NormalizedParameterState
             {
-                parameterStates.Add(CreateSingleParameterState(parameter.ParameterType, 1));
-                continue;
-            }
+                CategoryCount = range.CategoryCount,
+                ValueType = range.Type,
+                ParameterType = parameter.ParameterType
+            };
 
-            var range = stringRanges.First(r => r.Id == parameter.ParameterTypeId);
-            var newParameterStates = Enumerable
-                .Range(0, range.Values.Count)
-                .Select(i => CreateSingleParameterState(parameter.ParameterType, range.Values.Count))
-                .ToList();
-
-            parameterStates.AddRange(newParameterStates);
+            parameterStates.Add(parameterState);
         }
-    }
-
-    private NormalizedParameterState CreateSingleParameterState(ParameterType parameterType, int valuesCount)
-    {
-        return new NormalizedParameterState
-        {
-            Weight = CalculateWeight(valuesCount),
-            ParameterType = parameterType
-        };
     }
 
     private void ProcessNodeForNormalization(NodeObject node)
     {
         foreach (var parameter in node.Parameters)
         {
-            if (IsNumericParameter(parameter))
-            {
-                AddNormalizedNumericParameter(node, parameter);
-            }
-            else if (IsStringParameter(parameter))
-            {
-                AddNormalizedStringParameter(node, parameter);
-            }
-        }
-    }
-
-    private bool IsNumericParameter(NodeParameter parameter) => numericRanges.Any(range => range.Id == parameter.ParameterTypeId);
-
-    private bool IsStringParameter(NodeParameter parameter) => stringRanges.Any(range => range.Id == parameter.ParameterTypeId);
-
-    private void AddNormalizedNumericParameter(NodeObject node, NodeParameter parameter)
-    {
-        var currentIndex = node.NormalizedParameters.Count;
-        var normParameter = new NormalizedParameter()
-        {
-            Value = GetNormalizedNumericParameter(parameter),
-            NodeObject = node,
-            NormalizedParameterState = parameterStates[currentIndex],
-        };
-
-        node.NormalizedParameters.Add(normParameter);
-    }
-
-    private double GetNormalizedNumericParameter(NodeParameter parameter)
-    {
-        if (!IsNumeric(parameter.Value))
-            return 0;
-
-        var range = numericRanges
-            .FirstOrDefault(range => range.Id == parameter.ParameterTypeId);
-
-        if (range == null)
-            return 0;
-
-        var value = Convert.ToDouble(parameter.Value);
-        return NormalizeMinMax(value, range.Min, range.Max);
-    }
-
-    private void AddNormalizedStringParameter(NodeObject node, NodeParameter parameter)
-    {
-        var currentIndex = node.NormalizedParameters.Count;
-        var oneHotArray = GetNormalizedStringParameter(parameter);
-
-        for (int i = 0; i < oneHotArray.Length; i++)
-        {
-            var normalizedParameter = new NormalizedParameter
-            {
-                Value = oneHotArray[i],
-                NodeObject = node,
-                NormalizedParameterState = parameterStates[currentIndex + i]
-            };
+            var range = parameterNormalizers[parameter.ParameterTypeId];
+            var normalizedParameter = range.CreateNormalizedParameter(
+                parameter,
+                node,
+                parameterStates[node.NormalizedParameters.Count]
+                );
 
             node.NormalizedParameters.Add(normalizedParameter);
         }
-    }
-
-    private double[] GetNormalizedStringParameter(NodeParameter parameter)
-    {
-        var range = stringRanges
-            .FirstOrDefault(range => range.Id == parameter.ParameterTypeId);
-
-        if (range == null)
-            return Array.Empty<double>();
-
-        return ConvertStringToOneHot(parameter.Value, range.Values);
-    }
-
-    private static double NormalizeMinMax(double value, double min, double max)
-    {
-        if (max == min)
-            return 1;
-
-        return (value - min) / (max - min);
     }
 
     private static bool IsNumeric(string value)
     {
         return double.TryParse(value, out _);
     }
-
-    private static double[] ConvertStringToOneHot(string value, List<string> possibleValues)
-    {
-        var encoded = new double[possibleValues.Count];
-        var index = possibleValues.IndexOf(value);
-
-        if (index != -1)
-        {
-            encoded[index] = 1;
-        }
-
-        return encoded;
-    }
-
-    private static double CalculateWeight(int valuesCount) => 1.0 / valuesCount;
 }

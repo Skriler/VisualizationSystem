@@ -11,8 +11,8 @@ public class AgglomerativeCluster : Cluster
     public AgglomerativeCluster(NodeObject node)
     {
         IsMerged = false;
-        AverageParameters = node.NormalizedParameters
-            .ConvertAll(nn => new WeightedParameter(nn.Value, nn.NormalizedParameterState.Weight));
+        //AverageParameters = node.NormalizedParameters
+        //    .ConvertAll(nn => new WeightedParameter(nn.Value, nn.NormalizedParameterState.Weight));
 
         Nodes.Add(node);
     }

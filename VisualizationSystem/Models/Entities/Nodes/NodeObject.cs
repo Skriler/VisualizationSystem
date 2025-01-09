@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using VisualizationSystem.Models.Entities.Normalized;
 
 namespace VisualizationSystem.Models.Entities.Nodes;
 
@@ -20,7 +21,7 @@ public class NodeObject
 
     public override int GetHashCode() => Name.GetHashCode();
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj is NodeObject otherNode)
             return Name == otherNode.Name;

@@ -1,4 +1,5 @@
 ﻿using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Entities.Normalized;
 
 namespace VisualizationSystem.Models.Domain.Clusters;
 
@@ -8,7 +9,7 @@ public class KMeansCluster : Cluster
 
     public KMeansCluster(List<NormalizedParameter> nodeParameters)
     {
-        Centroid = nodeParameters.Select(np => np.Value).ToList();
+        //Centroid = nodeParameters.Select(np => np.Value).ToList();
     }
 
     public void RecalculateCentroid(List<NodeObject> nodes)
@@ -16,8 +17,8 @@ public class KMeansCluster : Cluster
         if (nodes.Any(n => n.NormalizedParameters.Count != Centroid.Count))
             throw new InvalidOperationException("Node parameter count does not match centroid's");
 
-        Centroid = Enumerable.Range(0, Centroid.Count)
-            .Select(col => nodes.Average(n => n.NormalizedParameters[col].Value))
-            .ToList();
+        //Centroid = Enumerable.Range(0, Centroid.Count)
+        //    .Select(col => nodes.Average(n => n.NormalizedParameters[col].Value))
+        //    .ToList();
     }
 }

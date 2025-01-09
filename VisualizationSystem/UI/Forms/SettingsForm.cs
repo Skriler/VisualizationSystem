@@ -94,6 +94,7 @@ public partial class SettingsForm : Form
     {
         panelClusteringOptions.Visible = isClusteringEnabled;
         chkbxWithEdges.Visible = isClusteringEnabled;
+        chkbxWithEdges.Checked = settings.AlgorithmSettings.WithEdges;
         UpdateButtonPositions(isClusteringEnabled);
         UpdateFormSize(isClusteringEnabled);
     }
