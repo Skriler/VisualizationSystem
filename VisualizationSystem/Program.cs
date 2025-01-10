@@ -7,6 +7,7 @@ using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.UI;
 using VisualizationSystem.Services.Utilities.Clusterers;
 using VisualizationSystem.Services.Utilities.Comparers;
+using VisualizationSystem.Services.Utilities.DistanceCalculators;
 using VisualizationSystem.Services.Utilities.Factories;
 using VisualizationSystem.Services.Utilities.FileSystem;
 using VisualizationSystem.Services.Utilities.FileSystem.ExcelHandlers;

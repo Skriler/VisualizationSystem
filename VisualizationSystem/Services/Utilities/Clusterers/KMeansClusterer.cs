@@ -1,5 +1,6 @@
 ﻿using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Services.Utilities.DistanceCalculators;
 using VisualizationSystem.Services.Utilities.Normalizers;
 using VisualizationSystem.Services.Utilities.Settings;
 

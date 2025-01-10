@@ -6,7 +6,7 @@ namespace VisualizationSystem.Models.Domain.Clusters;
 public class AgglomerativeCluster : Cluster
 {
     public bool IsMerged { get; set; }
-    public List<WeightedParameter> AverageParameters { get; private set; }
+    //public List<WeightedParameter> AverageParameters { get; private set; }
 
     public AgglomerativeCluster(NodeObject node)
     {
@@ -26,13 +26,13 @@ public class AgglomerativeCluster : Cluster
         var mergedNodesCount = mergedCluster.Nodes.Count;
         var totalNodes = currentNodesCount + mergedNodesCount;
 
-        for (int i = 0; i < AverageParameters.Count; ++i)
-        {
-            var weightedSum = AverageParameters[i].Value * currentNodesCount +
-                mergedCluster.AverageParameters[i].Value * mergedNodesCount;
+        //for (int i = 0; i < AverageParameters.Count; ++i)
+        //{
+        //    var weightedSum = AverageParameters[i].Value * currentNodesCount +
+        //        mergedCluster.AverageParameters[i].Value * mergedNodesCount;
 
-            AverageParameters[i].Value = weightedSum / totalNodes;
-        }
+        //    AverageParameters[i].Value = weightedSum / totalNodes;
+        //}
     }
 
     public void Merge(AgglomerativeCluster mergedCluster)

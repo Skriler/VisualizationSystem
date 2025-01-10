@@ -3,6 +3,7 @@ using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Services.Utilities.Normalizers;
 using VisualizationSystem.Services.Utilities.Settings;
+using VisualizationSystem.Services.Utilities.DistanceCalculators;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
 

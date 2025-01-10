@@ -2,6 +2,7 @@
 using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Normalized;
+using VisualizationSystem.Services.Utilities.DistanceCalculators;
 using VisualizationSystem.Services.Utilities.Normalizers;
 using VisualizationSystem.Services.Utilities.Settings;
 
@@ -56,10 +57,11 @@ public class AgglomerativeClusterer : BaseClusterer
                 if (agglomerativeClusters[j].IsMerged)
                     continue;
 
-                var similarity = distanceCalculator.CalculateCosine(
-                    agglomerativeClusters[i].AverageParameters,
-                    agglomerativeClusters[j].AverageParameters
-                    );
+                var similarity = 0;
+                //var similarity = distanceCalculator.CalculateCosine(
+                //    agglomerativeClusters[i].AverageParameters,
+                //    agglomerativeClusters[j].AverageParameters
+                //    );
 
                 if (similarity <= clusterSimilarity.Similarity)
                     continue;
