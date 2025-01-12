@@ -2,5 +2,5 @@
 
 public interface ICategoricalDistance
 {
-    double CalculateDistance(List<int> firstValues, List<int> secondValues, int categoriesCount);
+    double CalculateDistance(IEnumerable<int> firstValues, IEnumerable<int> secondValues, int categoriesCount);
 }

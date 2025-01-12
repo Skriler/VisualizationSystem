@@ -1,4 +1,5 @@
-﻿using VisualizationSystem.Models.Entities.Nodes;
+﻿using VisualizationSystem.Models.Domain.Nodes;
+using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Normalized;
 using VisualizationSystem.Services.DAL;
 
@@ -16,24 +17,26 @@ public class DataNormalizer
         this.normalizedNodesRepository = normalizedNodesRepository;
     }
 
-    public async Task<List<NodeObject>> GetNormalizedNodesAsync(NodeTable nodeTable)
+    public async Task<List<CalculationNode>> GetCalculationNodesAsync(NodeTable nodeTable)
     {
         if (await normalizedNodesRepository.ExistsAsync(nodeTable.Name))
         {
-            return await normalizedNodesRepository.GetByTableNameAsync(nodeTable.Name);
+            var normalizedNodes = await normalizedNodesRepository.GetByTableNameAsync(nodeTable.Name);
+            return normalizedNodes.ConvertAll(n => new CalculationNode(n));
         }
 
         parameterNormalizers.Clear();
         parameterStates.Clear();
 
-        InitializeParameterRanges(nodeTable.NodeObjects);
-        InitializeParameterStates(nodeTable.NodeObjects.First());
+        var nodes = nodeTable.NodeObjects;
+        InitializeParameterRanges(nodes);
+        InitializeParameterStates(nodes.First());
         await normalizedNodesRepository.AddNormalizedParameterStateListAsync(parameterStates);
 
-        nodeTable.NodeObjects.ForEach(ProcessNodeForNormalization);
-        await normalizedNodesRepository.AddAllNormalizedParametersAsync(nodeTable.NodeObjects);
+        nodes.ForEach(ProcessNodeForNormalization);
+        await normalizedNodesRepository.AddAllNormalizedParametersAsync(nodes);
 
-        return nodeTable.NodeObjects;
+        return nodes.ConvertAll(n => new CalculationNode(n));
     }
 
     private void InitializeParameterRanges(List<NodeObject> nodes)
@@ -49,10 +52,18 @@ public class DataNormalizer
     }
 
     private ParameterValueType GetParameterValueType(string value)
-        => IsNumeric(value) ? ParameterValueType.Numeric : ParameterValueType.Categorical;
+    {
+        if (value == string.Empty)
+            return ParameterValueType.None;
+
+        return IsNumeric(value) ? ParameterValueType.Numeric : ParameterValueType.Categorical;
+    }
 
     private void AddToParameterRange(NodeParameter parameter, ParameterValueType valueType)
     {
+        if (valueType == ParameterValueType.None)
+            return;
+
         if (parameterNormalizers.TryGetValue(parameter.ParameterTypeId, out var existingRange))
         {
             existingRange.AddValue(parameter.Value);
@@ -77,8 +88,10 @@ public class DataNormalizer
     {
         foreach (var parameter in node.Parameters)
         {
-            var range = parameterNormalizers[parameter.ParameterTypeId];
+            if (!parameterNormalizers.ContainsKey(parameter.ParameterTypeId))
+                continue;
 
+            var range = parameterNormalizers[parameter.ParameterTypeId];
             var parameterState = new NormalizedParameterState
             {
                 CategoryCount = range.CategoryCount,
@@ -94,6 +107,9 @@ public class DataNormalizer
     {
         foreach (var parameter in node.Parameters)
         {
+            if (!parameterNormalizers.ContainsKey(parameter.ParameterTypeId))
+                continue;
+
             var range = parameterNormalizers[parameter.ParameterTypeId];
             var normalizedParameter = range.CreateNormalizedParameter(
                 parameter,

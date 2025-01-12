@@ -8,6 +8,8 @@ using VisualizationSystem.Services.UI;
 using VisualizationSystem.Services.Utilities.Clusterers;
 using VisualizationSystem.Services.Utilities.Comparers;
 using VisualizationSystem.Services.Utilities.DistanceCalculators;
+using VisualizationSystem.Services.Utilities.DistanceCalculators.Categorical;
+using VisualizationSystem.Services.Utilities.DistanceCalculators.Numeric;
 using VisualizationSystem.Services.Utilities.Factories;
 using VisualizationSystem.Services.Utilities.FileSystem;
 using VisualizationSystem.Services.Utilities.FileSystem.ExcelHandlers;
@@ -65,6 +67,7 @@ internal static class Program
         services.AddRepositories()
             .AddUIServices()
             .AddDataProcessingServices()
+            .AddDistanceServices()
             .AddClusteringServices()
             .AddGraphServices();
 
@@ -93,7 +96,6 @@ internal static class Program
             .AddSingleton<NodeTableMapper>()
             .AddSingleton<ExcelDataImporter>()
             .AddSingleton<DataNormalizer>()
-            .AddSingleton<MetricDistanceCalculator>()
             .AddSingleton<SimilarityComparer>()
             .AddSingleton<ICompare, DefaultComparer>();
     }
@@ -104,6 +106,13 @@ internal static class Program
             .AddSingleton<AgglomerativeClusterer>()
             .AddSingleton<DBSCANClusterer>()
             .AddSingleton<ClustererFactory>();
+    }
+
+    private static IServiceCollection AddDistanceServices(this IServiceCollection services)
+    {
+        return services.AddSingleton<INumericDistance, EuclideanDistance>()
+            .AddSingleton<ICategoricalDistance, HammingDistance>()
+            .AddSingleton<IDistanceCalculator, DistanceCalculator>();
     }
 
     private static IServiceCollection AddGraphServices(this IServiceCollection services)

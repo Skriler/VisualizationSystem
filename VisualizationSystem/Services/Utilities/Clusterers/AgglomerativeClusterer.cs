@@ -1,7 +1,6 @@
 ﻿using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Models.Entities.Normalized;
 using VisualizationSystem.Services.Utilities.DistanceCalculators;
 using VisualizationSystem.Services.Utilities.Normalizers;
 using VisualizationSystem.Services.Utilities.Settings;
@@ -11,11 +10,10 @@ namespace VisualizationSystem.Services.Utilities.Clusterers;
 public class AgglomerativeClusterer : BaseClusterer
 {
     private List<AgglomerativeCluster> agglomerativeClusters;
-    private List<NormalizedParameterState> parameterStates;
 
     public AgglomerativeClusterer(
         DataNormalizer dataNormalizer,
-        MetricDistanceCalculator distanceCalculator,
+        IDistanceCalculator distanceCalculator,
         ISettingsSubject settingsSubject
         )
         : base(dataNormalizer, distanceCalculator, settingsSubject)
@@ -23,7 +21,7 @@ public class AgglomerativeClusterer : BaseClusterer
 
     public override async Task<List<Cluster>> ClusterAsync(NodeTable nodeTable)
     {
-        var nodes = await dataNormalizer.GetNormalizedNodesAsync(nodeTable);
+        var nodes = await dataNormalizer.GetCalculationNodesAsync(nodeTable);
 
         agglomerativeClusters = nodes
             .Select(n => new AgglomerativeCluster(n))
@@ -40,7 +38,10 @@ public class AgglomerativeClusterer : BaseClusterer
                 .Merge(agglomerativeClusters[similarCluster.SecondClusterId]);
         }
 
-        return agglomerativeClusters.Where(c => !c.IsMerged).Cast<Cluster>().ToList();
+        return agglomerativeClusters
+            .Where(c => !c.IsMerged)
+            .Cast<Cluster>()
+            .ToList();
     }
 
     private ClusterSimilarityResult FindMostSimilarClusters()
@@ -57,11 +58,10 @@ public class AgglomerativeClusterer : BaseClusterer
                 if (agglomerativeClusters[j].IsMerged)
                     continue;
 
-                var similarity = 0;
-                //var similarity = distanceCalculator.CalculateCosine(
-                //    agglomerativeClusters[i].AverageParameters,
-                //    agglomerativeClusters[j].AverageParameters
-                //    );
+                var similarity = GetAverageDistance(
+                    agglomerativeClusters[i],
+                    agglomerativeClusters[j]
+                    );
 
                 if (similarity <= clusterSimilarity.Similarity)
                     continue;
@@ -71,5 +71,15 @@ public class AgglomerativeClusterer : BaseClusterer
         }
 
         return clusterSimilarity;
+    }
+
+    private double GetAverageDistance(AgglomerativeCluster first, AgglomerativeCluster second)
+    {
+        var totalCount = first.CalculationNodes.Count * second.CalculationNodes.Count;
+        var totalDistance = first.CalculationNodes
+            .SelectMany(firstNode => second.CalculationNodes, distanceCalculator.Calculate)
+            .Sum();
+
+        return totalCount > 0 ? totalDistance / totalCount : 0;
     }
 }

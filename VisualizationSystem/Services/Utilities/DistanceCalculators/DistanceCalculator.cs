@@ -1,24 +1,24 @@
-﻿using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Models.Entities.Normalized;
+﻿using VisualizationSystem.Models.Domain.Nodes;
+using VisualizationSystem.Models.Domain.Nodes.Parameters;
 using VisualizationSystem.Services.Utilities.DistanceCalculators.Categorical;
 using VisualizationSystem.Services.Utilities.DistanceCalculators.Numeric;
 
 namespace VisualizationSystem.Services.Utilities.DistanceCalculators;
 
-public class MetricDistanceCalculator
+public class DistanceCalculator : IDistanceCalculator
 {
     private readonly INumericDistance numericDistance;
     private readonly ICategoricalDistance categoricalDistance;
 
-    public MetricDistanceCalculator(INumericDistance numericDistance, ICategoricalDistance categoricalDistance)
+    public DistanceCalculator(INumericDistance numericDistance, ICategoricalDistance categoricalDistance)
     {
         this.numericDistance = numericDistance;
         this.categoricalDistance = categoricalDistance;
     }
 
-    public double CalculateDistance(NodeObject firstNode, NodeObject secondNode)
+    public double Calculate(CalculationNode firstNode, CalculationNode secondNode)
     {
-        if (firstNode.NormalizedParameters.Count != secondNode.NormalizedParameters.Count)
+        if (firstNode.Parameters.Count != secondNode.Parameters.Count)
             throw new ArgumentException("The nodes must have the same number of parameters.");
 
         var firstNumericValues = ExtractNumericValues(firstNode);
@@ -27,32 +27,29 @@ public class MetricDistanceCalculator
         var firstCategoricalParams = ExtractCategoricalParameters(firstNode);
         var secondCategoricalParams = ExtractCategoricalParameters(secondNode);
 
-        var numericDistanceValue = CalculateNumericDistance(firstNumericValues, secondNumericValues);
-        var categoricalDistanceValue = CalculateCategoricalDistance(firstCategoricalParams, secondCategoricalParams);
+        var numericDistance = CalculateNumericDistance(firstNumericValues, secondNumericValues);
+        var categoricalDistance = CalculateCategoricalDistance(firstCategoricalParams, secondCategoricalParams);
 
-        int totalParamsCount = firstNumericValues.Count + firstCategoricalParams.Count;
-
-        if (totalParamsCount == 0)
-            return 0;
-
-        double weightedNumericDistance = numericDistanceValue * firstNumericValues.Count;
-        double weightedCategoricalDistance = categoricalDistanceValue * firstCategoricalParams.Count;
-
-        return (weightedNumericDistance + weightedCategoricalDistance) / totalParamsCount;
+        return CalculateAverageDistance(
+            numericDistance,
+            firstNumericValues.Count,
+            categoricalDistance,
+            firstCategoricalParams.Count
+            );
     }
 
-    private List<double> ExtractNumericValues(NodeObject node)
+    private List<double> ExtractNumericValues(CalculationNode node)
     {
-        return node.NormalizedParameters
-            .OfType<NormalizedNumericParameter>()
+        return node.Parameters
+            .OfType<NumericParameter>()
             .Select(p => p.Value)
             .ToList();
     }
 
-    private List<NormalizedCategoricalParameter> ExtractCategoricalParameters(NodeObject node)
+    private List<CategoricalParameter> ExtractCategoricalParameters(CalculationNode node)
     {
-        return node.NormalizedParameters
-            .OfType<NormalizedCategoricalParameter>()
+        return node.Parameters
+            .OfType<CategoricalParameter>()
             .ToList();
     }
 
@@ -65,8 +62,8 @@ public class MetricDistanceCalculator
     }
 
     private double CalculateCategoricalDistance(
-        List<NormalizedCategoricalParameter> firstCategoricalParams,
-        List<NormalizedCategoricalParameter> secondCategoricalParams
+        List<CategoricalParameter> firstCategoricalParams,
+        List<CategoricalParameter> secondCategoricalParams
         )
     {
         var totalCategoricalDistance = 0d;
@@ -82,10 +79,24 @@ public class MetricDistanceCalculator
             totalCategoricalDistance += categoricalDistance.CalculateDistance(
                 firstParam.OneHotIndexes,
                 secondParam.OneHotIndexes,
-                firstParam.NormalizedParameterState.CategoryCount
+                firstParam.CategoryCount
                 );
         }
 
         return totalCategoricalDistance / firstCategoricalParams.Count;
+    }
+
+    private double CalculateAverageDistance(
+        double numericDistance,
+        int numericParamsCount,
+        double categoricalDistance,
+        int categoricalParamsCount
+        )
+    {
+        var weightedNumericDistance = numericDistance * numericParamsCount;
+        var weightedCategoricalDistance = categoricalDistance * categoricalParamsCount;
+        var totalCount = numericParamsCount + categoricalParamsCount;
+
+        return (weightedNumericDistance + weightedCategoricalDistance) / totalCount;
     }
 }

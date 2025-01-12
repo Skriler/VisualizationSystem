@@ -3,5 +3,6 @@
 public enum ParameterValueType
 {
     Numeric,
-    Categorical
+    Categorical,
+    None,
 }

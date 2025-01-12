@@ -10,13 +10,13 @@ namespace VisualizationSystem.Services.Utilities.Clusterers;
 public abstract class BaseClusterer : ISettingsObserver
 {
     protected readonly DataNormalizer dataNormalizer;
-    protected readonly MetricDistanceCalculator distanceCalculator;
+    protected readonly IDistanceCalculator distanceCalculator;
 
     protected UserSettings settings;
 
     protected BaseClusterer(
         DataNormalizer dataNormalizer,
-        MetricDistanceCalculator distanceCalculator,
+        IDistanceCalculator distanceCalculator,
         ISettingsSubject settingsSubject
         )
     {

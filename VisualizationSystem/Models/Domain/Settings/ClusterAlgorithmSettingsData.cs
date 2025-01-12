@@ -7,13 +7,13 @@ public class ClusterAlgorithmSettingsData
 {
     public ClusterAlgorithm SelectedAlgorithm { get; set; }
 
-    public float Threshold { get; set; }
+    public double Threshold { get; set; }
 
     public int NumberOfClusters { get; set; }
 
     public int MaxIterations { get; set; }
 
-    public float Epsilon { get; set; }
+    public double Epsilon { get; set; }
 
     public int MinPoints { get; set; }
 

@@ -36,7 +36,10 @@ public class NumericNormalizer : ITypeNormalizer
         NormalizedParameterState state
         )
     {
-        var value = Convert.ToDouble(parameter.Value);
+        // TODO
+        var value = parameter.Value != string.Empty
+            ? Convert.ToDouble(parameter.Value)
+            : 0;
 
         return new NormalizedNumericParameter
         {

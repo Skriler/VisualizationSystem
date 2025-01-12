@@ -1,4 +1,5 @@
 ﻿using VisualizationSystem.Models.Domain.Clusters;
+using VisualizationSystem.Models.Domain.Nodes;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Services.Utilities.DistanceCalculators;
 using VisualizationSystem.Services.Utilities.Normalizers;
@@ -13,7 +14,7 @@ public class KMeansClusterer : BaseClusterer
 
     public KMeansClusterer(
         DataNormalizer dataNormalizer,
-        MetricDistanceCalculator distanceCalculator,
+        IDistanceCalculator distanceCalculator,
         ISettingsSubject settingsSubject
         )
         : base(dataNormalizer, distanceCalculator, settingsSubject)
@@ -21,8 +22,8 @@ public class KMeansClusterer : BaseClusterer
 
     public override async Task<List<Cluster>> ClusterAsync(NodeTable nodeTable)
     {
-        var nodes = await dataNormalizer.GetNormalizedNodesAsync(nodeTable);
-        var parametersCount = nodes.FirstOrDefault()?.NormalizedParameters.Count ?? 0;
+        var nodes = await dataNormalizer.GetCalculationNodesAsync(nodeTable);
+        var parametersCount = nodes.FirstOrDefault()?.Parameters.Count ?? 0;
 
         if (nodes.Count < settings.AlgorithmSettings.NumberOfClusters)
             throw new InvalidOperationException("Nodes amount is less than the number of clusters");
@@ -41,7 +42,7 @@ public class KMeansClusterer : BaseClusterer
             {
                 var clusterIndex = GetNearestClusterIndex(nodes[i]);
 
-                if (kMeansClusters[clusterIndex].Nodes.Contains(nodeTable.NodeObjects[i])) 
+                if (kMeansClusters[clusterIndex].Nodes.Contains(nodeTable.NodeObjects[i]))
                     continue;
 
                 assignmentsChanged = true;
@@ -57,7 +58,7 @@ public class KMeansClusterer : BaseClusterer
         return kMeansClusters.Cast<Cluster>().ToList();
     }
 
-    private void InitializeClusters(List<NodeObject> nodes, int parametersCount)
+    private void InitializeClusters(List<CalculationNode> nodes, int parametersCount)
     {
         var selectedIndices = new HashSet<int>();
 
@@ -69,20 +70,19 @@ public class KMeansClusterer : BaseClusterer
                 randomIndex = random.Next(nodes.Count);
             } while (!selectedIndices.Add(randomIndex));
 
-            var cluster = new KMeansCluster(nodes[randomIndex].NormalizedParameters);
+            var cluster = new KMeansCluster(nodes[randomIndex]);
             kMeansClusters.Add(cluster);
         }
     }
 
-    private int GetNearestClusterIndex(NodeObject node)
+    private int GetNearestClusterIndex(CalculationNode node)
     {
         var clusterIndex = 0;
         var minDistance = double.MaxValue;
         
         for (int i = 0; i < kMeansClusters.Count; ++i)
         {
-            //var distance = distanceCalculator.CalculateEuclidean(node.NormalizedParameters, kMeansClusters[i].Centroid);
-            var distance = 0;
+            var distance = distanceCalculator.Calculate(node, kMeansClusters[i].Centroid);
 
             if (distance >= minDistance)
                 continue;
@@ -94,7 +94,7 @@ public class KMeansClusterer : BaseClusterer
         return clusterIndex;
     }
 
-    private void RecalculateClusters(List<NodeObject> data)
+    private void RecalculateClusters(List<CalculationNode> data)
     {
         foreach (var kMeansCluster in kMeansClusters)
         {
@@ -103,13 +103,13 @@ public class KMeansClusterer : BaseClusterer
         }
     }
 
-    private List<NodeObject> GetClusterNodes(List<NodeObject> data, KMeansCluster cluster)
+    private List<CalculationNode> GetClusterNodes(List<CalculationNode> data, KMeansCluster cluster)
     {
-        var clusterNodes = new List<NodeObject>();
+        var clusterNodes = new List<CalculationNode>();
 
         foreach (var node in cluster.Nodes)
         {
-            var normalizedNode = data.FirstOrDefault(n => n.Name == node.Name);
+            var normalizedNode = data.FirstOrDefault(n => n.Entity.Name == node.Name);
 
             if (normalizedNode == null)
                 continue;

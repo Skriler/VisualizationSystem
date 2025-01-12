@@ -7,10 +7,10 @@ namespace VisualizationSystem.Models.Entities.Settings;
 public class ClusterAlgorithmSettings
 {
     private const ClusterAlgorithm DefaultSelectedAlgorithm = ClusterAlgorithm.KMeans;
-    private const float DefaultThreshold = 0.8f;
+    private const double DefaultThreshold = 0.4f;
     private const int DefaultNumberOfClusters = 7;
     private const int DefaultMaxIterations = 500;
-    private const float DefaultEpsilon = 2;
+    private const double DefaultEpsilon = 0.15;
     private const int DefaultMinPoints = 2;
 
     [Key]
@@ -20,7 +20,7 @@ public class ClusterAlgorithmSettings
     public ClusterAlgorithm SelectedAlgorithm { get; set; }
 
     [Required]
-    public float Threshold { get; set; }
+    public double Threshold { get; set; }
 
     [Required]
     public int NumberOfClusters { get; set; }
@@ -29,7 +29,7 @@ public class ClusterAlgorithmSettings
     public int MaxIterations { get; set; }
 
     [Required]
-    public float Epsilon { get; set; }
+    public double Epsilon { get; set; }
 
     [Required]
     public int MinPoints { get; set; }
