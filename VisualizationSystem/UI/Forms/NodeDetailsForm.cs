@@ -38,8 +38,8 @@ public partial class NodeDetailsForm : Form
             var value = FormatDecimalValue(parameter.Value);
             
             row.CreateCells(
-                dgvNodeParameters, 
-                parameter.ParameterType.Name, 
+                dgvNodeParameters,
+                parameter.ParameterType.Name,
                 value
                 );
             rows.Add(row);

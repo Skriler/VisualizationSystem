@@ -2,10 +2,10 @@
 using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Services.Utilities.Comparers;
 using VisualizationSystem.Services.Utilities.Factories;
-using VisualizationSystem.Services.Utilities.Graph.Builders;
+using VisualizationSystem.Services.Utilities.Graphs.Builders;
 using VisualizationSystem.Services.Utilities.Settings;
 
-namespace VisualizationSystem.Services.Utilities.Graph.Managers;
+namespace VisualizationSystem.Services.Utilities.Graphs.Managers;
 
 public class GraphCreationManager<TGraph> : ISettingsObserver
 {
@@ -53,7 +53,7 @@ public class GraphCreationManager<TGraph> : ISettingsObserver
         var clusterer = clustererFactory.CreateClusterer(settings.AlgorithmSettings.SelectedAlgorithm);
         var clusters = await clusterer.ClusterAsync(nodeTable);
 
-        if (settings.AlgorithmSettings.WithEdges)
+        if (settings.UseClusteredGraph)
         {
             var similarityResults = similarityComparer.CalculateSimilarNodes(nodeTable.NodeObjects);
             return graphBuilder.Build(nodeTable.Name, similarityResults, clusters);

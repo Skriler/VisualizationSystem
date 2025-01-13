@@ -7,17 +7,19 @@ using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.UI;
 using VisualizationSystem.Services.Utilities.Clusterers;
 using VisualizationSystem.Services.Utilities.Comparers;
+using VisualizationSystem.Services.Utilities.DimensionReducers;
 using VisualizationSystem.Services.Utilities.DistanceCalculators;
 using VisualizationSystem.Services.Utilities.DistanceCalculators.Categorical;
 using VisualizationSystem.Services.Utilities.DistanceCalculators.Numeric;
 using VisualizationSystem.Services.Utilities.Factories;
 using VisualizationSystem.Services.Utilities.FileSystem;
 using VisualizationSystem.Services.Utilities.FileSystem.ExcelHandlers;
-using VisualizationSystem.Services.Utilities.Graph.Builders;
-using VisualizationSystem.Services.Utilities.Graph.Helpers;
-using VisualizationSystem.Services.Utilities.Graph.Managers;
+using VisualizationSystem.Services.Utilities.Graphs.Builders;
+using VisualizationSystem.Services.Utilities.Graphs.Helpers;
+using VisualizationSystem.Services.Utilities.Graphs.Managers;
 using VisualizationSystem.Services.Utilities.Mappers;
 using VisualizationSystem.Services.Utilities.Normalizers;
+using VisualizationSystem.Services.Utilities.Plot;
 using VisualizationSystem.Services.Utilities.Settings;
 using VisualizationSystem.UI.Forms;
 
@@ -69,7 +71,8 @@ internal static class Program
             .AddDataProcessingServices()
             .AddDistanceServices()
             .AddClusteringServices()
-            .AddGraphServices();
+            .AddGraphServices()
+            .AddPlotServices();
 
         services.AddTransient<MainForm>();
     }
@@ -94,10 +97,19 @@ internal static class Program
     {
         return services.AddSingleton<ExcelReader>()
             .AddSingleton<NodeTableMapper>()
+            .AddSingleton<DataPointMapper>()
             .AddSingleton<ExcelDataImporter>()
             .AddSingleton<DataNormalizer>()
             .AddSingleton<SimilarityComparer>()
-            .AddSingleton<ICompare, DefaultComparer>();
+            .AddSingleton<ICompare, DefaultComparer>()
+            .AddSingleton<IDimensionReducer, PCAReducer>();
+    }
+
+    private static IServiceCollection AddDistanceServices(this IServiceCollection services)
+    {
+        return services.AddSingleton<INumericDistance, EuclideanDistance>()
+            .AddSingleton<ICategoricalDistance, HammingDistance>()
+            .AddSingleton<IDistanceCalculator, DistanceCalculator>();
     }
 
     private static IServiceCollection AddClusteringServices(this IServiceCollection services)
@@ -108,13 +120,6 @@ internal static class Program
             .AddSingleton<ClustererFactory>();
     }
 
-    private static IServiceCollection AddDistanceServices(this IServiceCollection services)
-    {
-        return services.AddSingleton<INumericDistance, EuclideanDistance>()
-            .AddSingleton<ICategoricalDistance, HammingDistance>()
-            .AddSingleton<IDistanceCalculator, DistanceCalculator>();
-    }
-
     private static IServiceCollection AddGraphServices(this IServiceCollection services)
     {
         return services.AddSingleton<GraphColorAssigner>()
@@ -122,5 +127,10 @@ internal static class Program
             .AddSingleton<GraphSaveManager>()
             .AddSingleton<IGraphBuilder<ExtendedGraph>, MsaglGraphBuilder>()
             .AddSingleton<IGraphBuilder<DotGraph>, DotNetGraphBuilder>();
+    }
+
+    private static IServiceCollection AddPlotServices(this IServiceCollection services)
+    {
+        return services.AddSingleton<PlotCreationManager>();
     }
 }

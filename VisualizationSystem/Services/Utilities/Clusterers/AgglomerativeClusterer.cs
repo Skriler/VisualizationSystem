@@ -24,8 +24,7 @@ public class AgglomerativeClusterer : BaseClusterer
         var nodes = await dataNormalizer.GetCalculationNodesAsync(nodeTable);
 
         agglomerativeClusters = nodes
-            .Select(n => new AgglomerativeCluster(n))
-            .ToList();
+            .ConvertAll(n => new AgglomerativeCluster(n));
 
         while (agglomerativeClusters.Count(c => !c.IsMerged) > 1)
         {
@@ -58,7 +57,7 @@ public class AgglomerativeClusterer : BaseClusterer
                 if (agglomerativeClusters[j].IsMerged)
                     continue;
 
-                var similarity = GetAverageDistance(
+                var similarity = GetMinimumDistance(
                     agglomerativeClusters[i],
                     agglomerativeClusters[j]
                     );
@@ -75,11 +74,16 @@ public class AgglomerativeClusterer : BaseClusterer
 
     private double GetAverageDistance(AgglomerativeCluster first, AgglomerativeCluster second)
     {
-        var totalCount = first.CalculationNodes.Count * second.CalculationNodes.Count;
-        var totalDistance = first.CalculationNodes
-            .SelectMany(firstNode => second.CalculationNodes, distanceCalculator.Calculate)
-            .Sum();
+        return first.Nodes
+            .SelectMany(firstNode => second.Nodes, distanceCalculator.Calculate)
+            .Average();
+    }
 
-        return totalCount > 0 ? totalDistance / totalCount : 0;
+    private double GetMinimumDistance(AgglomerativeCluster first, AgglomerativeCluster second)
+    {
+        return first.Nodes
+            .SelectMany(firstNode => second.Nodes, distanceCalculator.Calculate)
+            .Min();
+
     }
 }

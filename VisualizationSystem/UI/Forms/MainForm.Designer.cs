@@ -39,6 +39,7 @@
             saveGraphImageToolStripMenuItem = new ToolStripMenuItem();
             settingsToolStripMenuItem = new ToolStripMenuItem();
             tabControl = new TabControl();
+            buildPlotToolStripMenuItem = new ToolStripMenuItem();
             menuStrip.SuspendLayout();
             SuspendLayout();
             // 
@@ -61,7 +62,7 @@
             // uploadToolStripMenuItem
             // 
             uploadToolStripMenuItem.Name = "uploadToolStripMenuItem";
-            uploadToolStripMenuItem.Size = new Size(180, 22);
+            uploadToolStripMenuItem.Size = new Size(129, 22);
             uploadToolStripMenuItem.Text = "Load excel";
             uploadToolStripMenuItem.Click += uploadToolStripMenuItem_Click;
             // 
@@ -69,19 +70,19 @@
             // 
             showToolStripMenuItem.ForeColor = Color.Black;
             showToolStripMenuItem.Name = "showToolStripMenuItem";
-            showToolStripMenuItem.Size = new Size(180, 22);
+            showToolStripMenuItem.Size = new Size(129, 22);
             showToolStripMenuItem.Text = "View data";
             showToolStripMenuItem.Click += showToolStripMenuItem_Click;
             // 
             // datasetsToolStripMenuItem
             // 
             datasetsToolStripMenuItem.Name = "datasetsToolStripMenuItem";
-            datasetsToolStripMenuItem.Size = new Size(180, 22);
+            datasetsToolStripMenuItem.Size = new Size(129, 22);
             datasetsToolStripMenuItem.Text = "Datasets";
             // 
             // visualizationToolStripMenuItem
             // 
-            visualizationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { buildGraphToolStripMenuItem, saveGraphImageToolStripMenuItem, settingsToolStripMenuItem });
+            visualizationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { buildGraphToolStripMenuItem, saveGraphImageToolStripMenuItem, settingsToolStripMenuItem, buildPlotToolStripMenuItem });
             visualizationToolStripMenuItem.Name = "visualizationToolStripMenuItem";
             visualizationToolStripMenuItem.Size = new Size(85, 20);
             visualizationToolStripMenuItem.Text = "Visualization";
@@ -119,6 +120,13 @@
             tabControl.DrawItem += tabControl_DrawItem;
             tabControl.MouseDown += tabControl_MouseDown;
             // 
+            // buildPlotToolStripMenuItem
+            // 
+            buildPlotToolStripMenuItem.Name = "buildPlotToolStripMenuItem";
+            buildPlotToolStripMenuItem.Size = new Size(180, 22);
+            buildPlotToolStripMenuItem.Text = "Build plot";
+            buildPlotToolStripMenuItem.Click += buildPlotToolStripMenuItem_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -149,5 +157,6 @@
         private ToolStripMenuItem datasetsToolStripMenuItem;
         private TabControl tabControl;
         private ToolStripMenuItem saveGraphImageToolStripMenuItem;
+        private ToolStripMenuItem buildPlotToolStripMenuItem;
     }
 }

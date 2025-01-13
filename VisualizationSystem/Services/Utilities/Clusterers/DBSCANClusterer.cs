@@ -67,7 +67,7 @@ public class DBSCANClusterer : BaseClusterer
         List<CalculationNode> nodes
         )
     {
-        cluster.AddNode(node.Entity);
+        cluster.AddNode(node);
 
         var сonnectedNodes = new Queue<CalculationNode>(neighbors);
 
@@ -85,16 +85,16 @@ public class DBSCANClusterer : BaseClusterer
             {
                 foreach (var newNeighbor in neighborNeighbors)
                 {
-                    if (!cluster.Nodes.Contains(newNeighbor.Entity) && !сonnectedNodes.Contains(newNeighbor))
+                    if (!cluster.Nodes.Contains(newNeighbor) && !сonnectedNodes.Contains(newNeighbor))
                     {
                         сonnectedNodes.Enqueue(newNeighbor);
                     }
                 }
             }
 
-            if (!cluster.Nodes.Contains(neighbor.Entity))
+            if (!cluster.Nodes.Contains(neighbor))
             {
-                cluster.AddNode(neighbor.Entity);
+                cluster.AddNode(neighbor);
             }
         }
     }

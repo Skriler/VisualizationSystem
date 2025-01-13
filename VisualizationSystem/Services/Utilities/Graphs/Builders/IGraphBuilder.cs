@@ -2,7 +2,7 @@
 using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.Models.Entities.Nodes;
 
-namespace VisualizationSystem.Services.Utilities.Graph.Builders;
+namespace VisualizationSystem.Services.Utilities.Graphs.Builders;
 
 public interface IGraphBuilder<TGraph>
 {

@@ -21,6 +21,9 @@ public class UserSettings
     public bool UseClustering { get; set; }
 
     [Required]
+    public bool UseClusteredGraph { get; set; }
+
+    [Required]
     public int NodeTableId { get; set; }
     public NodeTable NodeTable { get; set; } = default!;
 
@@ -46,6 +49,7 @@ public class UserSettings
         MinSimilarityPercentage = DefaultMinSimilarityPercentage;
         DeviationPercent = DefaultDeviationPercent;
         UseClustering = false;
+        UseClusteredGraph = false;
     }
 
     public void ResetParameterStates()

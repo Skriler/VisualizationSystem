@@ -4,8 +4,9 @@ using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.Utilities.FileSystem.ExcelHandlers;
 using VisualizationSystem.Services.Utilities.Settings;
-using VisualizationSystem.Services.Utilities.Graph.Managers;
+using VisualizationSystem.Services.Utilities.Graphs.Managers;
 using VisualizationSystem.Models.Domain.Graphs;
+using VisualizationSystem.Services.Utilities.Plot;
 
 namespace VisualizationSystem.UI.Forms;
 
@@ -19,6 +20,7 @@ public partial class MainForm : Form
     private readonly ISettingsManager userSettingsManager;
     private readonly GraphCreationManager<ExtendedGraph> graphCreationManager;
     private readonly GraphSaveManager graphSaveManager;
+    private readonly PlotCreationManager plotCreationManager;
 
     private readonly TabControlManager tabControlService;
 
@@ -29,7 +31,8 @@ public partial class MainForm : Form
         ExcelDataImporter fileService,
         ISettingsManager userSettingsManager,
         GraphCreationManager<ExtendedGraph> graphCreationManager,
-        GraphSaveManager graphSaveManager
+        GraphSaveManager graphSaveManager,
+        PlotCreationManager plotCreationManager
         )
     {
         InitializeComponent();
@@ -42,6 +45,7 @@ public partial class MainForm : Form
         this.userSettingsManager = userSettingsManager;
         this.graphCreationManager = graphCreationManager;
         this.graphSaveManager = graphSaveManager;
+        this.plotCreationManager = plotCreationManager;
 
         tabControlService = new TabControlManager(tabControl);
     }
@@ -86,7 +90,7 @@ public partial class MainForm : Form
     {
         if (nodeTable == null)
         {
-            ShowWarning("No data to visualize graph");
+            ShowWarning("No data to build graph");
             return;
         }
 
@@ -95,6 +99,26 @@ public partial class MainForm : Form
             var graph = await graphCreationManager.BuildGraphAsync(nodeTable);
 
             tabControlService.AddGViewerTabPage(graph, nodeTable.Name);
+        }
+        catch (Exception ex)
+        {
+            ShowError("Error while visualizing graph", ex);
+        }
+    }
+
+    private async void buildPlotToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        if (nodeTable == null)
+        {
+            ShowWarning("No data to build plot");
+            return;
+        }
+
+        try
+        {
+            var plot = await plotCreationManager.BuildClusteredPlotAsync(nodeTable);
+
+            tabControlService.AddClusteredPlotTabPage(plot);
         }
         catch (Exception ex)
         {

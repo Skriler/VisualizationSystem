@@ -4,13 +4,13 @@ using Microsoft.Msagl.Layout.MDS;
 using VisualizationSystem.Models.Domain.Graphs;
 using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Services.Utilities.Graph.Helpers;
+using VisualizationSystem.Services.Utilities.Graphs.Helpers;
 using VisualizationSystem.Services.Utilities.Settings;
 using Cluster = VisualizationSystem.Models.Domain.Clusters.Cluster;
 using MsaglColor = Microsoft.Msagl.Drawing.Color;
 using SystemColor = System.Drawing.Color;
 
-namespace VisualizationSystem.Services.Utilities.Graph.Builders;
+namespace VisualizationSystem.Services.Utilities.Graphs.Builders;
 
 public class MsaglGraphBuilder : BaseGraphBuilder<ExtendedGraph>
 {

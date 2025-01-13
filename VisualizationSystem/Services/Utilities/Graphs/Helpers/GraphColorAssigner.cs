@@ -1,6 +1,6 @@
 ﻿using VisualizationSystem.Models.DTOs;
 
-namespace VisualizationSystem.Services.Utilities.Graph.Helpers;
+namespace VisualizationSystem.Services.Utilities.Graphs.Helpers;
 
 public class GraphColorAssigner
 {

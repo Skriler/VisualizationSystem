@@ -35,9 +35,6 @@ public class ClusterAlgorithmSettings
     public int MinPoints { get; set; }
 
     [Required]
-    public bool WithEdges { get; set; }
-
-    [Required]
     public int UserSettingsId { get; set; }
     public UserSettings UserSettings { get; set; } = default!;
 
@@ -54,7 +51,6 @@ public class ClusterAlgorithmSettings
         MaxIterations = DefaultMaxIterations;
         Epsilon = DefaultEpsilon;
         MinPoints = DefaultMinPoints;
-        WithEdges = false;
     }
 
     public void SetData(ClusterAlgorithmSettingsData settingsData)

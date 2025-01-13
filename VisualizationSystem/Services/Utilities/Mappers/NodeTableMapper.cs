@@ -16,7 +16,7 @@ public class NodeTableMapper
         return GetRowValues(table.Rows[headersRowIndex]);
     }
 
-    public NodeTable MapToNodeTable(DataTable table, int nameColumnIndex)
+    public NodeTable Map(DataTable table, int nameColumnIndex)
     {
         var headerRowIndex = FindHeaderRowIndex(table);
 

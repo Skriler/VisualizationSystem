@@ -15,10 +15,12 @@ public class NumericNormalizer : ITypeNormalizer
 
     private double Max { get; set; }
 
+    private double Average { get; set; }
+
     public NumericNormalizer(int id, double value)
     {
         Id = id;
-        Min = Max = value;
+        Min = Max = Average = value;
     }
 
     public void AddValue(string value)
@@ -28,6 +30,7 @@ public class NumericNormalizer : ITypeNormalizer
 
         Min = Math.Min(Min, numericValue);
         Max = Math.Max(Max, numericValue);
+        Average = (Min + Max) / 2;
     }
 
     public NormalizedParameter CreateNormalizedParameter(
@@ -36,10 +39,9 @@ public class NumericNormalizer : ITypeNormalizer
         NormalizedParameterState state
         )
     {
-        // TODO
         var value = parameter.Value != string.Empty
             ? Convert.ToDouble(parameter.Value)
-            : 0;
+            : Average;
 
         return new NormalizedNumericParameter
         {

@@ -4,10 +4,10 @@ using VisualizationSystem.Models.Domain.Nodes;
 using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Settings;
-using VisualizationSystem.Services.Utilities.Graph.Helpers;
+using VisualizationSystem.Services.Utilities.Graphs.Helpers;
 using VisualizationSystem.Services.Utilities.Settings;
 
-namespace VisualizationSystem.Services.Utilities.Graph.Builders;
+namespace VisualizationSystem.Services.Utilities.Graphs.Builders;
 
 public abstract class BaseGraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISettingsObserver
 {
@@ -68,8 +68,9 @@ public abstract class BaseGraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISetting
         foreach (var node in nodes)
         {
             var currentNodeName = node.Name;
+            var cluster = clusters
+                .FirstOrDefault(c => c.Nodes.Any(n => n.Name == currentNodeName));
 
-            var cluster = clusters.FirstOrDefault(c => c.Nodes.Contains(node));
             var nodeColor = cluster != null
                 ? GetColorByName(cluster.Id.ToString())
                 : GetColorByName(node.Name);

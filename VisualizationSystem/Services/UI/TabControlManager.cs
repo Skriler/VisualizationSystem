@@ -1,5 +1,5 @@
-﻿using System.Windows.Forms;
-using VisualizationSystem.Models.Domain.Graphs;
+﻿using VisualizationSystem.Models.Domain.Graphs;
+using VisualizationSystem.Models.Domain.Plots;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.UI.Components.TabPages;
 
@@ -19,6 +19,8 @@ public class TabControlManager
     private static string GetDataGridViewTabId(string tableName) => $"Dataset: {tableName}";
 
     private static string GetGViewerTabId(ExtendedGraph graph, string tableName) => $"{graph.Type}: {tableName}";
+
+    private static string GetClusteredPlotTabId(string tableName) => $"Clustered plot: {tableName}";
 
     public void AddDataGridViewTabPage(NodeTable table)
     {
@@ -42,6 +44,17 @@ public class TabControlManager
         AddTabPage(id, tabPage);
     }
 
+    public void AddClusteredPlotTabPage(ClusteredPlot plot)
+    {
+        var id = GetClusteredPlotTabId(plot.Name);
+
+        if (TryUpdateTabPage(id, plot))
+            return;
+
+        var tabPage = new ClosableClusteredPlotTabPage(id, plot);
+        AddTabPage(id, tabPage);
+    }
+
     public void UpdateDataGridViewTabPageIfOpen(NodeTable table)
     {
         var id = GetDataGridViewTabId(table.Name);
@@ -54,6 +67,13 @@ public class TabControlManager
         var id = GetGViewerTabId(graph, tableName);
 
         TryUpdateTabPage(id, graph, false);
+    }
+
+    public void UpdateScatterPlotTabPageIfOpen(ClusteredPlot plot)
+    {
+        var id = GetClusteredPlotTabId(plot.Name);
+
+        TryUpdateTabPage(id, plot, false);
     }
 
     public void RemoveTabPage(TabPage tabPage)

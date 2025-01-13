@@ -66,8 +66,10 @@ public class DistanceCalculator : IDistanceCalculator
         List<CategoricalParameter> secondCategoricalParams
         )
     {
-        var totalCategoricalDistance = 0d;
+        if (firstCategoricalParams.Count == 0 || secondCategoricalParams.Count == 0)
+            return 0;
 
+        var totalCategoricalDistance = 0d;
         for (int i = 0; i < firstCategoricalParams.Count; ++i)
         {
             var firstParam = firstCategoricalParams[i];

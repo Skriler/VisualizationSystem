@@ -42,11 +42,11 @@ public class KMeansClusterer : BaseClusterer
             {
                 var clusterIndex = GetNearestClusterIndex(nodes[i]);
 
-                if (kMeansClusters[clusterIndex].Nodes.Contains(nodeTable.NodeObjects[i]))
+                if (kMeansClusters[clusterIndex].Nodes.Contains(nodes[i]))
                     continue;
 
                 assignmentsChanged = true;
-                kMeansClusters[clusterIndex].AddNode(nodeTable.NodeObjects[i]);
+                kMeansClusters[clusterIndex].AddNode(nodes[i]);
             }
 
             if (!assignmentsChanged)
@@ -98,25 +98,7 @@ public class KMeansClusterer : BaseClusterer
     {
         foreach (var kMeansCluster in kMeansClusters)
         {
-            var clusterData = GetClusterNodes(data, kMeansCluster);
-            kMeansCluster.RecalculateCentroid(clusterData);
+            kMeansCluster.RecalculateCentroid();
         }
-    }
-
-    private List<CalculationNode> GetClusterNodes(List<CalculationNode> data, KMeansCluster cluster)
-    {
-        var clusterNodes = new List<CalculationNode>();
-
-        foreach (var node in cluster.Nodes)
-        {
-            var normalizedNode = data.FirstOrDefault(n => n.Entity.Name == node.Name);
-
-            if (normalizedNode == null)
-                continue;
-
-            clusterNodes.Add(normalizedNode);
-        }
-
-        return clusterNodes;
     }
 }

@@ -3,10 +3,10 @@ using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Services.Utilities.Comparers;
 using VisualizationSystem.Services.Utilities.Factories;
 using VisualizationSystem.Services.Utilities.FileSystem;
-using VisualizationSystem.Services.Utilities.Graph.Builders;
+using VisualizationSystem.Services.Utilities.Graphs.Builders;
 using VisualizationSystem.Services.Utilities.Settings;
 
-namespace VisualizationSystem.Services.Utilities.Graph.Managers;
+namespace VisualizationSystem.Services.Utilities.Graphs.Managers;
 
 public class GraphSaveManager : GraphCreationManager<DotGraph>
 {

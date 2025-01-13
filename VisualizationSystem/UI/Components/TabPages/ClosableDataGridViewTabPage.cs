@@ -9,7 +9,7 @@ public sealed class ClosableDataGridViewTabPage : ClosableTabPageBase
         : base(text)
     {
         nodeTableDataGridView = new NodeTableDataGridView(table);
-        
+
         InitializeContent();
     }
 

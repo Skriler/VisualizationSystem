@@ -3,11 +3,11 @@ using DotNetGraph.Extensions;
 using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Services.Utilities.Graph.Helpers;
+using VisualizationSystem.Services.Utilities.Graphs.Helpers;
 using VisualizationSystem.Services.Utilities.Settings;
 using Color = System.Drawing.Color;
 
-namespace VisualizationSystem.Services.Utilities.Graph.Builders;
+namespace VisualizationSystem.Services.Utilities.Graphs.Builders;
 
 public sealed class DotNetGraphBuilder : BaseGraphBuilder<DotGraph>
 {

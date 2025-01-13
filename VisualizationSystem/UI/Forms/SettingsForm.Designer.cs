@@ -240,11 +240,11 @@
             // chkbxWithEdges
             // 
             chkbxWithEdges.AutoSize = true;
-            chkbxWithEdges.Location = new Point(160, 97);
+            chkbxWithEdges.Location = new Point(144, 97);
             chkbxWithEdges.Name = "chkbxWithEdges";
-            chkbxWithEdges.Size = new Size(85, 19);
+            chkbxWithEdges.Size = new Size(110, 19);
             chkbxWithEdges.TabIndex = 13;
-            chkbxWithEdges.Text = "With edges";
+            chkbxWithEdges.Text = "Clustered graph";
             chkbxWithEdges.UseVisualStyleBackColor = true;
             // 
             // SettingsForm

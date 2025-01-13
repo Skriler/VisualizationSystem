@@ -53,7 +53,7 @@ public class ExcelDataImporter
                 )
                 return false;
 
-            nodeTable = nodeTableMapper.MapToNodeTable(dataTable, selectedNameColumn.SelectedIndex);
+            nodeTable = nodeTableMapper.Map(dataTable, selectedNameColumn.SelectedIndex);
             return true;
         }
         catch (Exception e)

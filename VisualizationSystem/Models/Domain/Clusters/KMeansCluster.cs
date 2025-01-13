@@ -11,11 +11,11 @@ public class KMeansCluster : Cluster
         Centroid = new CalculationNode(node);
     }
 
-    public void RecalculateCentroid(List<CalculationNode> nodes)
+    public void RecalculateCentroid()
     {
-        if (nodes.Any(n => n.Parameters.Count != Centroid.Parameters.Count))
+        if (Nodes.Any(n => n.Parameters.Count != Centroid.Parameters.Count))
             throw new InvalidOperationException("Node parameter count does not match centroid's");
 
-        nodes.ForEach(Centroid.Merge);
+        Nodes.ForEach(Centroid.Merge);
     }
 }

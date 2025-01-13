@@ -6,20 +6,20 @@ namespace VisualizationSystem.Models.Domain.Nodes;
 
 public class CalculationNode
 {
-    public NodeObject Entity { get; }
+    public string Name { get; }
 
     public List<BaseParameter> Parameters { get; private set; }
 
     public CalculationNode(NodeObject node)
     {
-        Entity = node;
+        Name = node.Name;
         Parameters = node.NormalizedParameters
             .ConvertAll(ConvertParameter);
     }
 
     public CalculationNode(CalculationNode other)
     {
-        Entity = other.Entity;
+        Name = other.Name;
         Parameters = other.Parameters
             .ConvertAll(p => p.Clone());
     }
@@ -33,9 +33,9 @@ public class CalculationNode
 
     private static BaseParameter ConvertParameter(NormalizedParameter param) => param switch
     {
-        NormalizedNumericParameter numericParam => 
+        NormalizedNumericParameter numericParam =>
             new NumericParameter(numericParam.Value),
-        NormalizedCategoricalParameter categoricalParam => 
+        NormalizedCategoricalParameter categoricalParam =>
             new CategoricalParameter(
                 categoricalParam.OneHotIndexes,
                 categoricalParam.NormalizedParameterState.CategoryCount
