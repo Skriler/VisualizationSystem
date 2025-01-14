@@ -1,5 +1,4 @@
-﻿using VisualizationSystem.Models.Domain.Clusters;
-using VisualizationSystem.Models.Domain.Plots;
+﻿using VisualizationSystem.Models.Domain.Plots;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Services.Utilities.DimensionReducers;
@@ -7,7 +6,7 @@ using VisualizationSystem.Services.Utilities.Factories;
 using VisualizationSystem.Services.Utilities.Normalizers;
 using VisualizationSystem.Services.Utilities.Settings;
 
-namespace VisualizationSystem.Services.Utilities.Plot;
+namespace VisualizationSystem.Services.Utilities.Plots;
 
 public class PlotCreationManager : ISettingsObserver
 {
@@ -35,6 +34,9 @@ public class PlotCreationManager : ISettingsObserver
 
     public async Task<ClusteredPlot> BuildClusteredPlotAsync(NodeTable nodeTable)
     {
+        if (!settings.UseClustering)
+            throw new InvalidOperationException("Clustering has not been selected. Enable clustering to generate the plot.");
+
         var clusterer = clustererFactory.CreateClusterer(settings.AlgorithmSettings.SelectedAlgorithm);
         var clusters = await clusterer.ClusterAsync(nodeTable);
 

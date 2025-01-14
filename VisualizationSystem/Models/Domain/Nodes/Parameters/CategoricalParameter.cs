@@ -2,6 +2,8 @@
 
 public class CategoricalParameter : BaseParameter
 {
+    private const float MinCategoryThreshold = 0.3f;
+
     public HashSet<int> OneHotIndexes { get; }
 
     public int CategoryCount { get; }
@@ -21,8 +23,21 @@ public class CategoricalParameter : BaseParameter
             throw new ArgumentException("Cannot merge CategoricalParameter with non-CategoricalParameter");
 
         var mergedIndexes = new HashSet<int>(OneHotIndexes);
-        mergedIndexes.UnionWith(categorical.OneHotIndexes);
 
-        return new CategoricalParameter(mergedIndexes, CategoryCount + other.MergeCount);
+        var totalCount = MergeCount + categorical.MergeCount;
+        var threshold = totalCount * MinCategoryThreshold;
+
+        foreach (var index in categorical.OneHotIndexes)
+        {
+            var count = OneHotIndexes.Contains(index) ? MergeCount : 0;
+            count += categorical.OneHotIndexes.Contains(index) ? MergeCount : 0;
+
+            if (count < threshold)
+                continue;
+
+            mergedIndexes.Add(index);
+        }
+
+        return new CategoricalParameter(mergedIndexes, CategoryCount);
     }
 }

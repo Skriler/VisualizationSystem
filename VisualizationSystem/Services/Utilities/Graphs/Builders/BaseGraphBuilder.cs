@@ -4,26 +4,23 @@ using VisualizationSystem.Models.Domain.Nodes;
 using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Settings;
-using VisualizationSystem.Services.Utilities.Graphs.Helpers;
+using VisualizationSystem.Services.Utilities.Helpers.Colors;
 using VisualizationSystem.Services.Utilities.Settings;
 
 namespace VisualizationSystem.Services.Utilities.Graphs.Builders;
 
 public abstract class BaseGraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISettingsObserver
 {
-    protected readonly GraphColorAssigner colorAssigner;
-
-    protected readonly Random random = new();
-    protected readonly Dictionary<string, Color> nodeColors = new();
+    protected readonly ColorHelper colorHelper;
 
     protected UserSettings settings;
 
     protected BaseGraphBuilder(
-        GraphColorAssigner colorAssigner,
+        ColorHelper colorHelper,
         ISettingsSubject settingsSubject
         )
     {
-        this.colorAssigner = colorAssigner;
+        this.colorHelper = colorHelper;
 
         settingsSubject.Attach(this);
     }
@@ -49,7 +46,7 @@ public abstract class BaseGraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISetting
         {
             var currentNodeName = similarityResult.Node.Name;
 
-            var nodeColor = colorAssigner.GetNodeColorFromDensityWithSigmoid(
+            var nodeColor = colorHelper.GetNodeColorFromDensityWithSigmoid(
                 similarityResult,
                 maxSimilarNodesAboveThreshold,
                 settings.MinSimilarityPercentage
@@ -65,15 +62,16 @@ public abstract class BaseGraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISetting
 
     protected virtual void AddNodes(TGraph graph, List<NodeObject> nodes, List<Cluster> clusters)
     {
+        var clustersIds = clusters.ConvertAll(cluster => cluster.Id);
+        var colors = colorHelper.GetDistinctColors(clustersIds);
+
         foreach (var node in nodes)
         {
             var currentNodeName = node.Name;
             var cluster = clusters
                 .FirstOrDefault(c => c.Nodes.Any(n => n.Name == currentNodeName));
 
-            var nodeColor = cluster != null
-                ? GetColorByName(cluster.Id.ToString())
-                : GetColorByName(node.Name);
+            var nodeColor = cluster != null ? colors[cluster.Id] : Color.WhiteSmoke;
 
             AddNode(
                 graph,
@@ -109,33 +107,6 @@ public abstract class BaseGraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISetting
     }
 
     private bool IsNeighbor(SimilarNode similarNode) => similarNode.SimilarityPercentage < settings.MinSimilarityPercentage;
-
-    protected Color GetColorByName(string name)
-    {
-        if (nodeColors.TryGetValue(name, out Color nodeColor))
-            return nodeColor;
-
-        var newColor = GetNewRandomColor();
-        nodeColors[name] = newColor;
-
-        return newColor;
-    }
-
-    protected Color GetNewRandomColor()
-    {
-        Color randColor;
-
-        do
-        {
-            randColor = Color.FromArgb(
-                random.Next(128, 256),
-                random.Next(128, 256),
-                random.Next(128, 256)
-            );
-        } while (nodeColors.Values.Contains(randColor));
-
-        return randColor;
-    }
 
     protected double GetNodeSize(int connectionCount, int maxConnections)
     {

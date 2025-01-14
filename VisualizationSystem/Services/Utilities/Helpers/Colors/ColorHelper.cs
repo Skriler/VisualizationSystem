@@ -1,9 +1,13 @@
 ﻿using VisualizationSystem.Models.DTOs;
 
-namespace VisualizationSystem.Services.Utilities.Graphs.Helpers;
+namespace VisualizationSystem.Services.Utilities.Helpers.Colors;
 
-public class GraphColorAssigner
+public class ColorHelper
 {
+    private const int MinLightColorValue = 128;
+    private const int MaxColorValue = 255;
+    private const double DefaultSaturation = 1.0;
+
     public Color CalculateEdgeColor(float similarityPercentage, float minSimilarityThreshold)
     {
         var normalizedSimilarity = (similarityPercentage - minSimilarityThreshold) / (100 - minSimilarityThreshold);
@@ -55,12 +59,77 @@ public class GraphColorAssigner
         return CalculateColorFromDensity(adjustedDensity);
     }
 
-    private double Sigmoid(double x, double k)
+    public Dictionary<int, Color> GetDistinctColors(List<int> ids)
+    {
+        return GetDistinctColors(ids, ColorBrightness.Light);
+    }
+
+    public static Dictionary<int, Color> GetDistinctColors(List<int> ids, ColorBrightness brightness = ColorBrightness.Light)
+    {
+        var colors = new Dictionary<int, Color>();
+
+        if (ids.Count <= 0)
+            return colors;
+
+        var (min, max) = brightness switch
+        {
+            ColorBrightness.Dark => (0, MinLightColorValue),
+            ColorBrightness.Light => (MinLightColorValue, MaxColorValue),
+            ColorBrightness.All => (0, MaxColorValue),
+            _ => throw new ArgumentException("Unsupported brightness value")
+        };
+
+        for (int i = 0; i < ids.Count; i++)
+        {
+            var hue = (double)i / ids.Count;
+            var value = (double)(max - min) / MaxColorValue;
+
+            var color = ColorFromHSV(hue, DefaultSaturation, value);
+            color = AdjustColorToBrightnessRange(color, min, max);
+
+            colors.Add(ids[i], color);
+        }
+
+        return colors;
+    }
+
+    private static Color ColorFromHSV(double hue, double saturation, double value)
+    {
+        int hi = Convert.ToInt32(Math.Floor(hue * 6)) % 6;
+        double f = hue * 6 - Math.Floor(hue * 6);
+        value *= 255;
+        int v = Convert.ToInt32(value);
+        int p = Convert.ToInt32(value * (1 - saturation));
+        int q = Convert.ToInt32(value * (1 - f * saturation));
+        int t = Convert.ToInt32(value * (1 - (1 - f) * saturation));
+
+        return hi switch
+        {
+            0 => Color.FromArgb(v, t, p),
+            1 => Color.FromArgb(q, v, p),
+            2 => Color.FromArgb(p, v, t),
+            3 => Color.FromArgb(p, q, v),
+            4 => Color.FromArgb(t, p, v),
+            _ => Color.FromArgb(v, p, q)
+        };
+    }
+
+    private static Color AdjustColorToBrightnessRange(Color color, int minValue, int maxValue)
+    {
+        float scale = (maxValue - minValue) / 255f;
+        return Color.FromArgb(
+            (int)(minValue + color.R * scale),
+            (int)(minValue + color.G * scale),
+            (int)(minValue + color.B * scale)
+        );
+    }
+
+    private static double Sigmoid(double x, double k)
     {
         return 1 / (1 + Math.Exp(-k * (x - 0.5)));
     }
 
-    private Color CalculateColorFromSimilarity(double similarity)
+    private static Color CalculateColorFromSimilarity(double similarity)
     {
         // Interpolation between red (when the closest is 0) and green (when the closest is 100)
         var red = (byte)(255 * (1 - similarity)); // Red decreases from 255 to 0
@@ -70,7 +139,7 @@ public class GraphColorAssigner
         return Color.FromArgb(red, green, blue);
     }
 
-    private Color CalculateColorFromDensity(double density, byte minBrightness = 128)
+    private static Color CalculateColorFromDensity(double density, byte minBrightness = 128)
     {
         var brightness = (byte)(255 * (1 - density));
 

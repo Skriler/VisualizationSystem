@@ -1,5 +1,4 @@
-﻿using VisualizationSystem.Models.Domain.Clusters;
-using VisualizationSystem.Models.Domain.PCA;
+﻿using VisualizationSystem.Models.Domain.PCA;
 
 namespace VisualizationSystem.Models.Domain.Plots;
 

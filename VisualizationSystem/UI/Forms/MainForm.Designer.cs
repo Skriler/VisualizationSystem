@@ -38,8 +38,8 @@
             buildGraphToolStripMenuItem = new ToolStripMenuItem();
             saveGraphImageToolStripMenuItem = new ToolStripMenuItem();
             settingsToolStripMenuItem = new ToolStripMenuItem();
-            tabControl = new TabControl();
             buildPlotToolStripMenuItem = new ToolStripMenuItem();
+            tabControl = new TabControl();
             menuStrip.SuspendLayout();
             SuspendLayout();
             // 
@@ -82,7 +82,7 @@
             // 
             // visualizationToolStripMenuItem
             // 
-            visualizationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { buildGraphToolStripMenuItem, saveGraphImageToolStripMenuItem, settingsToolStripMenuItem, buildPlotToolStripMenuItem });
+            visualizationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { buildGraphToolStripMenuItem, buildPlotToolStripMenuItem, saveGraphImageToolStripMenuItem, settingsToolStripMenuItem });
             visualizationToolStripMenuItem.Name = "visualizationToolStripMenuItem";
             visualizationToolStripMenuItem.Size = new Size(85, 20);
             visualizationToolStripMenuItem.Text = "Visualization";
@@ -108,6 +108,13 @@
             settingsToolStripMenuItem.Text = "Settings";
             settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
             // 
+            // buildPlotToolStripMenuItem
+            // 
+            buildPlotToolStripMenuItem.Name = "buildPlotToolStripMenuItem";
+            buildPlotToolStripMenuItem.Size = new Size(180, 22);
+            buildPlotToolStripMenuItem.Text = "Build plot";
+            buildPlotToolStripMenuItem.Click += buildPlotToolStripMenuItem_Click;
+            // 
             // tabControl
             // 
             tabControl.Dock = DockStyle.Fill;
@@ -119,13 +126,6 @@
             tabControl.TabIndex = 3;
             tabControl.DrawItem += tabControl_DrawItem;
             tabControl.MouseDown += tabControl_MouseDown;
-            // 
-            // buildPlotToolStripMenuItem
-            // 
-            buildPlotToolStripMenuItem.Name = "buildPlotToolStripMenuItem";
-            buildPlotToolStripMenuItem.Size = new Size(180, 22);
-            buildPlotToolStripMenuItem.Text = "Build plot";
-            buildPlotToolStripMenuItem.Click += buildPlotToolStripMenuItem_Click;
             // 
             // MainForm
             // 

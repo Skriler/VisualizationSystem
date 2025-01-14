@@ -10,11 +10,10 @@ public class CalculationNode
 
     public List<BaseParameter> Parameters { get; private set; }
 
-    public CalculationNode(NodeObject node)
+    public CalculationNode(string name, List<NormalizedParameter> parameters)
     {
-        Name = node.Name;
-        Parameters = node.NormalizedParameters
-            .ConvertAll(ConvertParameter);
+        Name = name;
+        Parameters = parameters.ConvertAll(ConvertParameter);
     }
 
     public CalculationNode(CalculationNode other)
@@ -29,6 +28,19 @@ public class CalculationNode
         Parameters = Parameters
             .Zip(other.Parameters, (param, otherParam) => param.Merge(otherParam))
             .ToList();
+    }
+
+    public int GetFeaturesCount()
+    {
+        if (Parameters == null || Parameters.Count == 0)
+            return 0;
+
+        return Parameters.Sum(parameter => parameter switch
+        {
+            NumericParameter => 1,
+            CategoricalParameter categorical => categorical.CategoryCount,
+            _ => 0
+        });
     }
 
     private static BaseParameter ConvertParameter(NormalizedParameter param) => param switch

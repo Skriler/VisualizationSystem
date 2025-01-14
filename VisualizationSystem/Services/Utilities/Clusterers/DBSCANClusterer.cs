@@ -21,7 +21,7 @@ public class DBSCANClusterer : BaseClusterer
 
     public override async Task<List<Cluster>> ClusterAsync(NodeTable nodeTable)
     {
-        var nodes = await dataNormalizer.GetCalculationNodesAsync(nodeTable);
+        var nodes = await dataNormalizer.GetCalculationNodesAsync(nodeTable, settings.ParameterStates);
 
         var clusters = new List<Cluster>();
         visitedNodes = new HashSet<CalculationNode>();

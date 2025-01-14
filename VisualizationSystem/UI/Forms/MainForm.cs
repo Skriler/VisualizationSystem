@@ -6,7 +6,7 @@ using VisualizationSystem.Services.Utilities.FileSystem.ExcelHandlers;
 using VisualizationSystem.Services.Utilities.Settings;
 using VisualizationSystem.Services.Utilities.Graphs.Managers;
 using VisualizationSystem.Models.Domain.Graphs;
-using VisualizationSystem.Services.Utilities.Plot;
+using VisualizationSystem.Services.Utilities.Plots;
 
 namespace VisualizationSystem.UI.Forms;
 
@@ -55,6 +55,7 @@ public partial class MainForm : Form
         await LoadTableNamesToMenuAsync();
 
         tabControl.Padding = new Point(20, 3);
+        saveGraphImageToolStripMenuItem.Visible = false;
     }
 
     private async void uploadToolStripMenuItem_Click(object sender, EventArgs e)
@@ -102,7 +103,7 @@ public partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            ShowError("Error while visualizing graph", ex);
+            ShowError("Error while building graph", ex);
         }
     }
 
@@ -122,7 +123,7 @@ public partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            ShowError("Error while visualizing graph", ex);
+            ShowError("Error while building plot", ex);
         }
     }
 
@@ -154,7 +155,7 @@ public partial class MainForm : Form
 
         if (await userSettingsManager.TryOpenSettingsForm())
         {
-            await UpdateGraphIfNeededAsync();
+            //await UpdateGraphIfNeededAsync();
         }
     }
 
@@ -306,7 +307,7 @@ public partial class MainForm : Form
         nodeTable = await nodeTableRepository.GetByNameAsync(tableName);
         await userSettingsManager.LoadAsync(nodeTable);
 
-        await UpdateGraphIfNeededAsync();
+        //await UpdateGraphIfNeededAsync();
     }
 
     private async Task OnDeleteTable(string tableName)
@@ -319,13 +320,13 @@ public partial class MainForm : Form
         await LoadTableNamesToMenuAsync();
     }
 
-    private async Task UpdateGraphIfNeededAsync()
-    {
-        var graph = await graphCreationManager.BuildGraphAsync(nodeTable);
+    //private async Task UpdateGraphIfNeededAsync()
+    //{
+    //    var graph = await graphCreationManager.BuildGraphAsync(nodeTable);
 
-        tabControlService.UpdateDataGridViewTabPageIfOpen(nodeTable);
-        tabControlService.UpdateGViewerTabPageIfOpen(graph, nodeTable.Name);
-    }
+    //    tabControlService.UpdateDataGridViewTabPageIfOpen(nodeTable);
+    //    tabControlService.UpdateGViewerTabPageIfOpen(graph, nodeTable.Name);
+    //}
 
     private void UpdateFormTitle()
     {

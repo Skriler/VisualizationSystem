@@ -4,7 +4,7 @@ using Microsoft.Msagl.Layout.MDS;
 using VisualizationSystem.Models.Domain.Graphs;
 using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Services.Utilities.Graphs.Helpers;
+using VisualizationSystem.Services.Utilities.Helpers.Colors;
 using VisualizationSystem.Services.Utilities.Settings;
 using Cluster = VisualizationSystem.Models.Domain.Clusters.Cluster;
 using MsaglColor = Microsoft.Msagl.Drawing.Color;
@@ -14,13 +14,13 @@ namespace VisualizationSystem.Services.Utilities.Graphs.Builders;
 
 public class MsaglGraphBuilder : BaseGraphBuilder<ExtendedGraph>
 {
-    private const int MinEdgesPerNode = 3;
+    private const int MinEdgesPerNodeClusteredGraph = 3;
 
     public MsaglGraphBuilder(
-        GraphColorAssigner colorAssigner,
+        ColorHelper colorHelper,
         ISettingsSubject settingsSubject
         )
-        : base(colorAssigner, settingsSubject)
+        : base(colorHelper, settingsSubject)
     { }
 
     public override ExtendedGraph Build(string name, List<NodeSimilarityResult> similarityResults)
@@ -119,13 +119,13 @@ public class MsaglGraphBuilder : BaseGraphBuilder<ExtendedGraph>
             var edgesCount = sourceNode.InEdges.Count() +
                 sourceNode.OutEdges.Count();
 
-            if (edgesCount > MinEdgesPerNode)
+            if (edgesCount > MinEdgesPerNodeClusteredGraph)
                 continue;
 
             var similarNodes = similarityResult.SimilarNodes
                 .Where(sn => sn.SimilarityPercentage > 0)
                 .OrderByDescending(sr => sr.SimilarityPercentage)
-                .Take(edgesCount + MinEdgesPerNode)
+                .Take(edgesCount + MinEdgesPerNodeClusteredGraph)
                 .ToList();
 
             foreach (var similarNode in similarNodes)
@@ -148,7 +148,6 @@ public class MsaglGraphBuilder : BaseGraphBuilder<ExtendedGraph>
             Attr =
             {
                 FillColor = new MsaglColor(nodeColor.R, nodeColor.G, nodeColor.B),
-                //LabelMargin = (int)GetNodeSize(edgesCount, maxEdges) TODO
             }
         };
 
@@ -162,12 +161,8 @@ public class MsaglGraphBuilder : BaseGraphBuilder<ExtendedGraph>
         edge.Attr.ArrowheadAtSource = ArrowStyle.None;
         edge.Attr.ArrowheadAtTarget = ArrowStyle.None;
 
-        // TODO
-        //edge.LabelText = $"{similarityPercentage:F1}%";
-        //edge.Attr.Length = 1.0 / similarityPercentage;
-
         var minSimilarityPercentage = Math.Min(settings.MinSimilarityPercentage, similarityPercentage);
-        var edgeColor = colorAssigner.CalculateEdgeColor(similarityPercentage, minSimilarityPercentage);
+        var edgeColor = colorHelper.CalculateEdgeColor(similarityPercentage, minSimilarityPercentage);
         edge.Attr.Color = new MsaglColor(edgeColor.A, edgeColor.R, edgeColor.G, edgeColor.B);
     }
 

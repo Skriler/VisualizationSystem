@@ -3,7 +3,7 @@ using DotNetGraph.Extensions;
 using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Services.Utilities.Graphs.Helpers;
+using VisualizationSystem.Services.Utilities.Helpers.Colors;
 using VisualizationSystem.Services.Utilities.Settings;
 using Color = System.Drawing.Color;
 
@@ -12,10 +12,10 @@ namespace VisualizationSystem.Services.Utilities.Graphs.Builders;
 public sealed class DotNetGraphBuilder : BaseGraphBuilder<DotGraph>
 {
     public DotNetGraphBuilder(
-        GraphColorAssigner colorAssigner,
+        ColorHelper colorHelper,
         ISettingsSubject settingsSubject
         )
-        : base(colorAssigner, settingsSubject)
+        : base(colorHelper, settingsSubject)
     { }
 
     public override DotGraph Build(string name, List<NodeSimilarityResult> similarityResults)
@@ -60,8 +60,7 @@ public sealed class DotNetGraphBuilder : BaseGraphBuilder<DotGraph>
 
             foreach (var nodeObject in cluster.Nodes)
             {
-                var nodeColor = GetColorByName(nodeObject.Name);
-                AddNode(graph, nodeObject.Name, nodeColor);
+                AddNode(graph, nodeObject.Name, Color.AliceBlue);
 
                 var node = graph.GetNodeByIdentifier(nodeObject.Name);
 
@@ -82,8 +81,6 @@ public sealed class DotNetGraphBuilder : BaseGraphBuilder<DotGraph>
         if (node != null)
             return;
 
-        //var nodeSize = GetNodeSize(edgesCount, maxEdges);
-
         node = new DotNode()
             .WithIdentifier(nodeName)
             .WithColor(new DotColor(nodeColor.A, nodeColor.G, nodeColor.B));
@@ -94,7 +91,7 @@ public sealed class DotNetGraphBuilder : BaseGraphBuilder<DotGraph>
     protected override void AddEdge(DotGraph graph, string sourceName, string targetName, float similarityPercentage)
     {
         // Interpolate edge color based on similarity
-        var edgeColor = colorAssigner.CalculateEdgeColor(similarityPercentage, settings.MinSimilarityPercentage);
+        var edgeColor = colorHelper.CalculateEdgeColor(similarityPercentage, settings.MinSimilarityPercentage);
         
         var edge = new DotEdge()
             .From(sourceName)

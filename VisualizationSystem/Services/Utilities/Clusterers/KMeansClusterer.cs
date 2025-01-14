@@ -22,7 +22,7 @@ public class KMeansClusterer : BaseClusterer
 
     public override async Task<List<Cluster>> ClusterAsync(NodeTable nodeTable)
     {
-        var nodes = await dataNormalizer.GetCalculationNodesAsync(nodeTable);
+        var nodes = await dataNormalizer.GetCalculationNodesAsync(nodeTable, settings.ParameterStates);
         var parametersCount = nodes.FirstOrDefault()?.Parameters.Count ?? 0;
 
         if (nodes.Count < settings.AlgorithmSettings.NumberOfClusters)

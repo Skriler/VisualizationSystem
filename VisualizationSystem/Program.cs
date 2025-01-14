@@ -15,11 +15,11 @@ using VisualizationSystem.Services.Utilities.Factories;
 using VisualizationSystem.Services.Utilities.FileSystem;
 using VisualizationSystem.Services.Utilities.FileSystem.ExcelHandlers;
 using VisualizationSystem.Services.Utilities.Graphs.Builders;
-using VisualizationSystem.Services.Utilities.Graphs.Helpers;
 using VisualizationSystem.Services.Utilities.Graphs.Managers;
+using VisualizationSystem.Services.Utilities.Helpers.Colors;
 using VisualizationSystem.Services.Utilities.Mappers;
 using VisualizationSystem.Services.Utilities.Normalizers;
-using VisualizationSystem.Services.Utilities.Plot;
+using VisualizationSystem.Services.Utilities.Plots;
 using VisualizationSystem.Services.Utilities.Settings;
 using VisualizationSystem.UI.Forms;
 
@@ -122,7 +122,7 @@ internal static class Program
 
     private static IServiceCollection AddGraphServices(this IServiceCollection services)
     {
-        return services.AddSingleton<GraphColorAssigner>()
+        return services.AddSingleton<ColorHelper>()
             .AddSingleton<GraphCreationManager<ExtendedGraph>>()
             .AddSingleton<GraphSaveManager>()
             .AddSingleton<IGraphBuilder<ExtendedGraph>, MsaglGraphBuilder>()
