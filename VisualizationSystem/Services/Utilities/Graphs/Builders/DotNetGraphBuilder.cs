@@ -92,7 +92,7 @@ public sealed class DotNetGraphBuilder : BaseGraphBuilder<DotGraph>
     {
         // Interpolate edge color based on similarity
         var edgeColor = colorHelper.CalculateEdgeColor(similarityPercentage, settings.MinSimilarityPercentage);
-        
+
         var edge = new DotEdge()
             .From(sourceName)
             .To(targetName)

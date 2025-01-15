@@ -12,7 +12,7 @@ public abstract class BaseClusterer : ISettingsObserver
     protected readonly DataNormalizer dataNormalizer;
     protected readonly IDistanceCalculator distanceCalculator;
 
-    protected UserSettings settings;
+    protected UserSettings settings = default!;
 
     protected BaseClusterer(
         DataNormalizer dataNormalizer,

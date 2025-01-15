@@ -13,7 +13,7 @@ public class GraphCreationManager<TGraph> : ISettingsObserver
     protected readonly SimilarityComparer similarityComparer;
     protected readonly ClustererFactory clustererFactory;
 
-    private UserSettings settings;
+    private UserSettings settings = default!;
 
     public GraphCreationManager(
         IGraphBuilder<TGraph> graphBuilder,
@@ -50,7 +50,7 @@ public class GraphCreationManager<TGraph> : ISettingsObserver
 
     protected async Task<TGraph> BuildClusteredGraphAsync(NodeTable nodeTable)
     {
-        var clusterer = clustererFactory.CreateClusterer(settings.AlgorithmSettings.SelectedAlgorithm);
+        var clusterer = clustererFactory.Create(settings.AlgorithmSettings.SelectedAlgorithm);
         var clusters = await clusterer.ClusterAsync(nodeTable);
 
         if (settings.UseClusteredGraph)

@@ -3,8 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VisualizationSystem.Models.Domain.Graphs;
+using VisualizationSystem.Models.Domain.Plots;
+using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.UI;
+using VisualizationSystem.Services.UI.TabPages;
 using VisualizationSystem.Services.Utilities.Clusterers;
 using VisualizationSystem.Services.Utilities.Comparers;
 using VisualizationSystem.Services.Utilities.DimensionReducers;
@@ -79,58 +82,70 @@ internal static class Program
 
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
-        return services.AddScoped<NodeTableRepository>()
+        return services
+            .AddScoped<NodeTableRepository>()
             .AddScoped<UserSettingsRepository>()
             .AddScoped<NormalizedNodeRepository>();
     }
 
     private static IServiceCollection AddUIServices(this IServiceCollection services)
     {
-        return services.AddSingleton<DialogManager>()
-            .AddSingleton<FileWriter>()
+        return services
+            .AddSingleton<DialogManager>()
             .AddSingleton<UserSettingsManager>()
+            .AddSingleton<TabControlService>()
             .AddSingleton<ISettingsSubject>(sp => sp.GetRequiredService<UserSettingsManager>())
-            .AddSingleton<ISettingsManager>(sp => sp.GetRequiredService<UserSettingsManager>());
+            .AddSingleton<ISettingsManager>(sp => sp.GetRequiredService<UserSettingsManager>())
+            .AddTransient<ITabStrategy, DataGridViewTabStrategy>()
+            .AddTransient<ITabStrategy, GViewerTabStrategy>()
+            .AddTransient<ITabStrategy, ClusteredPlotTabStrategy>()
+            .AddScoped<FileWriter>();
     }
 
     private static IServiceCollection AddDataProcessingServices(this IServiceCollection services)
     {
-        return services.AddSingleton<ExcelReader>()
-            .AddSingleton<NodeTableMapper>()
-            .AddSingleton<DataPointMapper>()
-            .AddSingleton<ExcelDataImporter>()
-            .AddSingleton<DataNormalizer>()
-            .AddSingleton<SimilarityComparer>()
+        return services
+            .AddTransient<ExcelReader>()
+            .AddTransient<NodeTableMapper>()
+            .AddTransient<DataPointMapper>()
+            .AddTransient<ExcelDataImporter>()
+            .AddTransient<DataNormalizer>()
+            .AddTransient<SimilarityComparer>()
             .AddSingleton<ICompare, DefaultComparer>()
             .AddSingleton<IDimensionReducer, PCAReducer>();
     }
 
     private static IServiceCollection AddDistanceServices(this IServiceCollection services)
     {
-        return services.AddSingleton<INumericDistance, EuclideanDistance>()
+        return services
+            .AddSingleton<INumericDistance, EuclideanDistance>()
             .AddSingleton<ICategoricalDistance, HammingDistance>()
             .AddSingleton<IDistanceCalculator, DistanceCalculator>();
     }
 
     private static IServiceCollection AddClusteringServices(this IServiceCollection services)
     {
-        return services.AddSingleton<KMeansClusterer>()
-            .AddSingleton<AgglomerativeClusterer>()
-            .AddSingleton<DBSCANClusterer>()
-            .AddSingleton<ClustererFactory>();
+        return services
+            .AddTransient<KMeansClusterer>()
+            .AddTransient<AgglomerativeClusterer>()
+            .AddTransient<DBSCANClusterer>()
+            .AddTransient<ClustererFactory>();
     }
 
     private static IServiceCollection AddGraphServices(this IServiceCollection services)
     {
-        return services.AddSingleton<ColorHelper>()
-            .AddSingleton<GraphCreationManager<ExtendedGraph>>()
-            .AddSingleton<GraphSaveManager>()
-            .AddSingleton<IGraphBuilder<ExtendedGraph>, MsaglGraphBuilder>()
-            .AddSingleton<IGraphBuilder<DotGraph>, DotNetGraphBuilder>();
+        return services
+            .AddSingleton<ColorHelper>()
+            .AddScoped<GraphCreationManager<ExtendedGraph>>()
+            .AddScoped<GraphSaveManager>()
+            .AddTransient<IGraphBuilder<ExtendedGraph>, MsaglGraphBuilder>()
+            .AddTransient<IGraphBuilder<DotGraph>, DotNetGraphBuilder>();
     }
 
     private static IServiceCollection AddPlotServices(this IServiceCollection services)
     {
-        return services.AddSingleton<PlotCreationManager>();
+        return services
+            .AddScoped<PlotCreationManager>()
+            .AddTransient<PlotConfigurator>();
     }
 }

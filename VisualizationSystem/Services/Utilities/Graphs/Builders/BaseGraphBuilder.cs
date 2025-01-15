@@ -13,7 +13,7 @@ public abstract class BaseGraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISetting
 {
     protected readonly ColorHelper colorHelper;
 
-    protected UserSettings settings;
+    protected UserSettings settings = default!;
 
     protected BaseGraphBuilder(
         ColorHelper colorHelper,

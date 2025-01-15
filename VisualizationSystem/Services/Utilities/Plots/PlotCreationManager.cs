@@ -14,7 +14,7 @@ public class PlotCreationManager : ISettingsObserver
     protected readonly DataNormalizer dataNormalizer;
     protected readonly IDimensionReducer dimensionReducer;
 
-    private UserSettings settings;
+    private UserSettings settings = default!;
 
     public PlotCreationManager(
         ClustererFactory clustererFactory,
@@ -37,7 +37,7 @@ public class PlotCreationManager : ISettingsObserver
         if (!settings.UseClustering)
             throw new InvalidOperationException("Clustering has not been selected. Enable clustering to generate the plot.");
 
-        var clusterer = clustererFactory.CreateClusterer(settings.AlgorithmSettings.SelectedAlgorithm);
+        var clusterer = clustererFactory.Create(settings.AlgorithmSettings.SelectedAlgorithm);
         var clusters = await clusterer.ClusterAsync(nodeTable);
 
         var plotData = dimensionReducer.ReduceDimension(clusters);

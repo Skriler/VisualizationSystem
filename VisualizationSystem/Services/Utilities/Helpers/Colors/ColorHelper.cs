@@ -59,12 +59,7 @@ public class ColorHelper
         return CalculateColorFromDensity(adjustedDensity);
     }
 
-    public Dictionary<int, Color> GetDistinctColors(List<int> ids)
-    {
-        return GetDistinctColors(ids, ColorBrightness.Light);
-    }
-
-    public static Dictionary<int, Color> GetDistinctColors(List<int> ids, ColorBrightness brightness = ColorBrightness.Light)
+    public Dictionary<int, Color> GetDistinctColors(List<int> ids, ColorBrightness brightness = ColorBrightness.Light)
     {
         var colors = new Dictionary<int, Color>();
 

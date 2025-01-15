@@ -16,17 +16,19 @@ public class PlotConfigurator
     private const int DefaultLabelFontSize = 8;
     private const float DefaultLabelOffsetY = -10;
 
-    private readonly FormsPlot formsPlot;
-    private readonly Plot plot;
+    private readonly ColorHelper colorHelper;
 
-    public PlotConfigurator(FormsPlot formsPlot)
+    private Plot plot = default!;
+
+    public PlotConfigurator(ColorHelper colorHelper)
     {
-        this.formsPlot = formsPlot;
-        plot = formsPlot.Plot;
+        this.colorHelper = colorHelper;
     }
 
-    public void UpdatePlot(ClusteredPlot clusteredPlot)
+    public void UpdatePlot(FormsPlot formsPlot, ClusteredPlot clusteredPlot)
     {
+        plot = formsPlot.Plot;
+
         ConfigurePlot(clusteredPlot.Name);
 
         var clusterIds = clusteredPlot.Points
@@ -35,7 +37,7 @@ public class PlotConfigurator
             .Order()
             .ToList();
 
-        var colors = ColorHelper.GetDistinctColors(clusterIds, ColorBrightness.All);
+        var colors = colorHelper.GetDistinctColors(clusterIds, ColorBrightness.All);
 
         AddPointsToPlot(clusteredPlot.Points, colors);
 

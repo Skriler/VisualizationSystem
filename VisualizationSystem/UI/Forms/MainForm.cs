@@ -1,5 +1,4 @@
-﻿using VisualizationSystem.Services.UI;
-using VisualizationSystem.UI.Components.TabPages;
+﻿using VisualizationSystem.UI.Components.TabPages;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.Utilities.FileSystem.ExcelHandlers;
@@ -7,6 +6,7 @@ using VisualizationSystem.Services.Utilities.Settings;
 using VisualizationSystem.Services.Utilities.Graphs.Managers;
 using VisualizationSystem.Models.Domain.Graphs;
 using VisualizationSystem.Services.Utilities.Plots;
+using VisualizationSystem.Services.UI.TabPages;
 
 namespace VisualizationSystem.UI.Forms;
 
@@ -16,18 +16,18 @@ public partial class MainForm : Form
 
     private readonly NodeTableRepository nodeTableRepository;
 
+    private readonly TabControlService tabControlService;
     private readonly ExcelDataImporter fileService;
     private readonly ISettingsManager userSettingsManager;
     private readonly GraphCreationManager<ExtendedGraph> graphCreationManager;
     private readonly GraphSaveManager graphSaveManager;
     private readonly PlotCreationManager plotCreationManager;
 
-    private readonly TabControlManager tabControlService;
-
-    private NodeTable nodeTable;
+    private NodeTable nodeTable = default!;
 
     public MainForm(
         NodeTableRepository nodeTableRepository,
+        TabControlService tabControlService,
         ExcelDataImporter fileService,
         ISettingsManager userSettingsManager,
         GraphCreationManager<ExtendedGraph> graphCreationManager,
@@ -41,13 +41,14 @@ public partial class MainForm : Form
 
         this.nodeTableRepository = nodeTableRepository;
 
+        this.tabControlService = tabControlService;
         this.fileService = fileService;
         this.userSettingsManager = userSettingsManager;
         this.graphCreationManager = graphCreationManager;
         this.graphSaveManager = graphSaveManager;
         this.plotCreationManager = plotCreationManager;
 
-        tabControlService = new TabControlManager(tabControl);
+        tabControlService.Initialize(tabControl);
     }
 
     private async void MainForm_Load(object sender, EventArgs e)
@@ -79,7 +80,7 @@ public partial class MainForm : Form
 
         try
         {
-            tabControlService.AddDataGridViewTabPage(nodeTable);
+            tabControlService.AddTab(nodeTable);
         }
         catch (Exception ex)
         {
@@ -99,7 +100,7 @@ public partial class MainForm : Form
         {
             var graph = await graphCreationManager.BuildGraphAsync(nodeTable);
 
-            tabControlService.AddGViewerTabPage(graph, nodeTable.Name);
+            tabControlService.AddTab(graph);
         }
         catch (Exception ex)
         {
@@ -119,7 +120,7 @@ public partial class MainForm : Form
         {
             var plot = await plotCreationManager.BuildClusteredPlotAsync(nodeTable);
 
-            tabControlService.AddClusteredPlotTabPage(plot);
+            tabControlService.AddTab(plot);
         }
         catch (Exception ex)
         {

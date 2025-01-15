@@ -1,5 +1,4 @@
 ﻿using VisualizationSystem.Models.Domain.Nodes.Parameters;
-using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Normalized;
 
 namespace VisualizationSystem.Models.Domain.Nodes;
@@ -21,13 +20,6 @@ public class CalculationNode
         Name = other.Name;
         Parameters = other.Parameters
             .ConvertAll(p => p.Clone());
-    }
-
-    public void Merge(CalculationNode other)
-    {
-        Parameters = Parameters
-            .Zip(other.Parameters, (param, otherParam) => param.Merge(otherParam))
-            .ToList();
     }
 
     public int GetFeaturesCount()

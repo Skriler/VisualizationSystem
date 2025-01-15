@@ -10,7 +10,7 @@ public class SimilarityComparer : ISettingsObserver
 {
     private readonly ICompare comparer;
 
-    private UserSettings settings;
+    private UserSettings settings = default!;
     private Dictionary<NodeObject, NodeSimilarityResult> similarityResultsDict = new();
 
     public SimilarityComparer(

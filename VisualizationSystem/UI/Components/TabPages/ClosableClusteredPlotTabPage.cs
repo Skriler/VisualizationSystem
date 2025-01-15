@@ -11,11 +11,15 @@ public class ClosableClusteredPlotTabPage : ClosableTabPageBase
 
     public ClusteredPlot DisplayedPlot { get; set; }
 
-    public ClosableClusteredPlotTabPage(string text, ClusteredPlot clusteredPlot)
+    public ClosableClusteredPlotTabPage(
+        string text,
+        ClusteredPlot clusteredPlot,
+        PlotConfigurator plotConfigurator
+        )
         : base(text)
     {
         formsPlot = new FormsPlot();
-        plotConfigurator = new PlotConfigurator(formsPlot);
+        this.plotConfigurator = plotConfigurator;
 
         DisplayedPlot = clusteredPlot;
         InitializeContent();
@@ -26,7 +30,7 @@ public class ClosableClusteredPlotTabPage : ClosableTabPageBase
         formsPlot.Dock = DockStyle.Fill;
         Controls.Add(formsPlot);
 
-        plotConfigurator.UpdatePlot(DisplayedPlot);
+        plotConfigurator.UpdatePlot(formsPlot, DisplayedPlot);
     }
 
     public override void UpdateContent(object newData)
@@ -35,6 +39,6 @@ public class ClosableClusteredPlotTabPage : ClosableTabPageBase
             throw new ArgumentException("Invalid input data");
 
         DisplayedPlot = clusteredPlot;
-        plotConfigurator.UpdatePlot(clusteredPlot);
+        plotConfigurator.UpdatePlot(formsPlot, clusteredPlot);
     }
 }
