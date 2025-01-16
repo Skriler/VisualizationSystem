@@ -1,23 +1,27 @@
-﻿using VisualizationSystem.Models.Domain.Nodes;
+﻿using VisualizationSystem.Models.Configs.DistanceMetrics;
+using VisualizationSystem.Models.Domain.Nodes;
 using VisualizationSystem.Models.Domain.Nodes.Parameters;
-using VisualizationSystem.Services.Utilities.DistanceCalculators.Categorical;
-using VisualizationSystem.Services.Utilities.DistanceCalculators.Numeric;
+using VisualizationSystem.Services.Utilities.DistanceCalculators.CategoricalMetrics;
+using VisualizationSystem.Services.Utilities.DistanceCalculators.NumericMetrics;
 
 namespace VisualizationSystem.Services.Utilities.DistanceCalculators;
 
 public class DistanceCalculator : IDistanceCalculator
 {
-    private readonly INumericDistance numericDistance;
-    private readonly ICategoricalDistance categoricalDistance;
+    private INumericDistanceMetric numericDistanceMetric = default!;
+    private ICategoricalDistanceMetric categoricalDistanceMetric = default!;
 
-    public DistanceCalculator(INumericDistance numericDistance, ICategoricalDistance categoricalDistance)
+    public void Initialize(DistanceMetricsConfig config)
     {
-        this.numericDistance = numericDistance;
-        this.categoricalDistance = categoricalDistance;
+        numericDistanceMetric = config.NumericDistanceMetric;
+        categoricalDistanceMetric = config.CategoricalDistanceMetric;
     }
 
     public double Calculate(CalculationNode firstNode, CalculationNode secondNode)
     {
+        if (numericDistanceMetric == null || categoricalDistanceMetric == null)
+            throw new InvalidOperationException("DistanceCalculator has not been initialized.");
+
         if (firstNode.Parameters.Count != secondNode.Parameters.Count)
             throw new ArgumentException("The nodes must have the same number of parameters.");
 
@@ -58,7 +62,7 @@ public class DistanceCalculator : IDistanceCalculator
         if (firstNumericValues.Count == 0 || secondNumericValues.Count == 0)
             return 0;
 
-        return numericDistance.CalculateDistance(firstNumericValues, secondNumericValues);
+        return numericDistanceMetric.CalculateDistance(firstNumericValues, secondNumericValues);
     }
 
     private double CalculateCategoricalDistance(
@@ -78,7 +82,7 @@ public class DistanceCalculator : IDistanceCalculator
             if (firstParam == null || secondParam == null)
                 continue;
 
-            totalCategoricalDistance += categoricalDistance.CalculateDistance(
+            totalCategoricalDistance += categoricalDistanceMetric.CalculateDistance(
                 firstParam.OneHotIndexes,
                 secondParam.OneHotIndexes,
                 firstParam.CategoryCount

@@ -6,7 +6,7 @@ public class Centroid : CalculationNode
 {
     private const float MinThreshold = 0.5f;
 
-    private readonly Dictionary<int, double[]> categoricalValues;
+    private Dictionary<int, double[]> categoricalValues = new();
 
     public int MergeCount { get; private set; }
 
@@ -17,101 +17,105 @@ public class Centroid : CalculationNode
     public void Merge(List<CalculationNode> nodes)
     {
         MergeCount = 1;
-
-        var categoricalValues = new Dictionary<int, double[]>();
-
-        var categoricals = Parameters
-            .OfType<CategoricalParameter>()
-            .ToList();
-
-        foreach (var categorical in categoricals)
-        {
-            var paramValues = new double[categorical.CategoryCount];
-
-            foreach (int index in categorical.OneHotIndexes)
-            {
-                paramValues[index] = 1;
-            }
-
-            categoricalValues[categorical.GetHashCode()] = paramValues;
-        }
+        categoricalValues = InitializeCategoricalValues();
 
         foreach (var node in nodes)
         {
-            Merge(node, categoricalValues);
+            MergeNode(node);
         }
 
-        foreach (var categorical in categoricals)
-        {
-            var mergedValues = categoricalValues[categorical.GetHashCode()];
-
-            categorical.OneHotIndexes.Clear();
-
-            for (int i = 0; i < mergedValues.Length; ++i)
-            {
-                if (mergedValues[i] < MinThreshold)
-                    continue;
-
-                categorical.OneHotIndexes.Add(i);
-            }
-        }
+        UpdateCategoricalParameters();
     }
 
-    public void Merge(CalculationNode node, Dictionary<int, double[]> categoricalValues)
+    private Dictionary<int, double[]> InitializeCategoricalValues()
     {
-        for (int i = 0; i < Parameters.Count; ++i)
-        {
-            if (Parameters[i] is NumericParameter numericParam &&
-                node.Parameters[i] is NumericParameter numericMergeParam)
-            {
-                MergeNumeric(numericParam, numericMergeParam);
-            }
-            else if (Parameters[i] is CategoricalParameter categoricalParam &&
-                node.Parameters[i] is CategoricalParameter categoricalMergeParam)
-            {
-                MergeCategorical(categoricalParam, categoricalMergeParam, categoricalValues);
-            }
-        }
-
-        ++MergeCount;
+        return Parameters.OfType<CategoricalParameter>()
+            .ToDictionary(p => p.GetHashCode(), CreateOneHotVector);
     }
 
-    private void MergeNumeric(NumericParameter param, NumericParameter mergeParam)
+    private double[] CreateOneHotVector(CategoricalParameter parameter)
+    {
+        var values = new double[parameter.CategoryCount];
+
+        foreach (int index in parameter.OneHotIndexes)
+        {
+            values[index] = 1;
+        }
+
+        return values;
+    }
+
+    private void MergeNode(CalculationNode node)
+    {
+        for (int i = 0; i < Parameters.Count; i++)
+        {
+            MergeParameter(Parameters[i], node.Parameters[i]);
+        }
+
+        MergeCount++;
+    }
+
+    private void MergeParameter(BaseParameter baseParam, BaseParameter mergeParam)
+    {
+        switch (baseParam)
+        {
+            case NumericParameter numericBase when mergeParam is NumericParameter numericMerge:
+                MergeNumericParameter(numericBase, numericMerge);
+                break;
+            case CategoricalParameter categoricalBase when mergeParam is CategoricalParameter categoricalMerge:
+                MergeCategoricalParameter(categoricalBase, categoricalMerge);
+                break;
+        }
+    }
+
+
+    private void MergeNumericParameter(NumericParameter param, NumericParameter mergeParam)
     {
         param.Value = CalculateAverage(param.Value, mergeParam.Value);
     }
 
-    private void MergeCategorical(CategoricalParameter param, CategoricalParameter mergeParam, Dictionary<int, double[]> categoricalValues)
+    private void MergeCategoricalParameter(CategoricalParameter param, CategoricalParameter mergeParam)
     {
-        var paramValues = categoricalValues[param.GetHashCode()];
+        var currentValues = categoricalValues[param.GetHashCode()];
+        var mergeValues = CreateOneHotVector(mergeParam);
 
-        var mergeValues = new double[paramValues.Length];
-        foreach (int index in mergeParam.OneHotIndexes)
-        {
-            mergeValues[index] = 1;
-        }
-
-        var averagedValues = CalculateCategoricalAverage(paramValues, mergeValues);
-
-        categoricalValues[param.GetHashCode()] = averagedValues;
+        categoricalValues[param.GetHashCode()] =
+            CalculateCategoricalAverage(currentValues, mergeValues);
     }
 
     private double CalculateAverage(double value, double mergeValue)
     {
-        var weightedSum = value * MergeCount + mergeValue;
+        var weightedSum = (value * MergeCount) + mergeValue;
         var totalCount = MergeCount + 1;
         return weightedSum / totalCount;
     }
 
     private double[] CalculateCategoricalAverage(double[] values, double[] mergeValues)
     {
-        var newValues = new double[values.Length];
+        return values
+            .Zip(mergeValues, CalculateAverage)
+            .ToArray();
+    }
 
-        for (int i = 0; i < values.Length; ++i)
+    private void UpdateCategoricalParameters()
+    {
+        foreach (var parameter in Parameters.OfType<CategoricalParameter>())
         {
-            newValues[i] = CalculateAverage(values[i], mergeValues[i]);
+            UpdateParameterOneHotIndexes(parameter);
         }
+    }
 
-        return newValues;
+    private void UpdateParameterOneHotIndexes(CategoricalParameter parameter)
+    {
+        var mergedValues = categoricalValues[parameter.GetHashCode()];
+        parameter.OneHotIndexes.Clear();
+
+        for (int i = 0; i < mergedValues.Length; i++)
+        {
+            if (mergedValues[i] < MinThreshold)
+                continue;
+
+            parameter.OneHotIndexes.Add(i);
+        }
     }
 }

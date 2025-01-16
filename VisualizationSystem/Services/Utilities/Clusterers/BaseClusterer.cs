@@ -4,6 +4,7 @@ using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Services.Utilities.Normalizers;
 using VisualizationSystem.Services.Utilities.Settings;
 using VisualizationSystem.Services.Utilities.DistanceCalculators;
+using VisualizationSystem.Services.Utilities.Factories;
 
 namespace VisualizationSystem.Services.Utilities.Clusterers;
 
@@ -12,16 +13,18 @@ public abstract class BaseClusterer : ISettingsObserver
     protected readonly DataNormalizer dataNormalizer;
     protected readonly IDistanceCalculator distanceCalculator;
 
+    protected abstract ClusterAlgorithm Algorithm { get; }
+
     protected UserSettings settings = default!;
 
     protected BaseClusterer(
         DataNormalizer dataNormalizer,
-        IDistanceCalculator distanceCalculator,
+        DistanceCalculatorFactory distanceCalculatorFactory,
         ISettingsSubject settingsSubject
         )
     {
         this.dataNormalizer = dataNormalizer;
-        this.distanceCalculator = distanceCalculator;
+        distanceCalculator = distanceCalculatorFactory.Create(Algorithm);
 
         settingsSubject.Attach(this);
     }

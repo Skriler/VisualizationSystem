@@ -1,7 +1,7 @@
 ﻿using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Models.Domain.Nodes;
 using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Services.Utilities.DistanceCalculators;
+using VisualizationSystem.Services.Utilities.Factories;
 using VisualizationSystem.Services.Utilities.Normalizers;
 using VisualizationSystem.Services.Utilities.Settings;
 
@@ -11,12 +11,14 @@ public class DBSCANClusterer : BaseClusterer
 {
     private HashSet<CalculationNode> visitedNodes;
 
+    protected override ClusterAlgorithm Algorithm => ClusterAlgorithm.DBSCAN;
+
     public DBSCANClusterer(
         DataNormalizer dataNormalizer,
-        IDistanceCalculator distanceCalculator,
+        DistanceCalculatorFactory distanceCalculatorFactory,
         ISettingsSubject settingsSubject
         )
-        : base(dataNormalizer, distanceCalculator, settingsSubject)
+        : base(dataNormalizer, distanceCalculatorFactory, settingsSubject)
     { }
 
     public override async Task<List<Cluster>> ClusterAsync(NodeTable nodeTable)
@@ -32,7 +34,6 @@ public class DBSCANClusterer : BaseClusterer
                 continue;
 
             visitedNodes.Add(node);
-
             var neighbors = GetNeighbors(node, nodes);
 
             if (neighbors.Count < settings.AlgorithmSettings.MinPoints)
@@ -43,6 +44,9 @@ public class DBSCANClusterer : BaseClusterer
 
             ExpandCluster(cluster, node, neighbors, nodes);
         }
+
+        var noiseCluster = GetNoiseCluster(nodes, clusters);
+        clusters.Add(noiseCluster);
 
         return clusters;
     }
@@ -97,5 +101,20 @@ public class DBSCANClusterer : BaseClusterer
                 cluster.AddNode(neighbor);
             }
         }
+    }
+
+    private Cluster GetNoiseCluster(List<CalculationNode> nodes, List<Cluster> clusters)
+    {
+        var noiseNodes = nodes
+            .Where(node => !clusters.Any(cluster => cluster.Nodes.Contains(node)))
+            .ToList();
+
+        var noiseCluster = new Cluster()
+        {
+            Type = ClusterType.Noise,
+        };
+        noiseNodes.ForEach(noiseCluster.AddNode);
+
+        return noiseCluster;
     }
 }

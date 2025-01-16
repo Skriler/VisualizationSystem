@@ -1,6 +1,6 @@
-﻿namespace VisualizationSystem.Models.Configs;
+﻿namespace VisualizationSystem.Models.Configs.AlgorithmParameters;
 
-public class AlgorithmParameterConfigs
+public static class AlgorithmParameterConfigs
 {
     public static readonly AlgorithmParameterConfig AgglomerativeConfig = new()
     {

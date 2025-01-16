@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using VisualizationSystem.Services.Utilities.Clusterers;
+using VisualizationSystem.Services.Utilities.DistanceCalculators;
 
 namespace VisualizationSystem.Services.Utilities.Factories;
 
@@ -16,9 +17,9 @@ public class ClustererFactory
     {
         return algorithm switch
         {
-            ClusterAlgorithm.HierarchicalAgglomerative => serviceProvider.GetRequiredService<AgglomerativeClusterer>(),
             ClusterAlgorithm.KMeans => serviceProvider.GetRequiredService<KMeansClusterer>(),
             ClusterAlgorithm.DBSCAN => serviceProvider.GetRequiredService<DBSCANClusterer>(),
+            ClusterAlgorithm.HierarchicalAgglomerative => serviceProvider.GetRequiredService<AgglomerativeClusterer>(),
             _ => throw new ArgumentOutOfRangeException(nameof(algorithm))
         };
     }

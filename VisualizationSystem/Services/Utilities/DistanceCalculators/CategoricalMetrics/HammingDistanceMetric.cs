@@ -1,6 +1,6 @@
-﻿namespace VisualizationSystem.Services.Utilities.DistanceCalculators.Categorical;
+﻿namespace VisualizationSystem.Services.Utilities.DistanceCalculators.CategoricalMetrics;
 
-public class HammingDistance : ICategoricalDistance
+public class HammingDistanceMetric : ICategoricalDistanceMetric
 {
     public double CalculateDistance(IEnumerable<int> firstIndexes, IEnumerable<int> secondIndexes, int categoriesCount)
     {

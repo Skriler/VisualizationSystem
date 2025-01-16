@@ -1,6 +1,7 @@
 ﻿using ScottPlot;
 using ScottPlot.Plottables;
 using ScottPlot.WinForms;
+using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Models.Domain.PCA;
 using VisualizationSystem.Models.Domain.Plots;
 using VisualizationSystem.Services.Utilities.Helpers.Colors;

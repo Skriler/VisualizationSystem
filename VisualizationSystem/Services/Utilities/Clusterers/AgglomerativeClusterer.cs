@@ -1,7 +1,7 @@
 ﻿using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Models.DTOs;
 using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Services.Utilities.DistanceCalculators;
+using VisualizationSystem.Services.Utilities.Factories;
 using VisualizationSystem.Services.Utilities.Normalizers;
 using VisualizationSystem.Services.Utilities.Settings;
 
@@ -11,12 +11,14 @@ public class AgglomerativeClusterer : BaseClusterer
 {
     private List<AgglomerativeCluster> agglomerativeClusters;
 
+    protected override ClusterAlgorithm Algorithm => ClusterAlgorithm.HierarchicalAgglomerative;
+
     public AgglomerativeClusterer(
         DataNormalizer dataNormalizer,
-        IDistanceCalculator distanceCalculator,
+        DistanceCalculatorFactory distanceCalculatorFactory,
         ISettingsSubject settingsSubject
         )
-        : base(dataNormalizer, distanceCalculator, settingsSubject)
+        : base(dataNormalizer, distanceCalculatorFactory, settingsSubject)
     { }
 
     public override async Task<List<Cluster>> ClusterAsync(NodeTable nodeTable)
@@ -30,7 +32,7 @@ public class AgglomerativeClusterer : BaseClusterer
         {
             var similarCluster = FindMostSimilarClusters();
 
-            if (similarCluster.Similarity < settings.AlgorithmSettings.Threshold)
+            if (similarCluster.Similarity > settings.AlgorithmSettings.Threshold)
                 break;
 
             agglomerativeClusters[similarCluster.FirstClusterId]
@@ -57,12 +59,12 @@ public class AgglomerativeClusterer : BaseClusterer
                 if (agglomerativeClusters[j].IsMerged)
                     continue;
 
-                var similarity = GetMinimumDistance(
+                var similarity = GetAverageDistance(
                     agglomerativeClusters[i],
                     agglomerativeClusters[j]
                     );
 
-                if (similarity <= clusterSimilarity.Similarity)
+                if (similarity > clusterSimilarity.Similarity)
                     continue;
 
                 clusterSimilarity.Update(i, j, similarity);

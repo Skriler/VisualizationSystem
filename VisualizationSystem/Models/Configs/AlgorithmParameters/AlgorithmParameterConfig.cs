@@ -1,4 +1,4 @@
-﻿namespace VisualizationSystem.Models.Configs;
+﻿namespace VisualizationSystem.Models.Configs.AlgorithmParameters;
 
 public class AlgorithmParameterConfig
 {

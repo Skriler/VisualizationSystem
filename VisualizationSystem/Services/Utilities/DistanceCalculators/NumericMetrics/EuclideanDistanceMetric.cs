@@ -1,6 +1,6 @@
-﻿namespace VisualizationSystem.Services.Utilities.DistanceCalculators.Numeric;
+﻿namespace VisualizationSystem.Services.Utilities.DistanceCalculators.NumericMetrics;
 
-public class EuclideanDistance : INumericDistance
+public class EuclideanDistanceMetric : INumericDistanceMetric
 {
     public double CalculateDistance(List<double> firstValues, List<double> secondValues)
     {

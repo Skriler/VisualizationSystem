@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VisualizationSystem.Models.Domain.Graphs;
-using VisualizationSystem.Models.Domain.Plots;
-using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.UI;
 using VisualizationSystem.Services.UI.TabPages;
@@ -12,8 +10,8 @@ using VisualizationSystem.Services.Utilities.Clusterers;
 using VisualizationSystem.Services.Utilities.Comparers;
 using VisualizationSystem.Services.Utilities.DimensionReducers;
 using VisualizationSystem.Services.Utilities.DistanceCalculators;
-using VisualizationSystem.Services.Utilities.DistanceCalculators.Categorical;
-using VisualizationSystem.Services.Utilities.DistanceCalculators.Numeric;
+using VisualizationSystem.Services.Utilities.DistanceCalculators.CategoricalMetrics;
+using VisualizationSystem.Services.Utilities.DistanceCalculators.NumericMetrics;
 using VisualizationSystem.Services.Utilities.Factories;
 using VisualizationSystem.Services.Utilities.FileSystem;
 using VisualizationSystem.Services.Utilities.FileSystem.ExcelHandlers;
@@ -118,9 +116,12 @@ internal static class Program
     private static IServiceCollection AddDistanceServices(this IServiceCollection services)
     {
         return services
-            .AddSingleton<INumericDistance, EuclideanDistance>()
-            .AddSingleton<ICategoricalDistance, HammingDistance>()
-            .AddSingleton<IDistanceCalculator, DistanceCalculator>();
+            .AddSingleton<EuclideanDistanceMetric>()
+            .AddSingleton<ManhattanDistanceMetric>()
+            .AddSingleton<CosineDistanceMetric>()
+            .AddSingleton<HammingDistanceMetric>()
+            .AddSingleton<IDistanceCalculator, DistanceCalculator>()
+            .AddTransient<DistanceCalculatorFactory>();
     }
 
     private static IServiceCollection AddClusteringServices(this IServiceCollection services)

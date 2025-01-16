@@ -1,4 +1,4 @@
-﻿using VisualizationSystem.Models.Configs;
+﻿using VisualizationSystem.Models.Configs.AlgorithmParameters;
 using VisualizationSystem.Models.Domain.Settings;
 using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Services.Utilities.Clusterers;

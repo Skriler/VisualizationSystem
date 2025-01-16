@@ -8,7 +8,7 @@ public class ClusterSimilarityResult
 
     public ClusterSimilarityResult()
     {
-        Similarity = 0;
+        Similarity = double.MaxValue;
     }
 
     public void Update(int firstClusterId, int secondClusterId, double similarity)

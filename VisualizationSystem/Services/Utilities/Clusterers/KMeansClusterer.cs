@@ -1,7 +1,7 @@
 ﻿using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Models.Domain.Nodes;
 using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Services.Utilities.DistanceCalculators;
+using VisualizationSystem.Services.Utilities.Factories;
 using VisualizationSystem.Services.Utilities.Normalizers;
 using VisualizationSystem.Services.Utilities.Settings;
 
@@ -12,12 +12,14 @@ public class KMeansClusterer : BaseClusterer
     private readonly Random random = new();
     private List<KMeansCluster> kMeansClusters;
 
+    protected override ClusterAlgorithm Algorithm => ClusterAlgorithm.KMeans;
+
     public KMeansClusterer(
         DataNormalizer dataNormalizer,
-        IDistanceCalculator distanceCalculator,
+        DistanceCalculatorFactory distanceCalculatorFactory,
         ISettingsSubject settingsSubject
         )
-        : base(dataNormalizer, distanceCalculator, settingsSubject)
+        : base(dataNormalizer, distanceCalculatorFactory, settingsSubject)
     { }
 
     public override async Task<List<Cluster>> ClusterAsync(NodeTable nodeTable)

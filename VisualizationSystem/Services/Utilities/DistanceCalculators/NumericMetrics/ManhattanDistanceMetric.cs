@@ -1,6 +1,6 @@
-﻿namespace VisualizationSystem.Services.Utilities.DistanceCalculators.Numeric;
+﻿namespace VisualizationSystem.Services.Utilities.DistanceCalculators.NumericMetrics;
 
-public class ManhattanDistance : INumericDistance
+public class ManhattanDistanceMetric : INumericDistanceMetric
 {
     public double CalculateDistance(List<double> firstValues, List<double> secondValues)
     {
