@@ -86,6 +86,5 @@ public class AgglomerativeClusterer : BaseClusterer
         return first.Nodes
             .SelectMany(firstNode => second.Nodes, distanceCalculator.Calculate)
             .Min();
-
     }
 }

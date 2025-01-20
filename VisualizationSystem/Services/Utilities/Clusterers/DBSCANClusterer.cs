@@ -45,8 +45,8 @@ public class DBSCANClusterer : BaseClusterer
             ExpandCluster(cluster, node, neighbors, nodes);
         }
 
-        var noiseCluster = GetNoiseCluster(nodes, clusters);
-        clusters.Add(noiseCluster);
+        //var noiseCluster = GetNoiseCluster(nodes, clusters);
+        //clusters.Add(noiseCluster);
 
         return clusters;
     }
@@ -109,10 +109,7 @@ public class DBSCANClusterer : BaseClusterer
             .Where(node => !clusters.Any(cluster => cluster.Nodes.Contains(node)))
             .ToList();
 
-        var noiseCluster = new Cluster()
-        {
-            Type = ClusterType.Noise,
-        };
+        var noiseCluster = new Cluster();
         noiseNodes.ForEach(noiseCluster.AddNode);
 
         return noiseCluster;

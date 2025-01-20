@@ -1,12 +1,12 @@
 ﻿using VisualizationSystem.UI.Components.TabPages;
 using VisualizationSystem.Models.Entities.Nodes;
-using VisualizationSystem.Services.DAL;
 using VisualizationSystem.Services.Utilities.FileSystem.ExcelHandlers;
 using VisualizationSystem.Services.Utilities.Settings;
 using VisualizationSystem.Services.Utilities.Graphs.Managers;
 using VisualizationSystem.Models.Domain.Graphs;
 using VisualizationSystem.Services.Utilities.Plots;
 using VisualizationSystem.Services.UI.TabPages;
+using VisualizationSystem.Services.DAL.Repositories;
 
 namespace VisualizationSystem.UI.Forms;
 
@@ -313,7 +313,7 @@ public partial class MainForm : Form
 
     private async Task OnDeleteTable(string tableName)
     {
-        await nodeTableRepository.DeleteTableAsync(tableName);
+        await nodeTableRepository.DeleteAsync(tableName);
 
         datasetsToolStripMenuItem.DropDownItems.RemoveByKey(tableName);
         tabControlService.RemoveRelatedTabPages(tableName);
@@ -331,7 +331,7 @@ public partial class MainForm : Form
 
     private void UpdateFormTitle()
     {
-        Text = nodeTable == null ? FormTitle : FormTitle + $" (Current table: {nodeTable.Name})";
+        Text = nodeTable == null ? FormTitle : FormTitle + $" (Current dataset: {nodeTable.Name})";
     }
 
     private static void ShowSuccess(string message)

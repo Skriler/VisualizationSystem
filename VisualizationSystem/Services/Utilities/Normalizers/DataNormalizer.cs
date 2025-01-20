@@ -2,7 +2,7 @@
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Normalized;
 using VisualizationSystem.Models.Entities.Settings;
-using VisualizationSystem.Services.DAL;
+using VisualizationSystem.Services.DAL.Repositories;
 
 namespace VisualizationSystem.Services.Utilities.Normalizers;
 
@@ -25,7 +25,7 @@ public class DataNormalizer
     {
         if (await normalizedNodesRepository.ExistsAsync(nodeTable.Name))
         {
-            var normalizedNodes = await normalizedNodesRepository.GetByTableNameAsync(nodeTable.Name);
+            var normalizedNodes = await normalizedNodesRepository.GetNodesByTableNameAsync(nodeTable.Name);
             return GetFilteredCalculationNodes(normalizedNodes, parameterStates);
         }
 
@@ -35,10 +35,10 @@ public class DataNormalizer
         var nodes = nodeTable.NodeObjects;
         InitializeParameterRanges(nodes);
         InitializeNormalizedParameterStates(nodes.First());
-        await normalizedNodesRepository.AddNormalizedParameterStateListAsync(normParameterStates);
+        await normalizedNodesRepository.AddNormalizedParameterStatesAsync(normParameterStates);
 
         nodes.ForEach(ProcessNodeForNormalization);
-        await normalizedNodesRepository.AddAllNormalizedParametersAsync(nodes);
+        await normalizedNodesRepository.AddNormalizedParametersAsync(nodes);
 
         return GetFilteredCalculationNodes(nodes, parameterStates);
     }

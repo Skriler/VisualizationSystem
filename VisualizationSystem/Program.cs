@@ -4,6 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VisualizationSystem.Models.Domain.Graphs;
 using VisualizationSystem.Services.DAL;
+using VisualizationSystem.Services.DAL.Repositories;
+using VisualizationSystem.Services.DAL.Validators;
 using VisualizationSystem.Services.UI;
 using VisualizationSystem.Services.UI.TabPages;
 using VisualizationSystem.Services.Utilities.Clusterers;
@@ -76,6 +78,14 @@ internal static class Program
             .AddPlotServices();
 
         services.AddTransient<MainForm>();
+    }
+
+    private static IServiceCollection AddValidators(this IServiceCollection services)
+    {
+        return services
+            .AddScoped<NodeTableValidator>()
+            .AddScoped<UserSettingsValidator>()
+            .AddScoped<NormalizedNodeValidator>();
     }
 
     private static IServiceCollection AddRepositories(this IServiceCollection services)

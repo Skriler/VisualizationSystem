@@ -1,6 +1,6 @@
 ﻿using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Settings;
-using VisualizationSystem.Services.DAL;
+using VisualizationSystem.Services.DAL.Repositories;
 using VisualizationSystem.Services.Utilities.Clusterers;
 using VisualizationSystem.UI.Forms;
 

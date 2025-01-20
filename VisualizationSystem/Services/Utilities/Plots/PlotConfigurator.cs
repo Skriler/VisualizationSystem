@@ -1,7 +1,6 @@
 ﻿using ScottPlot;
 using ScottPlot.Plottables;
 using ScottPlot.WinForms;
-using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Models.Domain.PCA;
 using VisualizationSystem.Models.Domain.Plots;
 using VisualizationSystem.Services.Utilities.Helpers.Colors;
@@ -72,7 +71,7 @@ public class PlotConfigurator
             ConfigureScatter(scatter, point.Name, color);
 
             var label = plot.Add.Text(point.Name, point.X, point.Y);
-            ConfigureLabel(label, point.Name, point.X, point.Y, color);
+            ConfigureLabel(label, point.Name, point.X, point.Y, SystemColor.Black);
         }
     }
 
