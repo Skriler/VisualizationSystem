@@ -37,12 +37,16 @@ public class UserSettingsRepository
         await validator.ValidateForGetByTableNameAsync(tableName);
 
         return await db.UserSettings
+            .AsNoTracking()
+            .Where(settings => settings.NodeTable.Name == tableName)
             .Include(settings => settings.NodeTable)
-            .Include(settings => settings.ParameterStates)
             .Include(settings => settings.AlgorithmSettings)
-            .FirstAsync(settings => settings.NodeTable.Name == tableName);
+            .Include(settings => settings.ParameterStates)
+                .ThenInclude(state => state.ParameterType)
+            .AsSplitQuery()
+            .FirstAsync();
     }
 
-    public async Task<bool> ExistsAsync(string tableName) => 
+    public async Task<bool> ExistsAsync(string tableName) =>
         await db.UserSettings.AnyAsync(settings => settings.NodeTable.Name == tableName);
 }

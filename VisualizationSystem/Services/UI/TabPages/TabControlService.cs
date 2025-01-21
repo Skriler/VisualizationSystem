@@ -32,7 +32,7 @@ public class TabControlService
         AddNewTab(tabId, tabPage);
     }
 
-    public void UpdateTabIfOpen(object content, bool setActive = true)
+    public void UpdateTabIfOpen(object content, bool setActive = false)
     {
         var strategy = GetStrategy(content);
         var tabId = strategy.GetTabId(content);
@@ -67,7 +67,7 @@ public class TabControlService
 
     private bool TryUpdateTab(string tabId, object newData, bool setActive = true)
     {
-        if (!tabPages.TryGetValue(tabId, out var existingTab))
+       if (!tabPages.TryGetValue(tabId, out var existingTab))
             return false;
 
         existingTab.UpdateContent(newData);
@@ -96,5 +96,10 @@ public class TabControlService
             throw new ArgumentException("No strategy found for content type");
 
         return strategy;
+    }
+
+    public bool HasOpenTabOfType<T>(string tabName) where T : ClosableTabPageBase
+    {
+        return tabPages.Any(kv => kv.Key.Contains(tabName) && kv.Value is T);
     }
 }

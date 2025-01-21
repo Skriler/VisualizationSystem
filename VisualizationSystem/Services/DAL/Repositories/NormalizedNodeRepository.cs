@@ -44,17 +44,16 @@ public class NormalizedNodeRepository
         await validator.ValidateForGetNodesByTableNameAsync(tableName);
 
         return await db.NodeObjects
+            .AsNoTracking()
             .Where(no => no.NodeTable.Name == tableName)
             .Include(nn => nn.NormalizedParameters)
-            .ThenInclude(np => np.NormalizedParameterState)
-            .AsNoTracking()
+                .ThenInclude(np => np.NormalizedParameterState)
             .ToListAsync();
     }
 
     public async Task<bool> ExistsAsync(string tableName)
     {
         return await db.NodeObjects
-            .Where(no => no.NodeTable.Name == tableName)
-            .AnyAsync(no => no.NormalizedParameters.Any());
+            .AnyAsync(no => no.NodeTable.Name == tableName && no.NormalizedParameters.Any());
     }
 }

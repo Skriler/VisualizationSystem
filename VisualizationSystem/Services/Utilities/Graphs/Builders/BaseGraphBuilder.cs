@@ -91,7 +91,7 @@ public abstract class BaseGraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISetting
 
             foreach (var similarNode in similarityResult.SimilarNodes)
             {
-                if (IsNeighbor(similarNode))
+                if (!IsNeighbor(similarNode))
                     continue;
 
                 var targetNode = similarNode.Node;
@@ -106,7 +106,7 @@ public abstract class BaseGraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISetting
         }
     }
 
-    private bool IsNeighbor(SimilarNode similarNode) => similarNode.SimilarityPercentage < settings.MinSimilarityPercentage;
+    private bool IsNeighbor(SimilarNode similarNode) => similarNode.SimilarityPercentage >= settings.MinSimilarityPercentage;
 
     protected double GetNodeSize(int connectionCount, int maxConnections)
     {

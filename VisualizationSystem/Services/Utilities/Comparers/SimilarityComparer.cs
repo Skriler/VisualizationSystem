@@ -89,11 +89,10 @@ public class SimilarityComparer : ISettingsObserver
             .Add(new SimilarNode(target, similarityPercentage));
     }
 
-    private static bool TryGetParameterByState(NodeObject node, ParameterState state, out NodeParameter? parameter)
+    private static bool TryGetParameterByState(NodeObject node, ParameterState state, out NodeParameter parameter)
     {
         parameter = node.Parameters
-            .Where(p => p.ParameterType == state.ParameterType)
-            .FirstOrDefault();
+            .First(p => p.ParameterType.Name == state.ParameterType.Name);
 
         return parameter != null;
     }

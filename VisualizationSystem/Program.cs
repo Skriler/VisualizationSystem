@@ -69,7 +69,8 @@ internal static class Program
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))
         );
 
-        services.AddRepositories()
+        services.AddValidators()
+            .AddRepositories()
             .AddUIServices()
             .AddDataProcessingServices()
             .AddDistanceServices()

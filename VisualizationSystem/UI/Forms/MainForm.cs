@@ -20,7 +20,6 @@ public partial class MainForm : Form
     private readonly ExcelDataImporter fileService;
     private readonly ISettingsManager userSettingsManager;
     private readonly GraphCreationManager<ExtendedGraph> graphCreationManager;
-    private readonly GraphSaveManager graphSaveManager;
     private readonly PlotCreationManager plotCreationManager;
 
     private NodeTable nodeTable = default!;
@@ -31,7 +30,6 @@ public partial class MainForm : Form
         ExcelDataImporter fileService,
         ISettingsManager userSettingsManager,
         GraphCreationManager<ExtendedGraph> graphCreationManager,
-        GraphSaveManager graphSaveManager,
         PlotCreationManager plotCreationManager
         )
     {
@@ -45,7 +43,6 @@ public partial class MainForm : Form
         this.fileService = fileService;
         this.userSettingsManager = userSettingsManager;
         this.graphCreationManager = graphCreationManager;
-        this.graphSaveManager = graphSaveManager;
         this.plotCreationManager = plotCreationManager;
 
         tabControlService.Initialize(tabControl);
@@ -56,7 +53,6 @@ public partial class MainForm : Form
         await LoadTableNamesToMenuAsync();
 
         tabControl.Padding = new Point(20, 3);
-        saveGraphImageToolStripMenuItem.Visible = false;
     }
 
     private async void uploadToolStripMenuItem_Click(object sender, EventArgs e)
@@ -66,8 +62,6 @@ public partial class MainForm : Form
 
         await LoadTableNamesToMenuAsync();
         UpdateFormTitle();
-
-        ShowSuccess("File uploaded successfully!");
     }
 
     private void showToolStripMenuItem_Click(object sender, EventArgs e)
@@ -128,24 +122,6 @@ public partial class MainForm : Form
         }
     }
 
-    private async void saveGraphImageToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (nodeTable == null)
-        {
-            ShowWarning("No data to save");
-            return;
-        }
-
-        try
-        {
-            await graphSaveManager.SaveGraphAsync(nodeTable);
-        }
-        catch (Exception ex)
-        {
-            ShowError("Error while showing data", ex);
-        }
-    }
-
     private async void settingsToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (nodeTable == null)
@@ -192,13 +168,16 @@ public partial class MainForm : Form
             if (!fileService.TryReadNodeTableFromExcelFile(out var nodeTables))
                 return false;
 
-            if (!nodeTables.Any())
+            if (nodeTables.Count == 0)
                 return false;
 
-            await nodeTableRepository.AddListAsync(nodeTables);
-            nodeTable = nodeTables.Last();
+            var newTables = await ProcessDuplicateTables(nodeTables);
 
-            await userSettingsManager.LoadAsync(nodeTable);
+            if (newTables.Count == 0)
+                return false;
+
+            await UploadNewTablesAsync(newTables);
+
         }
         catch (Exception ex)
         {
@@ -209,14 +188,52 @@ public partial class MainForm : Form
         return true;
     }
 
+    /// <summary>
+    /// Uploads new tables to the repository, sets last one as active and creates user settings for it.
+    /// </summary>
+    /// <param name="newTables">List of new tables to upload.</param>
+    /// <returns>No value</returns>
+    private async Task UploadNewTablesAsync(List<NodeTable> newTables)
+    {
+        await nodeTableRepository.AddListAsync(newTables);
+
+        nodeTable = newTables.Last();
+        await userSettingsManager.LoadAsync(nodeTable);
+
+        var newNames = string.Join(", ", newTables.Select(t => t.Name));
+        ShowSuccess($"Tables: {newNames} uploaded successfully!");
+    }
+
+    /// <summary>
+    /// Filters out duplicates from the provided node tables, notify about them and returns only new ones.
+    /// </summary>
+    /// <param name="nodeTables">List of node tables to process.</param>
+    /// <returns>List of new node tables.</returns>
+    private async Task<List<NodeTable>> ProcessDuplicateTables(List<NodeTable> tables)
+    {
+        var existingTables = await nodeTableRepository.GetAllNamesAsync();
+
+        var groupedTables = tables.ToLookup(t => existingTables.Contains(t.Name));
+
+        var newTables = groupedTables[false];
+        var duplicateTables = groupedTables[true];
+
+        if (duplicateTables.Any())
+        {
+            var duplicateNames = string.Join(", ", duplicateTables.Select(t => t.Name));
+            ShowWarning($"Tables already exist: {duplicateNames}");
+        }
+
+        return newTables.ToList();
+    }
+
     private async Task LoadTableNamesToMenuAsync()
     {
         datasetsToolStripMenuItem.DropDownItems.Clear();
 
-        var nodeTables = await nodeTableRepository.GetAllAsync();
-        var tableNames = nodeTables.Select(x => x.Name).ToList();
+        var tableNames = await nodeTableRepository.GetAllNamesAsync();
 
-        if (!tableNames.Any())
+        if (tableNames.Count == 0)
         {
             datasetsToolStripMenuItem.Enabled = false;
             return;
@@ -307,8 +324,6 @@ public partial class MainForm : Form
     {
         nodeTable = await nodeTableRepository.GetByNameAsync(tableName);
         await userSettingsManager.LoadAsync(nodeTable);
-
-        //await UpdateGraphIfNeededAsync();
     }
 
     private async Task OnDeleteTable(string tableName)
@@ -323,10 +338,17 @@ public partial class MainForm : Form
 
     //private async Task UpdateGraphIfNeededAsync()
     //{
-    //    var graph = await graphCreationManager.BuildGraphAsync(nodeTable);
+    //    if (tabControlService.HasOpenTabOfType<ClosableGViewerTabPage>(nodeTable.Name))
+    //    {
+    //        var graph = await graphCreationManager.BuildGraphAsync(nodeTable);
+    //        tabControlService.UpdateTabIfOpen(graph);
+    //    }
 
-    //    tabControlService.UpdateDataGridViewTabPageIfOpen(nodeTable);
-    //    tabControlService.UpdateGViewerTabPageIfOpen(graph, nodeTable.Name);
+    //    if (tabControlService.HasOpenTabOfType<ClosableClusteredPlotTabPage>(nodeTable.Name))
+    //    {
+    //        var plot = await plotCreationManager.BuildClusteredPlotAsync(nodeTable);
+    //        tabControlService.UpdateTabIfOpen(plot);
+    //    }
     //}
 
     private void UpdateFormTitle()

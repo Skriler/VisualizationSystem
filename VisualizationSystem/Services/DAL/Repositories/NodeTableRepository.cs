@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using VisualizationSystem.Models.Entities;
 using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Services.DAL.Validators;
 
@@ -60,12 +59,21 @@ public class NodeTableRepository
         await validator.ValidateForGetByNameAsync(tableName);
 
         return await db.NodeTables
+            .AsNoTracking()
+            .Where(table => table.Name == tableName)
             .Include(table => table.ParameterTypes)
             .Include(table => table.NodeObjects)
-            .ThenInclude(node => node.Parameters)
-            .Where(table => table.Name == tableName)
+                .ThenInclude(node => node.Parameters)
+                    .ThenInclude(parameter => parameter.ParameterType)
+            .AsSplitQuery()
             .FirstAsync();
     }
 
-    public async Task<List<NodeTable>> GetAllAsync() => await db.NodeTables.ToListAsync();
+    public async Task<List<string>> GetAllNamesAsync()
+    {
+        return await db.NodeTables
+            .AsNoTracking()
+            .Select(table => table.Name)
+            .ToListAsync();
+    }
 }
