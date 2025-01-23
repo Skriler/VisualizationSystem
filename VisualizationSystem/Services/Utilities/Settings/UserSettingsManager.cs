@@ -32,9 +32,9 @@ public class UserSettingsManager : ISettingsSubject, ISettingsManager
 
     public async Task LoadAsync(NodeTable table)
     {
-        if (await settingsRepository.ExistsAsync(table.Name))
+        if (await settingsRepository.ExistsAsync(table.Id))
         {
-            userSettings = await settingsRepository.GetByTableNameAsync(table.Name);
+            userSettings = await settingsRepository.GetByTableIdAsync(table.Id);
         }
         else
         {
@@ -56,7 +56,7 @@ public class UserSettingsManager : ISettingsSubject, ISettingsManager
 
             return true;
         }
-        
+
         return false;
     }
 
@@ -64,15 +64,12 @@ public class UserSettingsManager : ISettingsSubject, ISettingsManager
     {
         var userSettings = new UserSettings
         {
-            NodeTable = nodeTable,
+            NodeTableId = nodeTable.Id,
             AlgorithmSettings = new ClusterAlgorithmSettings()
         };
 
         userSettings.ParameterStates = nodeTable.ParameterTypes
-            .Select(p => new ParameterState(p, userSettings))
-            .ToList();
-
-        userSettings.ResetCoreValues();
+            .ConvertAll(p => new ParameterState(p.Id, userSettings.Id));
 
         return userSettings;
     }

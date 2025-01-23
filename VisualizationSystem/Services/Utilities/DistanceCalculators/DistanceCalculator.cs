@@ -42,7 +42,7 @@ public class DistanceCalculator : IDistanceCalculator
             );
     }
 
-    private List<double> ExtractNumericValues(CalculationNode node)
+    private static List<double> ExtractNumericValues(CalculationNode node)
     {
         return node.Parameters
             .OfType<NumericParameter>()
@@ -50,7 +50,7 @@ public class DistanceCalculator : IDistanceCalculator
             .ToList();
     }
 
-    private List<CategoricalParameter> ExtractCategoricalParameters(CalculationNode node)
+    private static List<CategoricalParameter> ExtractCategoricalParameters(CalculationNode node)
     {
         return node.Parameters
             .OfType<CategoricalParameter>()

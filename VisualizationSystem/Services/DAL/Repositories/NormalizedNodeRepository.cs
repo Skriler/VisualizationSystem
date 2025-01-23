@@ -39,21 +39,18 @@ public class NormalizedNodeRepository
         await db.SaveChangesAsync();
     }
 
-    public async Task<List<NodeObject>> GetNodesByTableNameAsync(string tableName)
+    public async Task<List<NodeObject>> GetNodesByTableIdAsync(int tableId)
     {
-        await validator.ValidateForGetNodesByTableNameAsync(tableName);
+        await validator.ValidateForGetNodesByTableIdAsync(tableId);
 
         return await db.NodeObjects
             .AsNoTracking()
-            .Where(no => no.NodeTable.Name == tableName)
+            .Where(no => no.NodeTableId == tableId)
             .Include(nn => nn.NormalizedParameters)
                 .ThenInclude(np => np.NormalizedParameterState)
             .ToListAsync();
     }
 
-    public async Task<bool> ExistsAsync(string tableName)
-    {
-        return await db.NodeObjects
-            .AnyAsync(no => no.NodeTable.Name == tableName && no.NormalizedParameters.Any());
-    }
+    public async Task<bool> ExistsAsync(int tableId) =>
+        await db.NodeObjects.AnyAsync(no => no.NodeTableId == tableId && no.NormalizedParameters.Any());
 }

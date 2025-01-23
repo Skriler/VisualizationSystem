@@ -23,9 +23,9 @@ public class DataNormalizer
         List<ParameterState> parameterStates
         )
     {
-        if (await normalizedNodesRepository.ExistsAsync(nodeTable.Name))
+        if (await normalizedNodesRepository.ExistsAsync(nodeTable.Id))
         {
-            var normalizedNodes = await normalizedNodesRepository.GetNodesByTableNameAsync(nodeTable.Name);
+            var normalizedNodes = await normalizedNodesRepository.GetNodesByTableIdAsync(nodeTable.Id);
             return GetFilteredCalculationNodes(normalizedNodes, parameterStates);
         }
 
@@ -100,7 +100,7 @@ public class DataNormalizer
             {
                 CategoryCount = range.CategoryCount,
                 ValueType = range.Type,
-                ParameterType = parameter.ParameterType
+                ParameterTypeId = parameter.ParameterType.Id,
             };
 
             normParameterStates.Add(normParameterState);

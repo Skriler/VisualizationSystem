@@ -23,19 +23,19 @@ public class NormalizedNodeValidator
         ArgumentNullException.ThrowIfNull(nodes);
     }
 
-    public async Task ValidateForGetNodesByTableNameAsync(string tableName)
+    public async Task ValidateForGetNodesByTableIdAsync(int tableId)
     {
-        if (string.IsNullOrWhiteSpace(tableName))
-            throw new ArgumentException("Node table name cannot be null or whitespace.", tableName);
+        if (tableId <= 0)
+            throw new ArgumentException("Table does not exist or is invalid.");
 
-        if (!await ExistsAsync(tableName))
-            throw new InvalidOperationException($"Normalized nodes for table {tableName} does not exist.");
+        if (!await ExistsAsync(tableId))
+            throw new InvalidOperationException($"Normalized nodes for table does not exist.");
     }
 
-    private async Task<bool> ExistsAsync(string tableName)
+    private async Task<bool> ExistsAsync(int tableId)
     {
         return await db.NodeObjects
-            .Where(no => no.NodeTable.Name == tableName)
+            .Where(no => no.NodeTableId == tableId)
             .AnyAsync(no => no.NormalizedParameters.Any());
     }
 }

@@ -13,7 +13,7 @@ public class DefaultComparer : ICompare
         return CompareStrings(firstValue, secondValue);
     }
 
-    private bool CompareNumerical(double firstNumber, double secondNumber, float deviationPercent)
+    private static bool CompareNumerical(double firstNumber, double secondNumber, float deviationPercent)
     {
         var maxNumber = Math.Max(firstNumber, secondNumber);
         var tolerance = maxNumber * deviationPercent / 100;
@@ -21,11 +21,22 @@ public class DefaultComparer : ICompare
         return Math.Abs(firstNumber - secondNumber) <= tolerance;
     }
 
-    private bool CompareStrings(string firstValue, string secondValue)
+    private static bool CompareStrings(string firstValue, string secondValue)
     {
         if (string.IsNullOrWhiteSpace(firstValue) || string.IsNullOrWhiteSpace(secondValue))
             return false;
 
-        return firstValue.Equals(secondValue, StringComparison.OrdinalIgnoreCase);
+        var firstValues = GetSplitValues(firstValue);
+        var secondValues = GetSplitValues(secondValue);
+
+        return firstValues.SequenceEqual(secondValues);
+    }
+
+    private static string[] GetSplitValues(string values)
+    {
+        return values.Split(',')
+            .Select(v => v.Trim())
+            .Order()
+            .ToArray();
     }
 }

@@ -54,12 +54,11 @@ public sealed class ClosableGViewerTabPage : ClosableTabPageBase
 
     private void OpenNodeDetailsForm(string nodeName)
     {
-        var similarityResult = DisplayedGraph.NodeDataMap[nodeName];
-
-        if (similarityResult == null)
+        if (!DisplayedGraph.NodeDataMap.TryGetValue(nodeName, out var similarityResult))
             return;
 
         var detailsForm = new NodeDetailsForm(similarityResult, OpenNodeDetailsForm);
+
         detailsForm.Show();
         detailsForm.BringToFront();
     }

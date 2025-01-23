@@ -14,19 +14,19 @@ public class UserSettingsValidator
 
     public async Task ValidateForAddAsync(UserSettings userSettings)
     {
-        if (await ExistsAsync(userSettings.NodeTable.Name))
-            throw new InvalidOperationException($"Settings for table {userSettings.NodeTable.Name} already exists.");
+        if (await ExistsAsync(userSettings.NodeTableId))
+            throw new InvalidOperationException($"Settings for table already exists.");
     }
 
-    public async Task ValidateForGetByTableNameAsync(string tableName)
+    public async Task ValidateForGetByTableIdAsync(int tableId)
     {
-        if (string.IsNullOrWhiteSpace(tableName))
-            throw new ArgumentException("Table name cannot be null or whitespace.", tableName);
+        if (tableId <= 0)
+            throw new ArgumentException("Table does not exist or is invalid.");
 
-        if (!await ExistsAsync(tableName))
-            throw new InvalidOperationException($"Settings for table {tableName} does not exist.");
+        if (!await ExistsAsync(tableId))
+            throw new InvalidOperationException($"Settings for table does not exist.");
     }
 
-    private async Task<bool> ExistsAsync(string tableName)
-        => await db.UserSettings.AnyAsync(settings => settings.NodeTable.Name == tableName);
+    private async Task<bool> ExistsAsync(int tableId)
+        => await db.UserSettings.AnyAsync(settings => settings.NodeTableId == tableId);
 }

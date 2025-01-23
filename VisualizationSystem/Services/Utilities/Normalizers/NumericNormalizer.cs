@@ -46,8 +46,8 @@ public class NumericNormalizer : ITypeNormalizer
         return new NormalizedNumericParameter
         {
             Value = NormalizeMinMax(value),
-            NodeObject = node,
-            NormalizedParameterState = state
+            NodeObjectId = node.Id,
+            NormalizedParameterStateId = state.Id
         };
     }
 

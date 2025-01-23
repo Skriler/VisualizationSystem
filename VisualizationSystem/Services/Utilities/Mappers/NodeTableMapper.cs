@@ -35,14 +35,12 @@ public class NodeTableMapper
             .Where((value, index) => index != nameColumnIndex)
             .ToList();
 
-        var nodeTable = new NodeTable
+        return new NodeTable
         {
             Name = table.TableName,
             ParameterTypes = parameterTypesWithoutName,
             NodeObjects = nodes,
         };
-
-        return nodeTable;
     }
 
     private List<string> GetRowValues(DataRow row)

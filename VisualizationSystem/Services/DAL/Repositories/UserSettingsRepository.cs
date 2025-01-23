@@ -32,14 +32,12 @@ public class UserSettingsRepository
         await db.SaveChangesAsync();
     }
 
-    public async Task<UserSettings> GetByTableNameAsync(string tableName)
+    public async Task<UserSettings> GetByTableIdAsync(int tableId)
     {
-        await validator.ValidateForGetByTableNameAsync(tableName);
+        await validator.ValidateForGetByTableIdAsync(tableId);
 
         return await db.UserSettings
-            .AsNoTracking()
-            .Where(settings => settings.NodeTable.Name == tableName)
-            .Include(settings => settings.NodeTable)
+            .Where(settings => settings.NodeTableId == tableId)
             .Include(settings => settings.AlgorithmSettings)
             .Include(settings => settings.ParameterStates)
                 .ThenInclude(state => state.ParameterType)
@@ -47,6 +45,6 @@ public class UserSettingsRepository
             .FirstAsync();
     }
 
-    public async Task<bool> ExistsAsync(string tableName) =>
-        await db.UserSettings.AnyAsync(settings => settings.NodeTable.Name == tableName);
+    public async Task<bool> ExistsAsync(int tableId) =>
+        await db.UserSettings.AnyAsync(settings => settings.NodeTableId == tableId);
 }

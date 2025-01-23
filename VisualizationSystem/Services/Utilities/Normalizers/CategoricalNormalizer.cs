@@ -9,9 +9,9 @@ public class CategoricalNormalizer : ITypeNormalizer
 
     public ParameterValueType Type { get; } = ParameterValueType.Categorical;
 
-    public int CategoryCount => Values.Count;
+    public int CategoryCount => Categories.Count;
 
-    public List<string> Values { get; private set; } = new();
+    public List<string> Categories { get; private set; } = new();
 
     public CategoricalNormalizer(int id, string value)
     {
@@ -19,12 +19,17 @@ public class CategoricalNormalizer : ITypeNormalizer
         AddValue(value);
     }
 
-    public void AddValue(string value)
+    public void AddValue(string originalValue)
     {
-        if (Values.Contains(value))
-            return;
+        var values = GetSplitValues(originalValue);
 
-        Values.Add(value);
+        foreach (var value in values)
+        {
+            if (Categories.Contains(value))
+                continue;
+
+            Categories.Add(value);
+        }
     }
 
     public NormalizedParameter CreateNormalizedParameter(
@@ -33,7 +38,7 @@ public class CategoricalNormalizer : ITypeNormalizer
         NormalizedParameterState state
         )
     {
-        var oneHotArray = ConvertStringToOneHot(parameter.Value);
+        var oneHotArray = ConvertValueToOneHot(parameter.Value);
         var indices = oneHotArray
             .Select((value, index) => new { value, index })
             .Where(x => x.value == 1)
@@ -43,21 +48,33 @@ public class CategoricalNormalizer : ITypeNormalizer
         return new NormalizedCategoricalParameter
         {
             OneHotIndexes = indices,
-            NodeObject = node,
-            NormalizedParameterState = state
+            NodeObjectId = node.Id,
+            NormalizedParameterStateId = state.Id
         };
     }
 
-    private int[] ConvertStringToOneHot(string value)
+    private int[] ConvertValueToOneHot(string originalValue)
     {
-        var encoded = new int[Values.Count];
-        var index = Values.IndexOf(value);
+        var encoded = new int[Categories.Count];
 
-        if (index != -1)
+        if (originalValue == string.Empty)
+            return encoded;
+
+        var values = GetSplitValues(originalValue);
+
+        foreach (var value in values)
         {
+            var index = Categories.IndexOf(value);
             encoded[index] = 1;
         }
 
         return encoded;
+    }
+    private static List<string> GetSplitValues(string values)
+    {
+        return values.Split(',')
+            .Select(v => v.Trim())
+            .Order()
+            .ToList();
     }
 }

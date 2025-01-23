@@ -30,10 +30,10 @@ public class ParameterState
         ResetToDefaults();
     }
 
-    public ParameterState(ParameterType parameterType, UserSettings userSettings)
+    public ParameterState(int parameterTypeId, int userSettingsId)
     {
-        ParameterType = parameterType;
-        UserSettings = userSettings;
+        ParameterTypeId = parameterTypeId;
+        UserSettingsId = userSettingsId;
         ResetToDefaults();
     }
 
