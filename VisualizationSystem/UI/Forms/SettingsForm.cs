@@ -1,5 +1,6 @@
 ﻿using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Services.UI.Panels;
+using VisualizationSystem.UI.Components.PanelControls;
 
 namespace VisualizationSystem.UI.Forms;
 
@@ -7,8 +8,8 @@ public partial class SettingsForm : Form
 {
     private readonly UserSettings settings;
 
-    private readonly PanelManager parameterStatesPanel;
-    private readonly PanelManager clusteringOptionsPanel;
+    private readonly PanelManager<ParameterStatePanelControls> parameterStatesPanel;
+    private readonly PanelManager<ClusteringAlgorithmPanelControls> clusteringOptionsPanel;
 
     private readonly Size startFormSize;
     private readonly Dictionary<Button, Point> startButtonPositions;
@@ -25,12 +26,8 @@ public partial class SettingsForm : Form
             { btnSetDefaults, btnSetDefaults.Location }
         };
 
-        parameterStatesPanel = new ParameterStatesPanelManager(settings, panelParameterStates, cmbNames, nudWeight, chkbxIsActive);
-        clusteringOptionsPanel = new ClusteringAlgorithmsPanelManager(
-            settings, panelClusteringOptions, cmbClusterAlgorithm,
-            nudFirstParameter, nudSecondParameter, lblFirstParameter,
-            lblSecondParameter
-            );
+        parameterStatesPanel = CreateParameterStatePanelManagers();
+        clusteringOptionsPanel = CreateClusteringAlgorithmsPanelManagers();
 
         InitializeMainControls();
         parameterStatesPanel.Initialize();
@@ -81,6 +78,35 @@ public partial class SettingsForm : Form
         InitializeMainControls();
         parameterStatesPanel.Initialize();
         clusteringOptionsPanel.Initialize();
+    }
+
+    private ParameterStatesPanelManager CreateParameterStatePanelManagers()
+    {
+        var parameterControls = new ParameterStatePanelControls(
+            panelParameterStates,
+            cmbNames,
+            nudWeight,
+            chkbxIsActive
+        );
+
+        return new ParameterStatesPanelManager(settings, parameterControls);
+    }
+
+    private ClusteringAlgorithmsPanelManager CreateClusteringAlgorithmsPanelManagers()
+    {
+        var clusteringControls = new ClusteringAlgorithmPanelControls(
+            panelClusteringOptions,
+            cmbClusterAlgorithm,
+            nudFirstParameter,
+            nudSecondParameter,
+            lblFirstParameter,
+            lblSecondParameter
+        );
+
+        return new ClusteringAlgorithmsPanelManager(settings, clusteringControls)
+        {
+            IsVisible = settings.UseClustering
+        };
     }
 
     private void InitializeMainControls()

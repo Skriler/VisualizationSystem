@@ -1,27 +1,20 @@
 ﻿using VisualizationSystem.Models.Domain.Settings;
 using VisualizationSystem.Models.Entities.Settings;
+using VisualizationSystem.UI.Components.PanelControls;
 
 namespace VisualizationSystem.Services.UI.Panels;
 
-public class ParameterStatesPanelManager : PanelManager
+public class ParameterStatesPanelManager : PanelManager<ParameterStatePanelControls>
 {
-    private readonly ComboBox cmbNames;
-    private readonly NumericUpDown nudWeight;
-    private readonly CheckBox chkbxIsActive;
-
-    private List<ParameterStateData> parametersList;
-    private string previousName;
+    private List<ParameterStateData> parametersList = default!;
+    private string previousName = default!;
 
     public ParameterStatesPanelManager(
-        UserSettings settings, Panel panel, ComboBox cmbNames,
-        NumericUpDown nudWeight, CheckBox chkbxIsActive
+        UserSettings settings,
+        ParameterStatePanelControls controls
         )
-        : base(settings, panel)
-    {
-        this.cmbNames = cmbNames;
-        this.nudWeight = nudWeight;
-        this.chkbxIsActive = chkbxIsActive;
-    }
+        : base(settings, controls)
+    { }
 
     public override void Initialize()
     {
@@ -29,32 +22,32 @@ public class ParameterStatesPanelManager : PanelManager
         parametersList = settings.ParameterStates
             .ConvertAll(p => new ParameterStateData(p));
 
-        cmbNames.Items.Clear();
-        cmbNames.Items.AddRange(
+        Controls.CmbNames.Items.Clear();
+        Controls.CmbNames.Items.AddRange(
             parametersList
                 .Select(p => p.Name)
                 .ToArray()
         );
 
-        if (cmbNames.Items.Count <= 0)
+        if (Controls.CmbNames.Items.Count <= 0)
             return;
 
-        cmbNames.SelectedIndex = 0;
+        Controls.CmbNames.SelectedIndex = 0;
 
         UpdateContent();
     }
 
     public override void UpdateContent()
     {
-        if (cmbNames.SelectedIndex < 0)
+        if (Controls.CmbNames.SelectedIndex < 0)
             return;
 
-        var selectedName = cmbNames.SelectedItem?.ToString();
+        var selectedName = Controls.CmbNames.SelectedItem?.ToString();
         var selectedParameterState = parametersList
-            .FirstOrDefault(p => p.Name == selectedName);
+            .First(p => p.Name == selectedName);
 
-        nudWeight.Value = (decimal)selectedParameterState.Weight;
-        chkbxIsActive.Checked = selectedParameterState.IsActive;
+        Controls.NudWeight.Value = (decimal)selectedParameterState.Weight;
+        Controls.ChkbxIsActive.Checked = selectedParameterState.IsActive;
 
         previousName = selectedName;
     }
@@ -67,8 +60,8 @@ public class ParameterStatesPanelManager : PanelManager
         if (parameterState == null)
             return;
 
-        parameterState.Weight = (float)nudWeight.Value;
-        parameterState.IsActive = chkbxIsActive.Checked;
+        parameterState.Weight = (float)Controls.NudWeight.Value;
+        parameterState.IsActive = Controls.ChkbxIsActive.Checked;
     }
 
     public override void Save()

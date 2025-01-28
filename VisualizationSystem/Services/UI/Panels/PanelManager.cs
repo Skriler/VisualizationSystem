@@ -1,16 +1,20 @@
 ﻿using VisualizationSystem.Models.Entities.Settings;
+using VisualizationSystem.UI.Components.PanelControls;
 
 namespace VisualizationSystem.Services.UI.Panels;
 
-public abstract class PanelManager
+public abstract class PanelManager<T> where T : PanelControls
 {
     protected readonly UserSettings settings;
-    protected readonly Panel panel;
 
-    protected PanelManager(UserSettings settings, Panel panel)
+    public T Controls { get; }
+
+    public bool IsVisible { get; set; } = true;
+
+    protected PanelManager(UserSettings settings, T controls)
     {
-        this.panel = panel;
         this.settings = settings;
+        Controls = controls;
     }
 
     public abstract void Initialize();

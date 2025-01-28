@@ -2,35 +2,23 @@
 using VisualizationSystem.Models.Domain.Settings;
 using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Services.Utilities.Clusterers;
+using VisualizationSystem.UI.Components.PanelControls;
 
 namespace VisualizationSystem.Services.UI.Panels;
 
-public class ClusteringAlgorithmsPanelManager : PanelManager
+public class ClusteringAlgorithmsPanelManager : PanelManager<ClusteringAlgorithmPanelControls>
 {
-    private readonly ComboBox cmbClusterAlgorithm;
-    private readonly NumericUpDown nudFirstParameter;
-    private readonly NumericUpDown nudSecondParameter;
-    private readonly Label lblFirstParameter;
-    private readonly Label lblSecondParameter;
-
-    private ClusterAlgorithmSettingsData settingsData;
+    private ClusterAlgorithmSettingsData settingsData = default!;
     private int previousAlgorithmIndex;
 
     private Array algorithms;
 
     public ClusteringAlgorithmsPanelManager(
-        UserSettings settings, Panel panel, ComboBox cmbClusterAlgorithm,
-        NumericUpDown nudFirstParameter, NumericUpDown nudSecondParameter,
-        Label lblFirstParameter, Label lblSecondParameter
+        UserSettings settings,
+        ClusteringAlgorithmPanelControls controls
         )
-        : base(settings, panel)
+        : base(settings, controls)
     {
-        this.cmbClusterAlgorithm = cmbClusterAlgorithm;
-        this.nudFirstParameter = nudFirstParameter;
-        this.nudSecondParameter = nudSecondParameter;
-        this.lblFirstParameter = lblFirstParameter;
-        this.lblSecondParameter = lblSecondParameter;
-
         algorithms = Enum.GetValues(typeof(ClusterAlgorithm));
     }
 
@@ -39,15 +27,13 @@ public class ClusteringAlgorithmsPanelManager : PanelManager
         previousAlgorithmIndex = -1;
         settingsData = new ClusterAlgorithmSettingsData(settings.AlgorithmSettings);
 
-        panel.Visible = settings.UseClustering;
+        Controls.CmbClusterAlgorithm.Items.Clear();
+        Controls.CmbClusterAlgorithm.Items.AddRange(Enum.GetNames(typeof(ClusterAlgorithm)));
 
-        cmbClusterAlgorithm.Items.Clear();
-        cmbClusterAlgorithm.Items.AddRange(Enum.GetNames(typeof(ClusterAlgorithm)));
-
-        if (cmbClusterAlgorithm.Items.Count <= 0)
+        if (Controls.CmbClusterAlgorithm.Items.Count <= 0)
             return;
 
-        cmbClusterAlgorithm.SelectedItem = settingsData.SelectedAlgorithm.ToString();
+        Controls.CmbClusterAlgorithm.SelectedItem = settingsData.SelectedAlgorithm.ToString();
 
         UpdateContent();
     }
@@ -55,10 +41,10 @@ public class ClusteringAlgorithmsPanelManager : PanelManager
 
     public override void UpdateContent()
     {
-        if(cmbClusterAlgorithm.SelectedIndex < 0)
+        if(Controls.CmbClusterAlgorithm.SelectedIndex < 0)
             return;
 
-        var algorithm = (ClusterAlgorithm)algorithms.GetValue(cmbClusterAlgorithm.SelectedIndex);
+        var algorithm = (ClusterAlgorithm)algorithms.GetValue(Controls.CmbClusterAlgorithm.SelectedIndex);
         settingsData.SelectedAlgorithm = algorithm;
 
         Action algorithmSetupAction = algorithm switch
@@ -70,7 +56,7 @@ public class ClusteringAlgorithmsPanelManager : PanelManager
         };
 
         algorithmSetupAction();
-        previousAlgorithmIndex = cmbClusterAlgorithm.SelectedIndex;
+        previousAlgorithmIndex = Controls.CmbClusterAlgorithm.SelectedIndex;
     }
 
     public override void SavePrevious()
@@ -102,41 +88,41 @@ public class ClusteringAlgorithmsPanelManager : PanelManager
     {
         UpdateClusteringOptions(AlgorithmParameterConfigs.AgglomerativeConfig);
 
-        nudFirstParameter.Value = (decimal)settingsData.Threshold;
+        Controls.NudFirstParameter.Value = (decimal)settingsData.Threshold;
     }
 
     private void UpdateClusteringOptionsForKMeans()
     {
         UpdateClusteringOptions(AlgorithmParameterConfigs.KMeansConfig);
 
-        nudFirstParameter.Value = settingsData.NumberOfClusters;
-        nudSecondParameter.Value = settingsData.MaxIterations;
+        Controls.NudFirstParameter.Value = settingsData.NumberOfClusters;
+        Controls.NudSecondParameter.Value = settingsData.MaxIterations;
     }
 
     private void UpdateClusteringOptionsForDBSCAN()
     {
         UpdateClusteringOptions(AlgorithmParameterConfigs.DBSCANConfig);
 
-        nudFirstParameter.Value = (decimal)settingsData.Epsilon;
-        nudSecondParameter.Value = settingsData.MinPoints;
+        Controls.NudFirstParameter.Value = (decimal)settingsData.Epsilon;
+        Controls.NudSecondParameter.Value = settingsData.MinPoints;
     }
 
     private void UpdateClusteringOptions(AlgorithmParameterConfig config)
     {
-        lblFirstParameter.Text = config.FirstParameterLabel;
-        lblSecondParameter.Text = config.SecondParameterLabel;
+        Controls.LblFirstParameter.Text = config.FirstParameterLabel;
+        Controls.LblSecondParameter.Text = config.SecondParameterLabel;
 
-        nudFirstParameter.Minimum = config.FirstParameterMin;
-        nudFirstParameter.Maximum = config.FirstParameterMax;
+        Controls.NudFirstParameter.Minimum = config.FirstParameterMin;
+        Controls.NudFirstParameter.Maximum = config.FirstParameterMax;
 
-        nudSecondParameter.Minimum = config.SecondParameterMin;
-        nudSecondParameter.Maximum = config.SecondParameterMax;
+        Controls.NudSecondParameter.Minimum = config.SecondParameterMin;
+        Controls.NudSecondParameter.Maximum = config.SecondParameterMax;
 
-        lblSecondParameter.Visible = config.HasSecondParameter;
-        nudSecondParameter.Visible = config.HasSecondParameter;
+        Controls.LblSecondParameter.Visible = config.HasSecondParameter;
+        Controls.NudSecondParameter.Visible = config.HasSecondParameter;
 
-        ConfigureNumericUpDown(nudFirstParameter, config.FirstParameterDecimalPlaces);
-        ConfigureNumericUpDown(nudSecondParameter, config.SecondParameterDecimalPlaces);
+        ConfigureNumericUpDown(Controls.NudFirstParameter, config.FirstParameterDecimalPlaces);
+        ConfigureNumericUpDown(Controls.NudSecondParameter, config.SecondParameterDecimalPlaces);
     }
 
     private void ConfigureNumericUpDown(NumericUpDown nud, int decimalPlaces)
@@ -147,18 +133,18 @@ public class ClusteringAlgorithmsPanelManager : PanelManager
 
     private void SaveAgglomerativeSettings()
     {
-        settingsData.Threshold = (float)nudFirstParameter.Value;
+        settingsData.Threshold = (float)Controls.NudFirstParameter.Value;
     }
 
     private void SaveKMeansSettings()
     {
-        settingsData.NumberOfClusters = (int)nudFirstParameter.Value;
-        settingsData.MaxIterations = (int)nudSecondParameter.Value;
+        settingsData.NumberOfClusters = (int)Controls.NudFirstParameter.Value;
+        settingsData.MaxIterations = (int)Controls.NudSecondParameter.Value;
     }
 
     private void SaveDBSCANSettings()
     {
-        settingsData.Epsilon = (float)nudFirstParameter.Value;
-        settingsData.MinPoints = (int)nudSecondParameter.Value;
+        settingsData.Epsilon = (float)Controls.NudFirstParameter.Value;
+        settingsData.MinPoints = (int)Controls.NudSecondParameter.Value;
     }
 }
