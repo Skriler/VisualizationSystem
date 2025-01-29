@@ -1,4 +1,5 @@
-﻿using VisualizationSystem.Models.Entities.Nodes;
+﻿using VisualizationSystem.Models.Domain.Nodes;
+using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Models.Entities.Settings;
 using VisualizationSystem.Services.Utilities.Comparers;
 using VisualizationSystem.Services.Utilities.Factories;
@@ -33,32 +34,20 @@ public class GraphCreationManager<TGraph> : ISettingsObserver
 
     public async Task<TGraph> BuildGraphAsync(NodeTable nodeTable)
     {
+        var analysisResult = new TableAnalysisResult(nodeTable);
+
+        if (settings.UseNormalGraph || settings.UseClusteredGraph)
+        {
+            analysisResult.SimilarityResults =
+                similarityComparer.CalculateSimilarNodes(analysisResult.Nodes);
+        }
+
         if (settings.UseClustering)
         {
-            return await BuildClusteredGraphAsync(nodeTable);
+            var clusterer = clustererFactory.Create(settings.AlgorithmSettings.SelectedAlgorithm);
+            analysisResult.Clusters = await clusterer.ClusterAsync(nodeTable);
         }
 
-        return BuildGraph(nodeTable);
-    }
-
-    protected TGraph BuildGraph(NodeTable nodeTable)
-    {
-        var similarityResults = similarityComparer.CalculateSimilarNodes(nodeTable.NodeObjects);
-
-        return graphBuilder.Build(nodeTable.Name, similarityResults);
-    }
-
-    protected async Task<TGraph> BuildClusteredGraphAsync(NodeTable nodeTable)
-    {
-        var clusterer = clustererFactory.Create(settings.AlgorithmSettings.SelectedAlgorithm);
-        var clusters = await clusterer.ClusterAsync(nodeTable);
-
-        if (settings.UseClusteredGraph)
-        {
-            var similarityResults = similarityComparer.CalculateSimilarNodes(nodeTable.NodeObjects);
-            return graphBuilder.Build(nodeTable.Name, similarityResults, clusters);
-        }
-
-        return graphBuilder.Build(nodeTable.Name, nodeTable.NodeObjects, clusters);
+        return graphBuilder.Build(analysisResult);
     }
 }

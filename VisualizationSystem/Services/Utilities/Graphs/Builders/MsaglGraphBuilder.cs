@@ -2,8 +2,8 @@
 using Microsoft.Msagl.Layout.Layered;
 using Microsoft.Msagl.Layout.MDS;
 using VisualizationSystem.Models.Domain.Graphs;
+using VisualizationSystem.Models.Domain.Nodes;
 using VisualizationSystem.Models.DTOs;
-using VisualizationSystem.Models.Entities.Nodes;
 using VisualizationSystem.Services.Utilities.Helpers.Colors;
 using VisualizationSystem.Services.Utilities.Settings;
 using Cluster = VisualizationSystem.Models.Domain.Clusters.Cluster;
@@ -19,54 +19,66 @@ public class MsaglGraphBuilder : BaseGraphBuilder<ExtendedGraph>
     public MsaglGraphBuilder(
         ColorHelper colorHelper,
         ISettingsSubject settingsSubject
-        )
-        : base(colorHelper, settingsSubject)
+    )
+    : base(colorHelper, settingsSubject)
     { }
 
-    public override ExtendedGraph Build(string name, List<NodeSimilarityResult> similarityResults)
+    public override ExtendedGraph Build(TableAnalysisResult analysisResult)
     {
-        var graph = new ExtendedGraph(name, "Graph")
+        if (settings.UseClusteredGraph)
+        {
+            return BuildClusteredGraph(analysisResult);
+        }
+
+        if (settings.UseClustering)
+        {
+            return BuildClusters(analysisResult);
+        }
+
+        return BuildNormalGraph(analysisResult);
+    }
+
+    protected override ExtendedGraph BuildNormalGraph(TableAnalysisResult analysisResult)
+    {
+        var graph = new ExtendedGraph(analysisResult.Name, "Graph")
         {
             LayoutAlgorithmSettings = new MdsLayoutSettings(),
         };
 
-        AddNodes(graph, similarityResults);
-        AddEdges(graph, similarityResults);
+        AddNodes(graph, analysisResult);
+        AddEdges(graph, analysisResult.SimilarityResults);
 
         return graph;
     }
 
-    public override ExtendedGraph Build(string name, List<NodeObject> nodes, List<Cluster> clusters)
+    protected override ExtendedGraph BuildClusters(TableAnalysisResult analysisResult)
     {
-        var graph = new ExtendedGraph(name, "Clusters")
+        var graph = new ExtendedGraph(analysisResult.Name, "Clusters")
         {
             LayoutAlgorithmSettings = new SugiyamaLayoutSettings(),
         };
 
-        AddNodes(graph, nodes, clusters);
-        AddClusters(graph, clusters);
+        AddNodes(graph, analysisResult);
+        AddClusters(graph, analysisResult.Clusters);
 
         return graph;
     }
 
-    public override ExtendedGraph Build(string name, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters)
+    protected override ExtendedGraph BuildClusteredGraph(TableAnalysisResult analysisResult)
     {
-        var graph = new ExtendedGraph(name, "Clustered graph")
+        var graph = new ExtendedGraph(analysisResult.Name, "Clustered graph")
         {
             LayoutAlgorithmSettings = new MdsLayoutSettings(),
         };
 
-        AddNodes(graph, similarityResults, clusters);
-        AddEdges(graph, similarityResults);
-        AddExtraEdges(graph, similarityResults);
+        AddNodes(graph, analysisResult);
+        AddEdges(graph, analysisResult.SimilarityResults);
 
         return graph;
     }
 
     protected override void AddClusters(ExtendedGraph graph, List<Cluster> clusters)
     {
-        graph.NodeDataMap.Clear();
-
         foreach (var cluster in clusters)
         {
             var subgraph = new Subgraph(cluster.Id.ToString())
@@ -88,56 +100,19 @@ public class MsaglGraphBuilder : BaseGraphBuilder<ExtendedGraph>
         }
     }
 
-    protected override void AddNodes(ExtendedGraph graph, List<NodeSimilarityResult> similarityResults)
+    protected override void AddNodes(ExtendedGraph graph, TableAnalysisResult analysisResult)
     {
-        base.AddNodes(graph, similarityResults);
+        base.AddNodes(graph, analysisResult);
 
-        graph.NodeDataMap = similarityResults
-            .ToDictionary(sr => sr.Node.Name, sr => sr);
+        graph.NodeDataMap = analysisResult.SimilarityResults.ToDictionary(sr => sr.Node.Name, sr => sr);
     }
 
-    protected void AddNodes(ExtendedGraph graph, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters)
+    protected override void AddEdges(ExtendedGraph graph, List<NodeSimilarityResult> similarityResults)
     {
-        var nodes = similarityResults
-            .ConvertAll(result => result.Node);
+        base.AddEdges(graph, similarityResults);
 
-        base.AddNodes(graph, nodes, clusters);
-
-        graph.NodeDataMap = similarityResults
-            .ToDictionary(sr => sr.Node.Name, sr => sr);
-    }
-
-    protected void AddExtraEdges(ExtendedGraph graph, List<NodeSimilarityResult> similarityResults)
-    {
-        foreach (var similarityResult in similarityResults)
-        {
-            var sourceNode = graph.FindNode(similarityResult.Node.Name);
-
-            if (sourceNode == null)
-                continue;
-
-            var edgesCount = sourceNode.InEdges.Count() +
-                sourceNode.OutEdges.Count();
-
-            if (edgesCount > MinEdgesPerNodeClusteredGraph)
-                continue;
-
-            var similarNodes = similarityResult.SimilarNodes
-                .Where(sn => sn.SimilarityPercentage > 0)
-                .OrderByDescending(sr => sr.SimilarityPercentage)
-                .Take(edgesCount + MinEdgesPerNodeClusteredGraph)
-                .ToList();
-
-            foreach (var similarNode in similarNodes)
-            {
-                var targetNode = graph.FindNode(similarNode.Node.Name);
-
-                if (graph.Edges.Any(e => HasEdge(e, sourceNode, targetNode)))
-                    continue;
-
-                AddEdge(graph, sourceNode.Id, targetNode.Id, similarNode.SimilarityPercentage);
-            }
-        }
+        if (settings.UseClusteredGraph)
+            AddEdgesForMinRequirement(graph, similarityResults);
     }
 
     protected override void AddNode(ExtendedGraph graph, string nodeName, SystemColor nodeColor)
@@ -162,11 +137,57 @@ public class MsaglGraphBuilder : BaseGraphBuilder<ExtendedGraph>
         edge.Attr.ArrowheadAtTarget = ArrowStyle.None;
 
         var minSimilarityPercentage = Math.Min(settings.MinSimilarityPercentage, similarityPercentage);
+
         var edgeColor = colorHelper.CalculateEdgeColor(similarityPercentage, minSimilarityPercentage);
         edge.Attr.Color = new MsaglColor(edgeColor.A, edgeColor.R, edgeColor.G, edgeColor.B);
     }
 
-    protected bool HasEdge(Edge edge, Node source, Node target)
+    protected void AddEdgesForMinRequirement(ExtendedGraph graph, List<NodeSimilarityResult> similarityResults)
+    {
+        foreach (var similarityResult in similarityResults)
+        {
+            var source = graph.FindNode(similarityResult.Node.Name);
+
+            if (source == null)
+                continue;
+
+            var edgesCount = source.InEdges.Count() + source.OutEdges.Count();
+
+            if (edgesCount > MinEdgesPerNodeClusteredGraph)
+                continue;
+
+            var similarNodes = GetSimilarNodesForExtraEdges(similarityResult);
+
+            AddEdges(graph, source, similarNodes);
+        }
+    }
+
+    protected List<SimilarNode> GetSimilarNodesForExtraEdges(NodeSimilarityResult similarityResult)
+    {
+        return similarityResult.SimilarNodes
+            .Where(IsInExtraEdgeSimilarityRange)
+            .OrderByDescending(sr => sr.SimilarityPercentage)
+            .Take(MinEdgesPerNodeClusteredGraph)
+            .ToList();
+    }
+
+    protected void AddEdges(ExtendedGraph graph, Node source, List<SimilarNode> similarNodes)
+    {
+        foreach (var similarNode in similarNodes)
+        {
+            var target = graph.FindNode(similarNode.Node.Name);
+
+            if (graph.Edges.Any(e => HasEdge(e, source, target)))
+                continue;
+
+            AddEdge(graph, source.Id, target.Id, similarNode.SimilarityPercentage);
+        }
+    }
+
+    protected bool IsInExtraEdgeSimilarityRange(SimilarNode node) =>
+        node.SimilarityPercentage > 0 && node.SimilarityPercentage < settings.MinSimilarityPercentage;
+
+    protected static bool HasEdge(Edge edge, Node source, Node target)
     {
         return (edge.SourceNode == source && edge.TargetNode == target) ||
                (edge.SourceNode == target && edge.TargetNode == source);

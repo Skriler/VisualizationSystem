@@ -1,14 +1,8 @@
-﻿using VisualizationSystem.Models.Domain.Clusters;
-using VisualizationSystem.Models.DTOs;
-using VisualizationSystem.Models.Entities.Nodes;
+﻿using VisualizationSystem.Models.Domain.Nodes;
 
 namespace VisualizationSystem.Services.Utilities.Graphs.Builders;
 
 public interface IGraphBuilder<TGraph>
 {
-    TGraph Build(string name, List<NodeSimilarityResult> similarityResults);
-
-    TGraph Build(string name, List<NodeObject> nodes, List<Cluster> clusters);
-
-    TGraph Build(string name, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters);
+    TGraph Build(TableAnalysisResult analysisResult);
 }

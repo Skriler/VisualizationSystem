@@ -25,18 +25,37 @@ public abstract class BaseGraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISetting
         settingsSubject.Attach(this);
     }
 
-    public abstract TGraph Build(string name, List<NodeSimilarityResult> similarityResults);
+    public abstract TGraph Build(TableAnalysisResult analysisResult);
 
-    public abstract TGraph Build(string name, List<NodeObject> nodes, List<Cluster> clusters);
+    protected abstract TGraph BuildNormalGraph(TableAnalysisResult analysisResult);
 
-    public abstract TGraph Build(string name, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters);
+    protected abstract TGraph BuildClusters(TableAnalysisResult analysisResult);
+
+    protected abstract TGraph BuildClusteredGraph(TableAnalysisResult analysisResult);
 
     public void Update(UserSettings settings) => this.settings = settings;
 
-    protected virtual void AddNodes(TGraph graph, List<NodeSimilarityResult> similarityResults)
+    protected virtual void AddNodes(TGraph graph, TableAnalysisResult analysisResult)
     {
-        var minSimilarity = similarityResults.Min(result => result.SimilarNodes.Min(s => s.SimilarityPercentage));
-        var maxSimilarity = similarityResults.Max(result => result.SimilarNodes.Max(s => s.SimilarityPercentage));
+        var nodeColors = settings.UseClustering
+            ? GetNodeColorsBasedOnClusters(analysisResult.Nodes, analysisResult.Clusters)
+            : GetNodeColorsBasedOnSimilarity(analysisResult.SimilarityResults);
+
+        foreach (var node in analysisResult.Nodes)
+        {
+            var currentNodeName = node.Name;
+
+            AddNode(
+                graph,
+                currentNodeName,
+                nodeColors[node]
+                );
+        }
+    }
+
+    protected Dictionary<NodeObject, Color> GetNodeColorsBasedOnSimilarity(List<NodeSimilarityResult> similarityResults)
+    {
+        var nodeColors = new Dictionary<NodeObject, Color>();
         var maxSimilarNodesAboveThreshold = similarityResults
             .Max(result => result.SimilarNodes
                 .Count(sn => sn.SimilarityPercentage > settings.MinSimilarityPercentage)
@@ -44,41 +63,34 @@ public abstract class BaseGraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISetting
 
         foreach (var similarityResult in similarityResults)
         {
-            var currentNodeName = similarityResult.Node.Name;
-
             var nodeColor = colorHelper.GetNodeColorFromDensityWithSigmoid(
                 similarityResult,
                 maxSimilarNodesAboveThreshold,
                 settings.MinSimilarityPercentage
                 );
 
-            AddNode(
-                graph,
-                currentNodeName,
-                nodeColor
-                );
+            nodeColors.Add(similarityResult.Node, nodeColor);
         }
+
+        return nodeColors;
     }
 
-    protected virtual void AddNodes(TGraph graph, List<NodeObject> nodes, List<Cluster> clusters)
+    protected Dictionary<NodeObject, Color> GetNodeColorsBasedOnClusters(List<NodeObject> nodes, List<Cluster> clusters)
     {
+        var nodeColors = new Dictionary<NodeObject, Color>();
+
         var clustersIds = clusters.ConvertAll(cluster => cluster.Id);
         var colors = colorHelper.GetDistinctColors(clustersIds);
 
         foreach (var node in nodes)
         {
-            var currentNodeName = node.Name;
-            var cluster = clusters
-                .FirstOrDefault(c => c.Nodes.Any(n => n.Name == currentNodeName));
-
+            var cluster = clusters.FirstOrDefault(c => c.Nodes.Any(n => n.Name == node.Name));
             var nodeColor = cluster != null ? colors[cluster.Id] : Color.WhiteSmoke;
 
-            AddNode(
-                graph,
-                currentNodeName,
-                nodeColor
-            );
+            nodeColors.Add(node, nodeColor);
         }
+
+        return nodeColors;
     }
 
     protected virtual void AddEdges(TGraph graph, List<NodeSimilarityResult> similarityResults)
@@ -106,12 +118,7 @@ public abstract class BaseGraphBuilder<TGraph> : IGraphBuilder<TGraph>, ISetting
         }
     }
 
-    private bool IsNeighbor(SimilarNode similarNode) => similarNode.SimilarityPercentage >= settings.MinSimilarityPercentage;
-
-    protected double GetNodeSize(int connectionCount, int maxConnections)
-    {
-        return 1 + connectionCount / (double)maxConnections * 20;
-    }
+    protected bool IsNeighbor(SimilarNode similarNode) => similarNode.SimilarityPercentage >= settings.MinSimilarityPercentage;
 
     protected abstract void AddClusters(TGraph graph, List<Cluster> clusters);
     protected abstract void AddNode(TGraph graph, string nodeName, Color nodeColor);

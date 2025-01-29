@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using VisualizationSystem.Models.Entities.Nodes;
 
 namespace VisualizationSystem.Models.Entities.Settings;
@@ -19,6 +20,9 @@ public class UserSettings
 
     [Required]
     public bool UseClustering { get; set; }
+
+    [NotMapped]
+    public bool UseNormalGraph { get => !UseClustering; }
 
     [Required]
     public bool UseClusteredGraph { get; set; }

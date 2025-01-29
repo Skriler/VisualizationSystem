@@ -1,8 +1,7 @@
 ﻿using DotNetGraph.Core;
 using DotNetGraph.Extensions;
 using VisualizationSystem.Models.Domain.Clusters;
-using VisualizationSystem.Models.DTOs;
-using VisualizationSystem.Models.Entities.Nodes;
+using VisualizationSystem.Models.Domain.Nodes;
 using VisualizationSystem.Services.Utilities.Helpers.Colors;
 using VisualizationSystem.Services.Utilities.Settings;
 using Color = System.Drawing.Color;
@@ -18,35 +17,50 @@ public sealed class DotNetGraphBuilder : BaseGraphBuilder<DotGraph>
         : base(colorHelper, settingsSubject)
     { }
 
-    public override DotGraph Build(string name, List<NodeSimilarityResult> similarityResults)
+    public override DotGraph Build(TableAnalysisResult analysisResult)
+    {
+        if (settings.UseNormalGraph)
+        {
+            return BuildNormalGraph(analysisResult);
+        }
+
+        if (settings.UseClustering)
+        {
+            return BuildClusters(analysisResult);
+        }
+
+        return BuildClusteredGraph(analysisResult);
+    }
+
+    protected override DotGraph BuildNormalGraph(TableAnalysisResult analysisResult)
     {
         var graph = new DotGraph()
-            .WithIdentifier(name);
+            .WithIdentifier(analysisResult.Name);
 
-        AddNodes(graph, similarityResults);
-        AddEdges(graph, similarityResults);
+        AddNodes(graph, analysisResult);
+        AddEdges(graph, analysisResult.SimilarityResults);
 
         return graph;
     }
 
-    public override DotGraph Build(string name, List<NodeObject> nodes, List<Cluster> clusters)
+    protected override DotGraph BuildClusters(TableAnalysisResult analysisResult)
     {
         var graph = new DotGraph()
-            .WithIdentifier(name);
+            .WithIdentifier(analysisResult.Name);
 
-        AddNodes(graph, nodes, clusters);
-        AddClusters(graph, clusters);
+        AddNodes(graph, analysisResult);
+        AddClusters(graph, analysisResult.Clusters);
 
         return graph;
     }
 
-    public override DotGraph Build(string name, List<NodeSimilarityResult> similarityResults, List<Cluster> clusters)
+    protected override DotGraph BuildClusteredGraph(TableAnalysisResult analysisResult)
     {
         var graph = new DotGraph()
-            .WithIdentifier(name);
+            .WithIdentifier(analysisResult.Name);
 
-        AddNodes(graph, similarityResults);
-        AddEdges(graph, similarityResults);
+        AddNodes(graph, analysisResult);
+        AddEdges(graph, analysisResult.SimilarityResults);
 
         return graph;
     }

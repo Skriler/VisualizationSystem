@@ -92,9 +92,7 @@ public partial class MainForm : Form
 
         try
         {
-            var graph = await graphCreationManager.BuildGraphAsync(nodeTable);
-
-            tabControlService.AddTab(graph);
+            await ExecuteTableOperationAsync(nodeTable.Name, "Building graph", OnBuildGraph);
         }
         catch (Exception ex)
         {
@@ -112,9 +110,7 @@ public partial class MainForm : Form
 
         try
         {
-            var plot = await plotCreationManager.BuildClusteredPlotAsync(nodeTable);
-
-            tabControlService.AddTab(plot);
+            await ExecuteTableOperationAsync(nodeTable.Name, "Building plot", OnBuildPlot);
         }
         catch (Exception ex)
         {
@@ -130,10 +126,7 @@ public partial class MainForm : Form
             return;
         }
 
-        if (await userSettingsManager.TryOpenSettingsForm())
-        {
-            //await UpdateGraphIfNeededAsync();
-        }
+        await userSettingsManager.TryOpenSettingsForm();
     }
 
     private void tabControl_DrawItem(object sender, DrawItemEventArgs e)
@@ -336,20 +329,25 @@ public partial class MainForm : Form
         await LoadTableNamesToMenuAsync();
     }
 
-    //private async Task UpdateGraphIfNeededAsync()
-    //{
-    //    if (tabControlService.HasOpenTabOfType<ClosableGViewerTabPage>(nodeTable.Name))
-    //    {
-    //        var graph = await graphCreationManager.BuildGraphAsync(nodeTable);
-    //        tabControlService.UpdateTabIfOpen(graph);
-    //    }
+    private async Task OnBuildGraph(string tableName)
+    {
+        if (tableName != nodeTable.Name)
+            throw new ArgumentException("Incorrect table name");
 
-    //    if (tabControlService.HasOpenTabOfType<ClosableClusteredPlotTabPage>(nodeTable.Name))
-    //    {
-    //        var plot = await plotCreationManager.BuildClusteredPlotAsync(nodeTable);
-    //        tabControlService.UpdateTabIfOpen(plot);
-    //    }
-    //}
+        var graph = await Task.Run(() => graphCreationManager.BuildGraphAsync(nodeTable));
+
+        tabControlService.AddTab(graph);
+    }
+
+    private async Task OnBuildPlot(string tableName)
+    {
+        if (tableName != nodeTable.Name)
+            throw new ArgumentException("Incorrect table name");
+
+        var plot = await Task.Run(() => plotCreationManager.BuildClusteredPlotAsync(nodeTable));
+
+        tabControlService.AddTab(plot);
+    }
 
     private void UpdateFormTitle()
     {

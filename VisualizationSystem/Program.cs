@@ -108,7 +108,7 @@ internal static class Program
             .AddTransient<ITabStrategy, DataGridViewTabStrategy>()
             .AddTransient<ITabStrategy, GViewerTabStrategy>()
             .AddTransient<ITabStrategy, ClusteredPlotTabStrategy>()
-            .AddScoped<FileWriter>();
+            .AddTransient<FileWriter>();
     }
 
     private static IServiceCollection AddDataProcessingServices(this IServiceCollection services)

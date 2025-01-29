@@ -130,16 +130,17 @@ public class DataNormalizer
         return double.TryParse(value, out _);
     }
 
-    private List<CalculationNode> GetFilteredCalculationNodes(
+    private static List<CalculationNode> GetFilteredCalculationNodes(
         List<NodeObject> nodes,
         List<ParameterState> parameterStates
         )
     {
         var calculationNodes = new List<CalculationNode>();
+        var activeParameterTypeIds = GetActiveParameterTypeIds(parameterStates);
 
         foreach (var node in nodes)
         {
-            var filteredParameters = GetFilteredNormalizedParameters(node.NormalizedParameters, parameterStates);
+            var filteredParameters = GetFilteredNormalizedParameters(node.NormalizedParameters, activeParameterTypeIds);
             var calculationNode = new CalculationNode(node.Name, filteredParameters);
 
             calculationNodes.Add(calculationNode);
@@ -148,16 +149,19 @@ public class DataNormalizer
         return calculationNodes;
     }
 
-    private List<NormalizedParameter> GetFilteredNormalizedParameters(
-        List<NormalizedParameter> parameters,
-        List<ParameterState> parameterStates
-        )
+    private static List<int> GetActiveParameterTypeIds(List<ParameterState> parameterStates)
     {
-        var activeParameterTypeIds = parameterStates
+        return parameterStates
             .Where(ps => ps.IsActive)
             .Select(ps => ps.ParameterTypeId)
             .ToList();
+    }
 
+    private static List<NormalizedParameter> GetFilteredNormalizedParameters(
+        List<NormalizedParameter> parameters,
+        List<int> activeParameterTypeIds
+        )
+    {
         return parameters
             .Where(np => activeParameterTypeIds.Contains(np.NormalizedParameterState.ParameterTypeId))
             .ToList();
