@@ -27,19 +27,24 @@ The application provides flexible configuration options for data analysis, clust
 ### Comparison Graph Features
 - Node color intensity reflects number of connections.
 - No connection created if similarity is below threshold.
+![VisualizationSystem_GrxGdV6d81](https://github.com/user-attachments/assets/b5e32def-7a15-4579-b7e0-9b756a5bef14)
 
 ### Clustered Graph Features
 - Nodes colored by cluster membership.
 - Connections show strongest relationships between objects (can be below threshold).
+![VisualizationSystem_BaqMwbHo6Q](https://github.com/user-attachments/assets/fd9c210a-d5b7-4db7-ba33-a537bfee7dc2)
 
 ### Additional Visualization Methods
 - Scatter Plots: 
   - Uses PCA (Principal Component Analysis) to reduce multi-dimensional data to 2D representation.
   - Each point represents an object.
   - Color indicates cluster membership.
+![VisualizationSystem_Cbj98B7B9H](https://github.com/user-attachments/assets/dcc855c7-961b-4a9b-8502-96424f559199)
+
 - Cluster Blocks:
   - Visual grouping of objects by cluster.
   - Shows cluster membership without preserving spatial relationships.
+![VisualizationSystem_bjJATYoQNq](https://github.com/user-attachments/assets/06a76d6f-821e-4f1b-8ce8-5b8fb447f12c)
 
 ## Clustering
 
