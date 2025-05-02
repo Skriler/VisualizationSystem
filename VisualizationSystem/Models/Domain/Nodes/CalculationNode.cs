@@ -18,32 +18,28 @@ public class CalculationNode
     public CalculationNode(CalculationNode other)
     {
         Name = other.Name;
-        Parameters = other.Parameters
-            .ConvertAll(p => p.Clone());
+        Parameters = other.Parameters.ConvertAll(p => p.Clone());
     }
 
-    public int GetFeaturesCount()
+    public CalculationNode(List<BaseParameter> parameters)
     {
-        if (Parameters == null || Parameters.Count == 0)
-            return 0;
-
-        return Parameters.Sum(parameter => parameter switch
-        {
-            NumericParameter => 1,
-            CategoricalParameter categorical => categorical.CategoryCount,
-            _ => 0
-        });
+        Name = string.Empty;
+        Parameters = parameters.ConvertAll(p => p.Clone());
     }
+
+    public int GetFeaturesCount() => Parameters?.Sum(GetParameterFeatureCount) ?? 0;
+
+    private static int GetParameterFeatureCount(BaseParameter parameter) => parameter switch
+    {
+        NumericParameter => 1,
+        CategoricalParameter categorical => categorical.OneHotValues.Length,
+        _ => 0
+    };
 
     private static BaseParameter ConvertParameter(NormalizedParameter param) => param switch
     {
-        NormalizedNumericParameter numericParam =>
-            new NumericParameter(numericParam.Value),
-        NormalizedCategoricalParameter categoricalParam =>
-            new CategoricalParameter(
-                categoricalParam.OneHotIndexes,
-                categoricalParam.NormalizedParameterState.CategoryCount
-            ),
+        NormalizedNumericParameter numericParam => new NumericParameter(numericParam.Value),
+        NormalizedCategoricalParameter categoricalParam => new CategoricalParameter(categoricalParam.OneHotIndexes),
         _ => throw new ArgumentException($"Unknown parameter type: {param.GetType()}")
     };
 }

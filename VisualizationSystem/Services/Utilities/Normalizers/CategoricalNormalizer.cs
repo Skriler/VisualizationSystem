@@ -39,15 +39,10 @@ public class CategoricalNormalizer : ITypeNormalizer
         )
     {
         var oneHotArray = ConvertValueToOneHot(parameter.Value);
-        var indices = oneHotArray
-            .Select((value, index) => new { value, index })
-            .Where(x => x.value == 1)
-            .Select(x => x.index)
-            .ToList();
 
         return new NormalizedCategoricalParameter
         {
-            OneHotIndexes = indices,
+            OneHotIndexes = oneHotArray,
             NodeObjectId = node.Id,
             NormalizedParameterStateId = state.Id
         };

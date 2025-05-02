@@ -2,5 +2,5 @@
 
 public class NormalizedCategoricalParameter : NormalizedParameter
 {
-    public List<int> OneHotIndexes { get; set; } = new();
+    public int[] OneHotIndexes { get; set; } = default!;
 }

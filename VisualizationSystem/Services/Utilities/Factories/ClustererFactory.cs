@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using VisualizationSystem.Services.Utilities.Clusterers;
-using VisualizationSystem.Services.Utilities.DistanceCalculators;
 
 namespace VisualizationSystem.Services.Utilities.Factories;
 

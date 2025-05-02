@@ -2,11 +2,18 @@
 
 public class HammingDistanceMetric : ICategoricalDistanceMetric
 {
-    public double CalculateDistance(IEnumerable<int> firstIndexes, IEnumerable<int> secondIndexes, int categoriesCount)
+    public double CalculateDistance(int[] firstValues, int[] secondValues)
     {
-        var differences = firstIndexes.Except(secondIndexes).Count()
-            + secondIndexes.Except(firstIndexes).Count();
+        int differences = 0;
 
-        return differences / (double)categoriesCount;
+        for (int i = 0; i < firstValues.Length; ++i)
+        {
+            if (firstValues[i] == secondValues[i])
+                continue;
+
+            ++differences;
+        }
+
+        return (double)differences / firstValues.Length;
     }
 }

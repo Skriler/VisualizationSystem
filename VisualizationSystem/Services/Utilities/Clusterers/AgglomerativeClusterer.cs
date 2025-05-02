@@ -9,9 +9,9 @@ namespace VisualizationSystem.Services.Utilities.Clusterers;
 
 public class AgglomerativeClusterer : BaseClusterer
 {
-    private List<AgglomerativeCluster> agglomerativeClusters;
-
     protected override ClusterAlgorithm Algorithm => ClusterAlgorithm.HierarchicalAgglomerative;
+
+    private List<AgglomerativeCluster> clusters = default!;
 
     public AgglomerativeClusterer(
         DataNormalizer dataNormalizer,
@@ -25,43 +25,53 @@ public class AgglomerativeClusterer : BaseClusterer
     {
         var nodes = await dataNormalizer.GetCalculationNodesAsync(nodeTable, settings.ParameterStates);
 
-        agglomerativeClusters = nodes
-            .ConvertAll(n => new AgglomerativeCluster(n));
+        clusters = nodes.ConvertAll(n => new AgglomerativeCluster(n));
+        PerformClustering();
 
-        while (agglomerativeClusters.Count(c => !c.IsMerged) > 1)
+        return clusters
+            .Where(c => !c.IsMerged)
+            .Cast<Cluster>()
+            .ToList();
+    }
+
+    /// <summary>
+    /// Performs a clustering process, merging the most similar clusters
+    /// until convergence or a threshold is reached.
+    /// </summary>
+    private void PerformClustering()
+    {
+        while (clusters.Count(c => !c.IsMerged) > 1)
         {
             var similarCluster = FindMostSimilarClusters();
 
             if (similarCluster.Similarity > settings.AlgorithmSettings.Threshold)
                 break;
 
-            agglomerativeClusters[similarCluster.FirstClusterId]
-                .Merge(agglomerativeClusters[similarCluster.SecondClusterId]);
+            clusters[similarCluster.FirstClusterId]
+                .Merge(clusters[similarCluster.SecondClusterId]);
         }
-
-        return agglomerativeClusters
-            .Where(c => !c.IsMerged)
-            .Cast<Cluster>()
-            .ToList();
     }
 
+    /// <summary>
+    /// Finds the cluster pair with the highest similarity.
+    /// </summary>
     private ClusterSimilarityResult FindMostSimilarClusters()
     {
         var clusterSimilarity = new ClusterSimilarityResult();
 
-        for (int i = 0; i < agglomerativeClusters.Count; ++i)
+        for (int i = 0; i < clusters.Count; ++i)
         {
-            if (agglomerativeClusters[i].IsMerged)
+            if (clusters[i].IsMerged)
                 continue;
 
-            for (int j = i + 1; j < agglomerativeClusters.Count; ++j)
+            for (int j = i + 1; j < clusters.Count; ++j)
             {
-                if (agglomerativeClusters[j].IsMerged)
+                if (clusters[j].IsMerged)
                     continue;
 
                 var similarity = GetAverageDistance(
-                    agglomerativeClusters[i],
-                    agglomerativeClusters[j]
+                    clusters[i],
+                    clusters[j]
                     );
 
                 if (similarity > clusterSimilarity.Similarity)
@@ -74,6 +84,9 @@ public class AgglomerativeClusterer : BaseClusterer
         return clusterSimilarity;
     }
 
+    /// <summary>
+    /// Calculates the average distance between two clusters based on their objects.
+    /// </summary>
     private double GetAverageDistance(AgglomerativeCluster first, AgglomerativeCluster second)
     {
         return first.Nodes
@@ -81,6 +94,9 @@ public class AgglomerativeClusterer : BaseClusterer
             .Average();
     }
 
+    /// <summary>
+    /// Calculates the minimum distance between two clusters based on their objects.
+    /// </summary>
     private double GetMinimumDistance(AgglomerativeCluster first, AgglomerativeCluster second)
     {
         return first.Nodes

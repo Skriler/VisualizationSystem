@@ -83,9 +83,8 @@ public class DistanceCalculator : IDistanceCalculator
                 continue;
 
             totalCategoricalDistance += categoricalDistanceMetric.CalculateDistance(
-                firstParam.OneHotIndexes,
-                secondParam.OneHotIndexes,
-                firstParam.CategoryCount
+                firstParam.OneHotValues,
+                secondParam.OneHotValues
                 );
         }
 

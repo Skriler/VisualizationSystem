@@ -2,15 +2,14 @@
 
 public class CategoricalParameter : BaseParameter
 {
-    public HashSet<int> OneHotIndexes { get; set; }
+    public int[] OneHotValues { get; set; }
 
     public int CategoryCount { get; }
 
-    public CategoricalParameter(IEnumerable<int> oneHotIndexes, int categoryCount)
+    public CategoricalParameter(int[] oneHotValues)
     {
-        OneHotIndexes = new HashSet<int>(oneHotIndexes);
-        CategoryCount = categoryCount;
+        OneHotValues = oneHotValues.ToArray();
     }
 
-    public override BaseParameter Clone() => new CategoricalParameter(OneHotIndexes, CategoryCount);
+    public override BaseParameter Clone() => new CategoricalParameter(OneHotValues);
 }

@@ -9,6 +9,7 @@ using VisualizationSystem.Services.DAL.Validators;
 using VisualizationSystem.Services.UI;
 using VisualizationSystem.Services.UI.TabPages;
 using VisualizationSystem.Services.Utilities.Clusterers;
+using VisualizationSystem.Services.Utilities.Clusterers.Helpers;
 using VisualizationSystem.Services.Utilities.Comparers;
 using VisualizationSystem.Services.Utilities.DimensionReducers;
 using VisualizationSystem.Services.Utilities.DistanceCalculators;
@@ -131,6 +132,7 @@ internal static class Program
             .AddSingleton<ManhattanDistanceMetric>()
             .AddSingleton<CosineDistanceMetric>()
             .AddSingleton<HammingDistanceMetric>()
+            .AddSingleton<JaccardDistanceMetric>()
             .AddSingleton<IDistanceCalculator, DistanceCalculator>()
             .AddTransient<DistanceCalculatorFactory>();
     }
@@ -138,6 +140,7 @@ internal static class Program
     private static IServiceCollection AddClusteringServices(this IServiceCollection services)
     {
         return services
+            .AddTransient<CentroidCalculator>()
             .AddTransient<KMeansClusterer>()
             .AddTransient<AgglomerativeClusterer>()
             .AddTransient<DBSCANClusterer>()

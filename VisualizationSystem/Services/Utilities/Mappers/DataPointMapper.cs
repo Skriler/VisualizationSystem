@@ -1,4 +1,5 @@
-﻿using VisualizationSystem.Models.Domain.Clusters;
+﻿using System.Reflection.Metadata;
+using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Models.Domain.Nodes;
 using VisualizationSystem.Models.Domain.Nodes.Parameters;
 using VisualizationSystem.Models.Domain.PCA;
@@ -39,21 +40,13 @@ public class DataPointMapper
     private IEnumerable<float> ParseParameter(BaseParameter parameter) => parameter switch
     {
         CategoricalParameter categorical => ParseCategoricalParameter(categorical),
-        NumericParameter numeric => new[] { ParseNumericParameter(numeric) },
+        NumericParameter numeric => ParseNumericParameter(numeric),
         _ => throw new ArgumentException($"Unsupported parameter type: {parameter.GetType()}", nameof(parameter))
     };
 
-    private float ParseNumericParameter(NumericParameter parameter) => (float)parameter.Value;
+    private static float[] ParseNumericParameter(NumericParameter parameter)
+        => new[] { (float)parameter.Value };
 
-    private float[] ParseCategoricalParameter(CategoricalParameter parameter)
-    {
-        var features = new float[parameter.CategoryCount];
-
-        foreach (var index in parameter.OneHotIndexes)
-        {
-            features[index] = 1;
-        }
-
-        return features;
-    }
+    private static float[] ParseCategoricalParameter(CategoricalParameter parameter)
+        => parameter.OneHotValues.Select(val => (float) val).ToArray();
 }

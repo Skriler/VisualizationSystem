@@ -2,7 +2,6 @@
 using Microsoft.ML.Data;
 using VisualizationSystem.Models.Domain.Clusters;
 using VisualizationSystem.Models.Domain.Nodes;
-using VisualizationSystem.Models.Domain.Nodes.Parameters;
 using VisualizationSystem.Models.Domain.PCA;
 using VisualizationSystem.Services.Utilities.Mappers;
 

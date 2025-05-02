@@ -10,10 +10,10 @@ namespace VisualizationSystem.Services.Utilities.Clusterers;
 
 public abstract class BaseClusterer : ISettingsObserver
 {
+    protected abstract ClusterAlgorithm Algorithm { get; }
+
     protected readonly DataNormalizer dataNormalizer;
     protected readonly IDistanceCalculator distanceCalculator;
-
-    protected abstract ClusterAlgorithm Algorithm { get; }
 
     protected UserSettings settings = default!;
 

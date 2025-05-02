@@ -31,16 +31,16 @@ public class DistanceCalculatorFactory
         return algorithm switch
         {
             ClusterAlgorithm.KMeans => new DistanceMetricsConfig(
-                serviceProvider.GetRequiredService<EuclideanDistanceMetric>(),
-                serviceProvider.GetRequiredService<HammingDistanceMetric>()
+                serviceProvider.GetRequiredService<ManhattanDistanceMetric>(),
+                serviceProvider.GetRequiredService<JaccardDistanceMetric>()
             ),
             ClusterAlgorithm.DBSCAN => new DistanceMetricsConfig(
-                serviceProvider.GetRequiredService<EuclideanDistanceMetric>(),
-                serviceProvider.GetRequiredService<HammingDistanceMetric>()
+                serviceProvider.GetRequiredService<ManhattanDistanceMetric>(),
+                serviceProvider.GetRequiredService<JaccardDistanceMetric>()
             ),
             ClusterAlgorithm.HierarchicalAgglomerative => new DistanceMetricsConfig(
-                serviceProvider.GetRequiredService<EuclideanDistanceMetric>(),
-                serviceProvider.GetRequiredService<HammingDistanceMetric>()
+                serviceProvider.GetRequiredService<ManhattanDistanceMetric>(),
+                serviceProvider.GetRequiredService<JaccardDistanceMetric>()
             ),
             _ => throw new ArgumentOutOfRangeException(nameof(algorithm))
         };
